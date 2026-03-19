@@ -1,5 +1,5 @@
 {
-  "conflictPatterns": {
+  "conflictPattern": {
     "semantic": [
       {
         "term1": "maximize",
