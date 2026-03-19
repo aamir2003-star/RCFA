@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import { ProtectedRoute } from './components/ProtectedRoute';
+
 import AuthPage from './pages/AuthPage';
 import { MainLayout } from './components/layout/MainLayout';
 
@@ -22,15 +22,13 @@ function App() {
           {/* Public Routes */}
           <Route path="/login" element={<AuthPage />} />
           
-          {/* Protected Routes */}
+          {/* Dashboard Route (Protected Route removed for now) */}
           <Route 
             path="/" 
             element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <Dashboard />
-                </MainLayout>
-              </ProtectedRoute>
+              <MainLayout>
+                <Dashboard />
+              </MainLayout>
             } 
           />
           

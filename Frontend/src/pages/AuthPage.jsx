@@ -1,29 +1,16 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Eye, EyeOff, BrainCircuit, X, CheckCircle2, ChevronRight, Briefcase, User, Code } from "lucide-react";
+import { BrainCircuit, CheckCircle2 } from "lucide-react";
 import { Input } from "../components/ui/Input";
 import { Button } from "../components/ui/Button";
 import { Modal } from "../components/ui/Modal";
 import { cn } from "../lib/utils";
 import { useAuth } from "../contexts/AuthContext";
-
-const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
-  rememberMe: z.boolean().optional(),
-});
-
-const signupSchema = z.object({
-  role: z.enum(["bde", "pm", "dev"], {
-    required_error: "Please select a role",
-  }),
-  fullName: z.string().min(2, "Full name is required"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-});
+import { LoginForm } from "../components/auth/LoginForm";
+import { SignupForm } from "../components/auth/SignupForm";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -31,23 +18,12 @@ const forgotPasswordSchema = z.object({
 
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState("login");
-  const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState("");
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
   const [forgotSuccess, setForgotSuccess] = useState(false);
   
-  const { login, register: signupUser } = useAuth() || {}; // Optional generic auth hook
+  const { login, register: signupUser } = useAuth() || {}; 
   const navigate = useNavigate();
-
-  const loginForm = useForm({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "", rememberMe: false },
-  });
-
-  const signupForm = useForm({
-    resolver: zodResolver(signupSchema),
-    defaultValues: { role: "dev", fullName: "", email: "", password: "" },
-  });
 
   const forgotForm = useForm({
     resolver: zodResolver(forgotPasswordSchema),
@@ -144,7 +120,7 @@ export default function AuthPage() {
               <div className="mt-auto absolute bottom-12">
                 <div className="flex -space-x-3 mb-4">
                   <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDc2NOVjwO2-DyyUZKL6nQWJCIPoCTf6X_yQOxetpWDDffaz0RkO80r9sc4qvjwWoQT4MSp5pwzPBSG8wdeyneBA69Jbd51SCqXI6d1fZBi_pE1hj8iB5W3Je94ozDQeSJyRJui-Y2LqUEKWaj3Vg_IxMW6fJ6qLLD5uTuErFO-wEJlXThyidueRTP9YjBMXJA2fOYSrZRFOO6iSHYfk0hBlWQD2U7kpfta7ap4kN55E2FEHbYujPTneWUggwkz22px5uHexBGTwbw" className="w-11 h-11 rounded-full border-2 border-primary object-cover" alt="User" />
-                  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcpftLMzi7MjJkfC6k74qh2kGHjXI5P6cxq2w4JPWIxQ5Jxx_ybEU9DCOXSdiDtINsTTz0db15F3bi0ZZA9J-egyCvflB7wP9H_L9yidSdSPivdHwxEx-cyd7dVzf2R4TEALBx7vynNr0Wl2SUbiYCG8e0k3ct_7_kRit1LgCwxkqbyHBZCaihbBTtzoI73InkN6Vw5jXVEAzae3_H9luSuL7syLLtjCaGlbRCu0RAeGwni4xBmFNvveTsFNDuCIhiBFXxaKHVipk" className="w-11 h-11 rounded-full border-2 border-primary object-cover" alt="User" />
+                  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcpftLMzi7MjJkfC6k74qh2kGHjXI5P6cxq2w4JPWIxQ5Jxx_ybEU9DCOXSdiDtINsTTz0db15F3bi0ZZA9J-egyCvflB7wP9H_L9yidSdSPivdHwxEx-cyd7dVzf2R4TEALBx7vynNr0Wl2SUbiYCG8e0k3ct_7_kRit1LgCwxkqbyHBZCaihbBTtzoI73InkN6Vw5jXVEAzae3_H9luSuL7syLLtjCaGlbRCu0RAeGwni4xBmFNveTsFNDuCIhiBFXxaKHVipk" className="w-11 h-11 rounded-full border-2 border-primary object-cover" alt="User" />
                   <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuD23eRDEqIZvpkJtRyjAwjX5duyqqlPD17S3TDvVk0gQ4W2ZyLtoNIp3nNzH2fOhTxo8RR7rhD4MLW-_vO40PAsJ8vynSstV2jmXJ_aKlq2xQoA2gMZv-IZQ3YMuGz0m523w7YB-ElDARfOQl-3mvIE_rJZwa7mRn9W4CNMUnVXD8jQWFlgayEumwUnrua5cuUnEeYMhVtZ83yziU1TJDWkBEWSp2StnUz4FUDisdsIVxRwAGobQBF3dpWDveHhBxbe2u6wGvE04yU" className="w-11 h-11 rounded-full border-2 border-primary object-cover" alt="User" />
                 </div>
                 <p className="text-sm font-medium text-white/80">Joined by over 10,000+ legal and HR professionals worldwide.</p>
@@ -222,125 +198,16 @@ export default function AuthPage() {
 
             {/* Forms */}
             {activeTab === "login" ? (
-              <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Email address</label>
-                  <Input 
-                    type="email" 
-                    placeholder="name@company.com" 
-                    {...loginForm.register("email")}
-                    className={loginForm.formState.errors.email ? "border-red-500 focus:ring-red-500/20" : ""}
-                  />
-                  {loginForm.formState.errors.email && <p className="mt-1.5 text-xs text-red-500">{loginForm.formState.errors.email.message}</p>}
-                </div>
-                <div>
-                  <div className="flex justify-between items-center mb-1.5">
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Password</label>
-                    <button type="button" onClick={() => setIsForgotModalOpen(true)} className="text-sm font-semibold text-primary hover:underline">Forgot password?</button>
-                  </div>
-                  <div className="relative">
-                    <Input 
-                      type={showPassword ? "text" : "password"} 
-                      placeholder="••••••••" 
-                      {...loginForm.register("password")}
-                      className={loginForm.formState.errors.password ? "border-red-500 focus:ring-red-500/20" : ""}
-                    />
-                    <button
-                      type="button"
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  {loginForm.formState.errors.password && <p className="mt-1.5 text-xs text-red-500">{loginForm.formState.errors.password.message}</p>}
-                </div>
-                <div className="flex items-center">
-                  <input 
-                    id="remember-me" 
-                    type="checkbox" 
-                    className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-800"
-                    {...loginForm.register("rememberMe")} 
-                  />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-600 dark:text-slate-400">Remember me for 30 days</label>
-                </div>
-                <Button type="submit" className="w-full py-6 text-base" disabled={loginForm.formState.isSubmitting}>
-                  {loginForm.formState.isSubmitting ? "Signing in..." : "Sign in to Account"}
-                </Button>
-                <div className="mt-8 text-center text-sm text-slate-500">
-                  Don't have an account? <button type="button" onClick={() => setActiveTab("signup")} className="font-bold text-primary hover:underline ml-1">Create an account</button>
-                </div>
-              </form>
+              <LoginForm 
+                onSubmit={onLoginSubmit} 
+                onForgotPassword={() => setIsForgotModalOpen(true)}
+                onToggleSignup={() => setActiveTab("signup")}
+              />
             ) : (
-              <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Select your role</label>
-                  <div className="grid grid-cols-3 gap-3">
-                    {["bde", "pm", "dev"].map((role, idx) => {
-                      const icons = { bde: Briefcase, pm: User, dev: Code };
-                      const Icon = icons[role];
-                      const labels = { bde: "BDE", pm: "PM", dev: "DEV" };
-                      return (
-                        <label key={role} className="cursor-pointer">
-                          <input type="radio" value={role} className="peer sr-only" {...signupForm.register("role")} />
-                          <div className="flex flex-col items-center justify-center p-3 border border-slate-200 dark:border-slate-800 rounded-xl transition-all hover:bg-slate-50 dark:hover:bg-slate-800 peer-checked:bg-primary peer-checked:border-primary peer-checked:text-white dark:peer-checked:bg-primary text-slate-600 dark:text-slate-400">
-                            <Icon className="w-5 h-5 mb-1.5" />
-                            <span className="text-[10px] font-bold uppercase tracking-wider">{labels[role]}</span>
-                          </div>
-                        </label>
-                      );
-                    })}
-                  </div>
-                  {signupForm.formState.errors.role && <p className="mt-1.5 text-xs text-red-500">{signupForm.formState.errors.role.message}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Full Name</label>
-                  <Input 
-                    type="text" 
-                    placeholder="John Doe" 
-                    {...signupForm.register("fullName")}
-                  />
-                  {signupForm.formState.errors.fullName && <p className="mt-1.5 text-xs text-red-500">{signupForm.formState.errors.fullName.message}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Work Email</label>
-                  <Input 
-                    type="email" 
-                    placeholder="john@company.com" 
-                    {...signupForm.register("email")}
-                  />
-                  {signupForm.formState.errors.email && <p className="mt-1.5 text-xs text-red-500">{signupForm.formState.errors.email.message}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
-                  <div className="relative">
-                    <Input 
-                      type={showPassword ? "text" : "password"} 
-                      placeholder="••••••••" 
-                      {...signupForm.register("password")}
-                    />
-                    <button
-                      type="button"
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  {signupForm.formState.errors.password && <p className="mt-1.5 text-xs text-red-500">{signupForm.formState.errors.password.message}</p>}
-                </div>
-
-                <Button type="submit" className="w-full py-6 text-base group" disabled={signupForm.formState.isSubmitting}>
-                  {signupForm.formState.isSubmitting ? "Creating..." : "Create Account"}
-                  <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                </Button>
-                <div className="mt-8 text-center text-sm text-slate-500">
-                  Already have an account? <button type="button" onClick={() => setActiveTab("login")} className="font-bold text-primary hover:underline ml-1">Log in</button>
-                </div>
-              </form>
+              <SignupForm 
+                onSubmit={onSignupSubmit}
+                onToggleLogin={() => setActiveTab("login")}
+              />
             )}
 
             <div className="mt-12 flex justify-center gap-6">
