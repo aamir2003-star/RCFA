@@ -9,6 +9,7 @@ app.use(express.json());
 // routes
 app.use("/api/projects", projectRoutes);
 
+
 // root
 app.get("/", (req, res) => {
   res.send("API is running...");
