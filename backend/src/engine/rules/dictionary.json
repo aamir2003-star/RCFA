@@ -1,0 +1,1739 @@
+{
+  "conflictPattern": {
+    "semantic": [
+      {
+        "term1": "maximize",
+        "term2": "minimize",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "maximize vs minimize conflict"
+      },
+      {
+        "term1": "maximize",
+        "term2": "increase",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "maximize vs increase conflict"
+      },
+      {
+        "term1": "maximize",
+        "term2": "decrease",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "maximize vs decrease conflict"
+      },
+      {
+        "term1": "maximize",
+        "term2": "enable",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "maximize vs enable conflict"
+      },
+      {
+        "term1": "maximize",
+        "term2": "disable",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "maximize vs disable conflict"
+      },
+      {
+        "term1": "maximize",
+        "term2": "allow",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "maximize vs allow conflict"
+      },
+      {
+        "term1": "maximize",
+        "term2": "prevent",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "maximize vs prevent conflict"
+      },
+      {
+        "term1": "minimize",
+        "term2": "maximize",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "minimize vs maximize conflict"
+      },
+      {
+        "term1": "minimize",
+        "term2": "increase",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "minimize vs increase conflict"
+      },
+      {
+        "term1": "minimize",
+        "term2": "decrease",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "minimize vs decrease conflict"
+      },
+      {
+        "term1": "minimize",
+        "term2": "enable",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "minimize vs enable conflict"
+      },
+      {
+        "term1": "minimize",
+        "term2": "disable",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "minimize vs disable conflict"
+      },
+      {
+        "term1": "minimize",
+        "term2": "allow",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "minimize vs allow conflict"
+      },
+      {
+        "term1": "minimize",
+        "term2": "prevent",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "minimize vs prevent conflict"
+      },
+      {
+        "term1": "increase",
+        "term2": "maximize",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "increase vs maximize conflict"
+      },
+      {
+        "term1": "increase",
+        "term2": "minimize",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "increase vs minimize conflict"
+      },
+      {
+        "term1": "increase",
+        "term2": "decrease",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "increase vs decrease conflict"
+      },
+      {
+        "term1": "increase",
+        "term2": "enable",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "increase vs enable conflict"
+      },
+      {
+        "term1": "increase",
+        "term2": "disable",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "increase vs disable conflict"
+      },
+      {
+        "term1": "increase",
+        "term2": "allow",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "increase vs allow conflict"
+      },
+      {
+        "term1": "increase",
+        "term2": "prevent",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "increase vs prevent conflict"
+      },
+      {
+        "term1": "decrease",
+        "term2": "maximize",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "decrease vs maximize conflict"
+      },
+      {
+        "term1": "decrease",
+        "term2": "minimize",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "decrease vs minimize conflict"
+      },
+      {
+        "term1": "decrease",
+        "term2": "increase",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "decrease vs increase conflict"
+      },
+      {
+        "term1": "decrease",
+        "term2": "enable",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "decrease vs enable conflict"
+      },
+      {
+        "term1": "decrease",
+        "term2": "disable",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "decrease vs disable conflict"
+      },
+      {
+        "term1": "decrease",
+        "term2": "allow",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "decrease vs allow conflict"
+      },
+      {
+        "term1": "decrease",
+        "term2": "prevent",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "decrease vs prevent conflict"
+      },
+      {
+        "term1": "enable",
+        "term2": "maximize",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "enable vs maximize conflict"
+      },
+      {
+        "term1": "enable",
+        "term2": "minimize",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "enable vs minimize conflict"
+      },
+      {
+        "term1": "enable",
+        "term2": "increase",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "enable vs increase conflict"
+      },
+      {
+        "term1": "enable",
+        "term2": "decrease",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "enable vs decrease conflict"
+      },
+      {
+        "term1": "enable",
+        "term2": "disable",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "enable vs disable conflict"
+      },
+      {
+        "term1": "enable",
+        "term2": "allow",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "enable vs allow conflict"
+      },
+      {
+        "term1": "enable",
+        "term2": "prevent",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "enable vs prevent conflict"
+      },
+      {
+        "term1": "disable",
+        "term2": "maximize",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "disable vs maximize conflict"
+      },
+      {
+        "term1": "disable",
+        "term2": "minimize",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "disable vs minimize conflict"
+      },
+      {
+        "term1": "disable",
+        "term2": "increase",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "disable vs increase conflict"
+      },
+      {
+        "term1": "disable",
+        "term2": "decrease",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "disable vs decrease conflict"
+      },
+      {
+        "term1": "disable",
+        "term2": "enable",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "disable vs enable conflict"
+      },
+      {
+        "term1": "disable",
+        "term2": "allow",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "disable vs allow conflict"
+      },
+      {
+        "term1": "disable",
+        "term2": "prevent",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "disable vs prevent conflict"
+      },
+      {
+        "term1": "allow",
+        "term2": "maximize",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "allow vs maximize conflict"
+      },
+      {
+        "term1": "allow",
+        "term2": "minimize",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "allow vs minimize conflict"
+      },
+      {
+        "term1": "allow",
+        "term2": "increase",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "allow vs increase conflict"
+      },
+      {
+        "term1": "allow",
+        "term2": "decrease",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "allow vs decrease conflict"
+      },
+      {
+        "term1": "allow",
+        "term2": "enable",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "allow vs enable conflict"
+      },
+      {
+        "term1": "allow",
+        "term2": "disable",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "allow vs disable conflict"
+      },
+      {
+        "term1": "allow",
+        "term2": "prevent",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "allow vs prevent conflict"
+      },
+      {
+        "term1": "prevent",
+        "term2": "maximize",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "prevent vs maximize conflict"
+      },
+      {
+        "term1": "prevent",
+        "term2": "minimize",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "prevent vs minimize conflict"
+      },
+      {
+        "term1": "prevent",
+        "term2": "increase",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "prevent vs increase conflict"
+      },
+      {
+        "term1": "prevent",
+        "term2": "decrease",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "prevent vs decrease conflict"
+      },
+      {
+        "term1": "prevent",
+        "term2": "enable",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "prevent vs enable conflict"
+      },
+      {
+        "term1": "prevent",
+        "term2": "disable",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "prevent vs disable conflict"
+      },
+      {
+        "term1": "prevent",
+        "term2": "allow",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "prevent vs allow conflict"
+      }
+    ],
+    "performance": [
+      {
+        "term1": "fast",
+        "term2": "slow",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "fast vs slow conflict"
+      },
+      {
+        "term1": "fast",
+        "term2": "instant",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "fast vs instant conflict"
+      },
+      {
+        "term1": "fast",
+        "term2": "delayed",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "fast vs delayed conflict"
+      },
+      {
+        "term1": "fast",
+        "term2": "low latency",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "fast vs low latency conflict"
+      },
+      {
+        "term1": "fast",
+        "term2": "high latency",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "fast vs high latency conflict"
+      },
+      {
+        "term1": "slow",
+        "term2": "fast",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "slow vs fast conflict"
+      },
+      {
+        "term1": "slow",
+        "term2": "instant",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "slow vs instant conflict"
+      },
+      {
+        "term1": "slow",
+        "term2": "delayed",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "slow vs delayed conflict"
+      },
+      {
+        "term1": "slow",
+        "term2": "low latency",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "slow vs low latency conflict"
+      },
+      {
+        "term1": "slow",
+        "term2": "high latency",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "slow vs high latency conflict"
+      },
+      {
+        "term1": "instant",
+        "term2": "fast",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "instant vs fast conflict"
+      },
+      {
+        "term1": "instant",
+        "term2": "slow",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "instant vs slow conflict"
+      },
+      {
+        "term1": "instant",
+        "term2": "delayed",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "instant vs delayed conflict"
+      },
+      {
+        "term1": "instant",
+        "term2": "low latency",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "instant vs low latency conflict"
+      },
+      {
+        "term1": "instant",
+        "term2": "high latency",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "instant vs high latency conflict"
+      },
+      {
+        "term1": "delayed",
+        "term2": "fast",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "delayed vs fast conflict"
+      },
+      {
+        "term1": "delayed",
+        "term2": "slow",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "delayed vs slow conflict"
+      },
+      {
+        "term1": "delayed",
+        "term2": "instant",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "delayed vs instant conflict"
+      },
+      {
+        "term1": "delayed",
+        "term2": "low latency",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "delayed vs low latency conflict"
+      },
+      {
+        "term1": "delayed",
+        "term2": "high latency",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "delayed vs high latency conflict"
+      },
+      {
+        "term1": "low latency",
+        "term2": "fast",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "low latency vs fast conflict"
+      },
+      {
+        "term1": "low latency",
+        "term2": "slow",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "low latency vs slow conflict"
+      },
+      {
+        "term1": "low latency",
+        "term2": "instant",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "low latency vs instant conflict"
+      },
+      {
+        "term1": "low latency",
+        "term2": "delayed",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "low latency vs delayed conflict"
+      },
+      {
+        "term1": "low latency",
+        "term2": "high latency",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "low latency vs high latency conflict"
+      },
+      {
+        "term1": "high latency",
+        "term2": "fast",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "high latency vs fast conflict"
+      },
+      {
+        "term1": "high latency",
+        "term2": "slow",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "high latency vs slow conflict"
+      },
+      {
+        "term1": "high latency",
+        "term2": "instant",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "high latency vs instant conflict"
+      },
+      {
+        "term1": "high latency",
+        "term2": "delayed",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "high latency vs delayed conflict"
+      },
+      {
+        "term1": "high latency",
+        "term2": "low latency",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "high latency vs low latency conflict"
+      }
+    ],
+    "security": [
+      {
+        "term1": "encrypt",
+        "term2": "plaintext",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "encrypt vs plaintext conflict"
+      },
+      {
+        "term1": "encrypt",
+        "term2": "secure",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "encrypt vs secure conflict"
+      },
+      {
+        "term1": "encrypt",
+        "term2": "insecure",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "encrypt vs insecure conflict"
+      },
+      {
+        "term1": "encrypt",
+        "term2": "authenticate",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "encrypt vs authenticate conflict"
+      },
+      {
+        "term1": "encrypt",
+        "term2": "anonymous",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "encrypt vs anonymous conflict"
+      },
+      {
+        "term1": "plaintext",
+        "term2": "encrypt",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "plaintext vs encrypt conflict"
+      },
+      {
+        "term1": "plaintext",
+        "term2": "secure",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "plaintext vs secure conflict"
+      },
+      {
+        "term1": "plaintext",
+        "term2": "insecure",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "plaintext vs insecure conflict"
+      },
+      {
+        "term1": "plaintext",
+        "term2": "authenticate",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "plaintext vs authenticate conflict"
+      },
+      {
+        "term1": "plaintext",
+        "term2": "anonymous",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "plaintext vs anonymous conflict"
+      },
+      {
+        "term1": "secure",
+        "term2": "encrypt",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "secure vs encrypt conflict"
+      },
+      {
+        "term1": "secure",
+        "term2": "plaintext",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "secure vs plaintext conflict"
+      },
+      {
+        "term1": "secure",
+        "term2": "insecure",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "secure vs insecure conflict"
+      },
+      {
+        "term1": "secure",
+        "term2": "authenticate",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "secure vs authenticate conflict"
+      },
+      {
+        "term1": "secure",
+        "term2": "anonymous",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "secure vs anonymous conflict"
+      },
+      {
+        "term1": "insecure",
+        "term2": "encrypt",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "insecure vs encrypt conflict"
+      },
+      {
+        "term1": "insecure",
+        "term2": "plaintext",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "insecure vs plaintext conflict"
+      },
+      {
+        "term1": "insecure",
+        "term2": "secure",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "insecure vs secure conflict"
+      },
+      {
+        "term1": "insecure",
+        "term2": "authenticate",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "insecure vs authenticate conflict"
+      },
+      {
+        "term1": "insecure",
+        "term2": "anonymous",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "insecure vs anonymous conflict"
+      },
+      {
+        "term1": "authenticate",
+        "term2": "encrypt",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "authenticate vs encrypt conflict"
+      },
+      {
+        "term1": "authenticate",
+        "term2": "plaintext",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "authenticate vs plaintext conflict"
+      },
+      {
+        "term1": "authenticate",
+        "term2": "secure",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "authenticate vs secure conflict"
+      },
+      {
+        "term1": "authenticate",
+        "term2": "insecure",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "authenticate vs insecure conflict"
+      },
+      {
+        "term1": "authenticate",
+        "term2": "anonymous",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "authenticate vs anonymous conflict"
+      },
+      {
+        "term1": "anonymous",
+        "term2": "encrypt",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "anonymous vs encrypt conflict"
+      },
+      {
+        "term1": "anonymous",
+        "term2": "plaintext",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "anonymous vs plaintext conflict"
+      },
+      {
+        "term1": "anonymous",
+        "term2": "secure",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "anonymous vs secure conflict"
+      },
+      {
+        "term1": "anonymous",
+        "term2": "insecure",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "anonymous vs insecure conflict"
+      },
+      {
+        "term1": "anonymous",
+        "term2": "authenticate",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "anonymous vs authenticate conflict"
+      }
+    ],
+    "scalability": [
+      {
+        "term1": "auto-scale",
+        "term2": "fixed",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "auto-scale vs fixed conflict"
+      },
+      {
+        "term1": "auto-scale",
+        "term2": "distributed",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "auto-scale vs distributed conflict"
+      },
+      {
+        "term1": "auto-scale",
+        "term2": "monolith",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "auto-scale vs monolith conflict"
+      },
+      {
+        "term1": "auto-scale",
+        "term2": "10k users",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "auto-scale vs 10k users conflict"
+      },
+      {
+        "term1": "auto-scale",
+        "term2": "100 users",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "auto-scale vs 100 users conflict"
+      },
+      {
+        "term1": "fixed",
+        "term2": "auto-scale",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "fixed vs auto-scale conflict"
+      },
+      {
+        "term1": "fixed",
+        "term2": "distributed",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "fixed vs distributed conflict"
+      },
+      {
+        "term1": "fixed",
+        "term2": "monolith",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "fixed vs monolith conflict"
+      },
+      {
+        "term1": "fixed",
+        "term2": "10k users",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "fixed vs 10k users conflict"
+      },
+      {
+        "term1": "fixed",
+        "term2": "100 users",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "fixed vs 100 users conflict"
+      },
+      {
+        "term1": "distributed",
+        "term2": "auto-scale",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "distributed vs auto-scale conflict"
+      },
+      {
+        "term1": "distributed",
+        "term2": "fixed",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "distributed vs fixed conflict"
+      },
+      {
+        "term1": "distributed",
+        "term2": "monolith",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "distributed vs monolith conflict"
+      },
+      {
+        "term1": "distributed",
+        "term2": "10k users",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "distributed vs 10k users conflict"
+      },
+      {
+        "term1": "distributed",
+        "term2": "100 users",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "distributed vs 100 users conflict"
+      },
+      {
+        "term1": "monolith",
+        "term2": "auto-scale",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "monolith vs auto-scale conflict"
+      },
+      {
+        "term1": "monolith",
+        "term2": "fixed",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "monolith vs fixed conflict"
+      },
+      {
+        "term1": "monolith",
+        "term2": "distributed",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "monolith vs distributed conflict"
+      },
+      {
+        "term1": "monolith",
+        "term2": "10k users",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "monolith vs 10k users conflict"
+      },
+      {
+        "term1": "monolith",
+        "term2": "100 users",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "monolith vs 100 users conflict"
+      },
+      {
+        "term1": "10k users",
+        "term2": "auto-scale",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "10k users vs auto-scale conflict"
+      },
+      {
+        "term1": "10k users",
+        "term2": "fixed",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "10k users vs fixed conflict"
+      },
+      {
+        "term1": "10k users",
+        "term2": "distributed",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "10k users vs distributed conflict"
+      },
+      {
+        "term1": "10k users",
+        "term2": "monolith",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "10k users vs monolith conflict"
+      },
+      {
+        "term1": "10k users",
+        "term2": "100 users",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "10k users vs 100 users conflict"
+      },
+      {
+        "term1": "100 users",
+        "term2": "auto-scale",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "100 users vs auto-scale conflict"
+      },
+      {
+        "term1": "100 users",
+        "term2": "fixed",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "100 users vs fixed conflict"
+      },
+      {
+        "term1": "100 users",
+        "term2": "distributed",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "100 users vs distributed conflict"
+      },
+      {
+        "term1": "100 users",
+        "term2": "monolith",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "100 users vs monolith conflict"
+      },
+      {
+        "term1": "100 users",
+        "term2": "10k users",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "100 users vs 10k users conflict"
+      }
+    ],
+    "cost": [
+      {
+        "term1": "low cost",
+        "term2": "high cost",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "low cost vs high cost conflict"
+      },
+      {
+        "term1": "low cost",
+        "term2": "free",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "low cost vs free conflict"
+      },
+      {
+        "term1": "low cost",
+        "term2": "paid",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "low cost vs paid conflict"
+      },
+      {
+        "term1": "low cost",
+        "term2": "cheap",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "low cost vs cheap conflict"
+      },
+      {
+        "term1": "low cost",
+        "term2": "expensive",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "low cost vs expensive conflict"
+      },
+      {
+        "term1": "high cost",
+        "term2": "low cost",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "high cost vs low cost conflict"
+      },
+      {
+        "term1": "high cost",
+        "term2": "free",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "high cost vs free conflict"
+      },
+      {
+        "term1": "high cost",
+        "term2": "paid",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "high cost vs paid conflict"
+      },
+      {
+        "term1": "high cost",
+        "term2": "cheap",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "high cost vs cheap conflict"
+      },
+      {
+        "term1": "high cost",
+        "term2": "expensive",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "high cost vs expensive conflict"
+      },
+      {
+        "term1": "free",
+        "term2": "low cost",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "free vs low cost conflict"
+      },
+      {
+        "term1": "free",
+        "term2": "high cost",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "free vs high cost conflict"
+      },
+      {
+        "term1": "free",
+        "term2": "paid",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "free vs paid conflict"
+      },
+      {
+        "term1": "free",
+        "term2": "cheap",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "free vs cheap conflict"
+      },
+      {
+        "term1": "free",
+        "term2": "expensive",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "free vs expensive conflict"
+      },
+      {
+        "term1": "paid",
+        "term2": "low cost",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "paid vs low cost conflict"
+      },
+      {
+        "term1": "paid",
+        "term2": "high cost",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "paid vs high cost conflict"
+      },
+      {
+        "term1": "paid",
+        "term2": "free",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "paid vs free conflict"
+      },
+      {
+        "term1": "paid",
+        "term2": "cheap",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "paid vs cheap conflict"
+      },
+      {
+        "term1": "paid",
+        "term2": "expensive",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "paid vs expensive conflict"
+      },
+      {
+        "term1": "cheap",
+        "term2": "low cost",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "cheap vs low cost conflict"
+      },
+      {
+        "term1": "cheap",
+        "term2": "high cost",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "cheap vs high cost conflict"
+      },
+      {
+        "term1": "cheap",
+        "term2": "free",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "cheap vs free conflict"
+      },
+      {
+        "term1": "cheap",
+        "term2": "paid",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "cheap vs paid conflict"
+      },
+      {
+        "term1": "cheap",
+        "term2": "expensive",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "cheap vs expensive conflict"
+      },
+      {
+        "term1": "expensive",
+        "term2": "low cost",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "expensive vs low cost conflict"
+      },
+      {
+        "term1": "expensive",
+        "term2": "high cost",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "expensive vs high cost conflict"
+      },
+      {
+        "term1": "expensive",
+        "term2": "free",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "expensive vs free conflict"
+      },
+      {
+        "term1": "expensive",
+        "term2": "paid",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "expensive vs paid conflict"
+      },
+      {
+        "term1": "expensive",
+        "term2": "cheap",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "expensive vs cheap conflict"
+      }
+    ],
+    "mobile": [
+      {
+        "term1": "offline",
+        "term2": "online",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "offline vs online conflict"
+      },
+      {
+        "term1": "offline",
+        "term2": "2G",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "offline vs 2G conflict"
+      },
+      {
+        "term1": "offline",
+        "term2": "5G",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "offline vs 5G conflict"
+      },
+      {
+        "term1": "offline",
+        "term2": "low-end",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "offline vs low-end conflict"
+      },
+      {
+        "term1": "offline",
+        "term2": "high-end",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "offline vs high-end conflict"
+      },
+      {
+        "term1": "online",
+        "term2": "offline",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "online vs offline conflict"
+      },
+      {
+        "term1": "online",
+        "term2": "2G",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "online vs 2G conflict"
+      },
+      {
+        "term1": "online",
+        "term2": "5G",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "online vs 5G conflict"
+      },
+      {
+        "term1": "online",
+        "term2": "low-end",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "online vs low-end conflict"
+      },
+      {
+        "term1": "online",
+        "term2": "high-end",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "online vs high-end conflict"
+      },
+      {
+        "term1": "2G",
+        "term2": "offline",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "2G vs offline conflict"
+      },
+      {
+        "term1": "2G",
+        "term2": "online",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "2G vs online conflict"
+      },
+      {
+        "term1": "2G",
+        "term2": "5G",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "2G vs 5G conflict"
+      },
+      {
+        "term1": "2G",
+        "term2": "low-end",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "2G vs low-end conflict"
+      },
+      {
+        "term1": "2G",
+        "term2": "high-end",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "2G vs high-end conflict"
+      },
+      {
+        "term1": "5G",
+        "term2": "offline",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "5G vs offline conflict"
+      },
+      {
+        "term1": "5G",
+        "term2": "online",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "5G vs online conflict"
+      },
+      {
+        "term1": "5G",
+        "term2": "2G",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "5G vs 2G conflict"
+      },
+      {
+        "term1": "5G",
+        "term2": "low-end",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "5G vs low-end conflict"
+      },
+      {
+        "term1": "5G",
+        "term2": "high-end",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "5G vs high-end conflict"
+      },
+      {
+        "term1": "low-end",
+        "term2": "offline",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "low-end vs offline conflict"
+      },
+      {
+        "term1": "low-end",
+        "term2": "online",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "low-end vs online conflict"
+      },
+      {
+        "term1": "low-end",
+        "term2": "2G",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "low-end vs 2G conflict"
+      },
+      {
+        "term1": "low-end",
+        "term2": "5G",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "low-end vs 5G conflict"
+      },
+      {
+        "term1": "low-end",
+        "term2": "high-end",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "low-end vs high-end conflict"
+      },
+      {
+        "term1": "high-end",
+        "term2": "offline",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "high-end vs offline conflict"
+      },
+      {
+        "term1": "high-end",
+        "term2": "online",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "high-end vs online conflict"
+      },
+      {
+        "term1": "high-end",
+        "term2": "2G",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "high-end vs 2G conflict"
+      },
+      {
+        "term1": "high-end",
+        "term2": "5G",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "high-end vs 5G conflict"
+      },
+      {
+        "term1": "high-end",
+        "term2": "low-end",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "high-end vs low-end conflict"
+      }
+    ],
+    "database": [
+      {
+        "term1": "SQL",
+        "term2": "NoSQL",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "SQL vs NoSQL conflict"
+      },
+      {
+        "term1": "SQL",
+        "term2": "ACID",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "SQL vs ACID conflict"
+      },
+      {
+        "term1": "SQL",
+        "term2": "eventual consistency",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "SQL vs eventual consistency conflict"
+      },
+      {
+        "term1": "NoSQL",
+        "term2": "SQL",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "NoSQL vs SQL conflict"
+      },
+      {
+        "term1": "NoSQL",
+        "term2": "ACID",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "NoSQL vs ACID conflict"
+      },
+      {
+        "term1": "NoSQL",
+        "term2": "eventual consistency",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "NoSQL vs eventual consistency conflict"
+      },
+      {
+        "term1": "ACID",
+        "term2": "SQL",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "ACID vs SQL conflict"
+      },
+      {
+        "term1": "ACID",
+        "term2": "NoSQL",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "ACID vs NoSQL conflict"
+      },
+      {
+        "term1": "ACID",
+        "term2": "eventual consistency",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "ACID vs eventual consistency conflict"
+      },
+      {
+        "term1": "eventual consistency",
+        "term2": "SQL",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "eventual consistency vs SQL conflict"
+      },
+      {
+        "term1": "eventual consistency",
+        "term2": "NoSQL",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "eventual consistency vs NoSQL conflict"
+      },
+      {
+        "term1": "eventual consistency",
+        "term2": "ACID",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "eventual consistency vs ACID conflict"
+      }
+    ],
+    "integration": [
+      {
+        "term1": "REST",
+        "term2": "SOAP",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "REST vs SOAP conflict"
+      },
+      {
+        "term1": "REST",
+        "term2": "webhook",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "REST vs webhook conflict"
+      },
+      {
+        "term1": "REST",
+        "term2": "polling",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "REST vs polling conflict"
+      },
+      {
+        "term1": "SOAP",
+        "term2": "REST",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "SOAP vs REST conflict"
+      },
+      {
+        "term1": "SOAP",
+        "term2": "webhook",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "SOAP vs webhook conflict"
+      },
+      {
+        "term1": "SOAP",
+        "term2": "polling",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "SOAP vs polling conflict"
+      },
+      {
+        "term1": "webhook",
+        "term2": "REST",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "webhook vs REST conflict"
+      },
+      {
+        "term1": "webhook",
+        "term2": "SOAP",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "webhook vs SOAP conflict"
+      },
+      {
+        "term1": "webhook",
+        "term2": "polling",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "webhook vs polling conflict"
+      },
+      {
+        "term1": "polling",
+        "term2": "REST",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "polling vs REST conflict"
+      },
+      {
+        "term1": "polling",
+        "term2": "SOAP",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "polling vs SOAP conflict"
+      },
+      {
+        "term1": "polling",
+        "term2": "webhook",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "polling vs webhook conflict"
+      }
+    ],
+    "uiux": [
+      {
+        "term1": "simple",
+        "term2": "complex",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "simple vs complex conflict"
+      },
+      {
+        "term1": "simple",
+        "term2": "mobile-first",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "simple vs mobile-first conflict"
+      },
+      {
+        "term1": "simple",
+        "term2": "desktop-first",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "simple vs desktop-first conflict"
+      },
+      {
+        "term1": "complex",
+        "term2": "simple",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "complex vs simple conflict"
+      },
+      {
+        "term1": "complex",
+        "term2": "mobile-first",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "complex vs mobile-first conflict"
+      },
+      {
+        "term1": "complex",
+        "term2": "desktop-first",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "complex vs desktop-first conflict"
+      },
+      {
+        "term1": "mobile-first",
+        "term2": "simple",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "mobile-first vs simple conflict"
+      },
+      {
+        "term1": "mobile-first",
+        "term2": "complex",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "mobile-first vs complex conflict"
+      },
+      {
+        "term1": "mobile-first",
+        "term2": "desktop-first",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "mobile-first vs desktop-first conflict"
+      },
+      {
+        "term1": "desktop-first",
+        "term2": "simple",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "desktop-first vs simple conflict"
+      },
+      {
+        "term1": "desktop-first",
+        "term2": "complex",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "desktop-first vs complex conflict"
+      },
+      {
+        "term1": "desktop-first",
+        "term2": "mobile-first",
+        "severity": "High",
+        "feasibilityImpact": "Requires Redesign",
+        "description": "desktop-first vs mobile-first conflict"
+      }
+    ]
+  },
+  "feasibilityImpacts": {
+    "Blocks Implementation": {
+      "level": 4
+    },
+    "Requires Redesign": {
+      "level": 3
+    },
+    "Minor Adjustment": {
+      "level": 2
+    },
+    "No Impact": {
+      "level": 1
+    }
+  },
+  "severityWeights": {
+    "Critical": 4,
+    "High": 3,
+    "Medium": 2,
+    "Low": 1
+  },
+  "categoryConflicts": [],
+  "priorityRules": {},
+  "aiIntegrationHints": {}
+}
