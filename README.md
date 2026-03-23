@@ -1,4 +1,4 @@
-# 🧠 Conflict Resolver AI — RCFA 
+# 🧠 Conflict Resolver AI — RCFA v2
 
 ## 🧠 Project Overview
 
@@ -191,17 +191,17 @@ conflict-resolver-ai/
 
 ### The Team
 
-| Dev |Name| Side | Role Focus | Screens Owned |
-|---|---|---|---|
+| Dev | Name | Side | Role Focus | Screens Owned |
+|---|---|---|---|---|
 | **Dev 1** | Shubham | Frontend | Auth + Global Layout + Role Routing | Screen 1 — Auth |
-| **Dev 2** | Ansh |Frontend | All 3 Dashboards (PM, Developer, BDE) | Screens 2, 3, 4 |
-| **Dev 3** | Pratik |Frontend | Create Project + Module Management + AI Generator | Screens 5, 6, 12 |
-| **Dev 4** | Dhruv mochi and shubham |Frontend | Requirement Editor + Conflict UI + Discussion + Timeline + Analytics | Screens 7, 8, 9, 10, 11 |
-| **Dev 5** | Dhruv patel |Backend | Auth API + All CRUD Routes + DB Schema | All REST endpoints |
-| **Dev 6** | Aamir |Backend | AI Conflict Engine + Gemini Integration + Requirement Generator | Detection + Gen pipeline |
-| **Dev 7** | Feenel |Backend | Real-time Events + Analytics API + Reports + File Uploads | Socket.io, Analytics, Reports |
+| **Dev 2** | Ansh | Frontend | All 3 Dashboards (PM, Developer, BDE) | Screens 2, 3, 4 |
+| **Dev 3** | Pratik | Frontend | Create Project + Module Management + AI Generator | Screens 5, 6, 12 |
+| **Dev 4** | Dhruv Mochi + Shubham | Frontend | Requirement Editor + Conflict UI + Discussion + Timeline + Analytics | Screens 7, 8, 9, 10, 11 |
+| **Dev 5** | Dhruv Patel | Backend | Auth API + All CRUD Routes + DB Schema | All REST endpoints |
+| **Dev 6** | Aamir | Backend | AI Conflict Engine + Gemini Integration + Requirement Generator | Detection + Gen pipeline |
+| **Dev 7** | Feenel | Backend | Real-time Events + Analytics API + Reports + File Uploads | Socket.io, Analytics, Reports |
 
-> ⚠️ **Critical Path:** Dev 5 must complete `chore/db-schema` and publish the Postman collection by **end of Week 1**. All other developers are blocked until the API contracts are defined.
+> ⚠️ **Critical Path:** **Dhruv Patel (Dev 5)** must complete `chore/db-schema` and publish the Postman collection by **end of Week 1**. All other developers are blocked until the API contracts are defined.
 
 ---
 
@@ -220,39 +220,39 @@ conflict-resolver-ai/
 
 | Branch | Owner | Screens |
 |---|---|---|
-| `feat/fe-auth` | Dev 1 | Screen 1 — Auth Page |
-| `feat/fe-layout` | Dev 1 | Sidebar, TopHeader, RoleRoute, ThemeContext |
-| `feat/fe-pm-dashboard` | Dev 2 | Screen 2 — Project Manager Dashboard |
-| `feat/fe-dev-dashboard` | Dev 2 | Screen 3 — Developer Dashboard |
-| `feat/fe-bde-dashboard` | Dev 2 | Screen 4 — BDE Dashboard |
-| `feat/fe-create-project` | Dev 3 | Screen 5 — Create Project Page |
-| `feat/fe-modules` | Dev 3 | Screen 6 — Module Management |
-| `feat/fe-ai-generator` | Dev 3 | Screen 12 — AI Requirement Generator |
-| `feat/fe-req-editor` | Dev 4 | Screen 7 — Requirement Editor |
-| `feat/fe-conflict-ui` | Dev 4 | Screen 8 — Conflict Detection Page |
-| `feat/fe-discussion` | Dev 4 | Screen 9 — Conflict Resolution Discussion |
-| `feat/fe-timeline` | Dev 4 | Screen 10 — Activity Timeline |
-| `feat/fe-analytics` | Dev 4 | Screen 11 — Analytics Dashboard |
+| `feat/fe-auth` | Shubham (Dev 1) | Screen 1 — Auth Page |
+| `feat/fe-layout` | Shubham (Dev 1) | Sidebar, TopHeader, RoleRoute, ThemeContext |
+| `feat/fe-pm-dashboard` | Ansh (Dev 2) | Screen 2 — Project Manager Dashboard |
+| `feat/fe-dev-dashboard` | Ansh (Dev 2) | Screen 3 — Developer Dashboard |
+| `feat/fe-bde-dashboard` | Ansh (Dev 2) | Screen 4 — BDE Dashboard |
+| `feat/fe-create-project` | Pratik (Dev 3) | Screen 5 — Create Project Page |
+| `feat/fe-modules` | Pratik (Dev 3) | Screen 6 — Module Management |
+| `feat/fe-ai-generator` | Pratik (Dev 3) | Screen 12 — AI Requirement Generator |
+| `feat/fe-req-editor` | Dhruv Mochi + Shubham (Dev 4) | Screen 7 — Requirement Editor |
+| `feat/fe-conflict-ui` | Dhruv Mochi + Shubham (Dev 4) | Screen 8 — Conflict Detection Page |
+| `feat/fe-discussion` | Dhruv Mochi + Shubham (Dev 4) | Screen 9 — Conflict Resolution Discussion |
+| `feat/fe-timeline` | Dhruv Mochi + Shubham (Dev 4) | Screen 10 — Activity Timeline |
+| `feat/fe-analytics` | Dhruv Mochi + Shubham (Dev 4) | Screen 11 — Analytics Dashboard |
 
 ### Backend Branches
 
 | Branch | Owner | Scope |
 |---|---|---|
-| `chore/db-schema` | Dev 5 | All 9 Mongoose models + indexes + seed script |
-| `feat/be-auth-api` | Dev 5 | Register, Login, Google OAuth, GitHub OAuth, JWT, RBAC |
-| `feat/be-projects-api` | Dev 5 | Projects, Requirements, Modules, Votes, Comments, Team CRUD |
-| `feat/be-conflict-engine` | Dev 6 | 7-step detection pipeline + all 4 rule files |
-| `feat/be-gemini-integration` | Dev 6 | Gemini client, semantic analysis, requirement generator |
-| `feat/be-socket-events` | Dev 7 | Socket.io server, conflict/activity/vote/module events |
-| `feat/be-analytics-api` | Dev 7 | Project health scores, conflict trend data, charts data |
-| `feat/be-reports-api` | Dev 7 | PDF generation, file upload (attachments), export routes |
+| `chore/db-schema` | Dhruv Patel (Dev 5) | All 9 Mongoose models + indexes + seed script |
+| `feat/be-auth-api` | Dhruv Patel (Dev 5) | Register, Login, Google OAuth, GitHub OAuth, JWT, RBAC |
+| `feat/be-projects-api` | Dhruv Patel (Dev 5) | Projects, Requirements, Modules, Votes, Comments, Team CRUD |
+| `feat/be-conflict-engine` | Aamir (Dev 6) | 7-step detection pipeline + all 4 rule files |
+| `feat/be-gemini-integration` | Aamir (Dev 6) | Gemini client, semantic analysis, requirement generator |
+| `feat/be-socket-events` | Feenel (Dev 7) | Socket.io server, conflict/activity/vote/module events |
+| `feat/be-analytics-api` | Feenel (Dev 7) | Project health scores, conflict trend data, charts data |
+| `feat/be-reports-api` | Feenel (Dev 7) | PDF generation, file upload (attachments), export routes |
 
 ### Shared Branches
 
 | Branch | Owner | Scope |
 |---|---|---|
 | `chore/ci-cd` | Team Lead | GitHub Actions, Dockerfile, Vercel config |
-| `test/unit-integration` | Dev 6 + Dev 7 | Jest, Vitest, supertest, socket test, coverage |
+| `test/unit-integration` | Aamir + Feenel (Dev 6 + Dev 7) | Jest, Vitest, supertest, socket test, coverage |
 
 ---
 
@@ -260,7 +260,7 @@ conflict-resolver-ai/
 
 ---
 
-### 👤 Dev 1 — Auth & Global Layout
+### 👤 Dev 1 — Shubham — Auth & Global Layout
 **Branches:** `feat/fe-auth` · `feat/fe-layout`
 
 #### `feat/fe-auth` — Screen 1: Authentication Page
@@ -305,7 +305,7 @@ conflict-resolver-ai/
 
 ---
 
-### 👤 Dev 2 — All Three Dashboards
+### 👤 Dev 2 — Ansh — All Three Dashboards
 **Branches:** `feat/fe-pm-dashboard` · `feat/fe-dev-dashboard` · `feat/fe-bde-dashboard`
 
 #### `feat/fe-pm-dashboard` — Screen 2: Project Manager Dashboard
@@ -348,7 +348,7 @@ conflict-resolver-ai/
 
 ---
 
-### 👤 Dev 3 — Create Project + Modules + AI Generator
+### 👤 Dev 3 — Pratik — Create Project + Modules + AI Generator
 **Branches:** `feat/fe-create-project` · `feat/fe-modules` · `feat/fe-ai-generator`
 
 #### `feat/fe-create-project` — Screen 5: Create Project Page
@@ -413,7 +413,7 @@ conflict-resolver-ai/
 
 ---
 
-### 👤 Dev 4 — Requirement Editor + Conflict Suite + Timeline + Analytics
+### 👤 Dev 4 — Dhruv Mochi + Shubham — Requirement Editor + Conflict Suite + Timeline + Analytics
 **Branches:** `feat/fe-req-editor` · `feat/fe-conflict-ui` · `feat/fe-discussion` · `feat/fe-timeline` · `feat/fe-analytics`
 
 #### `feat/fe-req-editor` — Screen 7: Requirement Editor
@@ -510,10 +510,10 @@ conflict-resolver-ai/
 
 ---
 
-### 👤 Dev 5 — Auth API + All CRUD Routes + DB Schema
+### 👤 Dev 5 — Dhruv Patel — Auth API + All CRUD Routes + DB Schema
 **Branches:** `chore/db-schema` · `feat/be-auth-api` · `feat/be-projects-api`
 
-#### `chore/db-schema` *(do first — unblocks everyone)*
+#### `chore/db-schema` *(Dhruv Patel — do first, unblocks everyone)*
 - [ ] Provision MongoDB Atlas M0 cluster
 - [ ] `User` model — `id, name, email, role (pm|developer|bde|admin), passwordHash, oauthProvider, oauthId, createdAt, refreshToken, aiCreditsUsed, aiCreditsLimit`
 - [ ] `Project` model — `id, name, clientName, description, budget, timeline, status, createdBy, teamMembers[], progress, createdAt`
@@ -526,7 +526,7 @@ conflict-resolver-ai/
 - [ ] `Report` model — `id, projectId, generatedBy, generatedAt, conflictCount, resolvedCount, downloadUrl, format`
 - [ ] Add indexes: `Requirements(projectId, moduleId, status)`, `Conflicts(projectId, status, severityScore)`, `Modules(projectId, sortOrder)`, `Users(email unique)`
 - [ ] Seed script (`npm run seed`) — 1 PM user, 2 developer users, 1 BDE user, 2 projects, 5 modules, 10 requirements, 3 conflicts
-- [ ] Publish `docs/api-collection.json` Postman collection ← **needed by all FE devs in Week 1**
+- [ ] Publish `docs/api-collection.json` Postman collection ← **Dhruv Patel to deliver by end of Week 1 — Shubham, Ansh, Pratik, and Dhruv Mochi are all blocked until this is done**
 
 #### `feat/be-auth-api`
 - [ ] `POST /api/v1/auth/register` — Zod validation, bcrypt hash (cost 12), role assignment, return JWT + refresh
@@ -562,7 +562,7 @@ conflict-resolver-ai/
 
 ---
 
-### 👤 Dev 6 — AI Conflict Engine + Gemini + Requirement Generator
+### 👤 Dev 6 — Aamir — AI Conflict Engine + Gemini + Requirement Generator
 **Branches:** `feat/be-conflict-engine` · `feat/be-gemini-integration`
 
 #### `feat/be-conflict-engine` — 7-Step Detection Pipeline
@@ -618,7 +618,7 @@ Respond ONLY in valid JSON:
 
 ---
 
-### 👤 Dev 7 — Real-time + Analytics API + Reports + File Uploads
+### 👤 Dev 7 — Feenel — Real-time + Analytics API + Reports + File Uploads
 **Branches:** `feat/be-socket-events` · `feat/be-analytics-api` · `feat/be-reports-api`
 
 #### `feat/be-socket-events`
@@ -999,3 +999,20 @@ A branch is ready for PR when all of the following are true:
 
 ---
 
+## 📅 Milestones
+
+| Milestone | Week | Deliverable |
+|---|---|---|
+| M1 — Foundation | Week 2 | Auth live (Google + GitHub), DB schema + seed done, layout + role routing done, Postman collection published |
+| M2 — Dashboards | Week 4 | All 3 role dashboards done, Create Project page + AI preview live, Module management with drag-and-drop |
+| M3 — Core Intelligence | Week 6 | Requirement Editor with AI assistant, Conflict Detection with 3 proposals, Discussion with file attachments, AI Requirement Generator |
+| M4 — Real-time & Analytics | Week 7 | Socket.io events live, Analytics dashboard with charts, Activity Timeline |
+| M5 — Reports & Launch | Week 8 | PDF reports, full CI/CD, security audit, production deploy |
+
+---
+
+<div align="center">
+
+**Conflict Resolver AI** · v2.0 · 12 Screens · 7 Developers · React + Node.js + MongoDB + Gemini AI
+
+</div>
