@@ -1,44 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Sidebar } from './Sidebar';
-import { TopHeader } from './TopHeader';
-import { Breadcrumb } from './Breadcrumb';
-import { PageWrapper } from './PageWrapper';
+import React from "react";
+import { Sidebar } from "./Sidebar";
+import { TopHeader } from "./TopHeader";
 
-export function MainLayout({ children }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isDark, setIsDark] = useState(() => {
-    return localStorage.getItem('theme') === 'dark' ||
-      (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
-  });
-
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDark]);
-
+export function MainLayout({ children, role }) {
   return (
-    <div className="flex h-screen bg-background-light dark:bg-background-dark overflow-hidden font-display transition-colors">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      
-      <div className="flex flex-1 flex-col z-0 overflow-y-auto">
-        <TopHeader 
-          toggleSidebar={() => setSidebarOpen(true)} 
-          toggleTheme={() => setIsDark(!isDark)}
-          isDark={isDark}
-        />
-        
-        <main className="flex-1">
-          <PageWrapper>
-            <div className="mb-6">
-              <Breadcrumb />
-            </div>
-            {children}
-          </PageWrapper>
+    <div className="flex h-screen w-full bg-slate-50 dark:bg-[#080b11] overflow-hidden text-foreground selection:bg-indigo-500/30">
+      <Sidebar role={role} />
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        <div className="absolute inset-0 bg-linear-to-br from-indigo-50/50 via-transparent to-purple-50/50 dark:from-indigo-950/20 dark:via-transparent dark:to-purple-950/20 pointer-events-none z-0"></div>
+        <TopHeader role={role} />
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-6 lg:p-8 relative z-10 scroll-smooth custom-scrollbar">
+          <div className="max-w-7xl mx-auto h-full w-full animate-in fade-in duration-500">{children}</div>
         </main>
       </div>
     </div>

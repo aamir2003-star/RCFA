@@ -63,7 +63,11 @@ export const LoginForm = ({ onSubmit, onForgotPassword, onToggleSignup }) => {
         />
         <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-600 dark:text-slate-400">Remember me for 30 days</label>
       </div>
-      <Button type="submit" className="w-full py-6 text-base" disabled={loginForm.formState.isSubmitting}>
+      <Button 
+        type="submit" 
+        className="w-full py-6 text-base text-white bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:text-white dark:hover:bg-indigo-700 transition-colors shadow-none" 
+        disabled={loginForm.formState.isSubmitting}
+      >
         {loginForm.formState.isSubmitting ? "Signing in..." : "Sign in to Account"}
       </Button>
       <div className="mt-8 text-center text-sm text-slate-500">

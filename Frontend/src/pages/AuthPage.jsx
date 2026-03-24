@@ -68,25 +68,25 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-0 md:p-4 bg-background-light dark:bg-background-dark font-display">
-      <div className="flex w-full md:max-w-5xl md:bg-white md:dark:bg-slate-900 md:rounded-xl md:overflow-hidden md:shadow-2xl min-h-screen md:min-h-[700px]">
+    <div className="min-h-screen flex items-center justify-center p-0 md:p-4 bg-slate-50 dark:bg-slate-950 font-display">
+      <div className="flex w-full md:max-w-5xl bg-white dark:bg-slate-900 md:rounded-xl overflow-hidden shadow-2xl min-h-screen md:min-h-[700px]">
         
         {/* Left Side: Branding */}
         <div
           className={cn(
             "hidden lg:flex lg:w-1/2 relative flex-col justify-between p-12 text-white overflow-hidden transition-all duration-500",
             activeTab === "login" 
-              ? "bg-gradient-to-br from-[#1d283a] via-[#2d3e5a] to-[#4a5d7a]"
-              : "bg-[radial-gradient(circle_at_top_left,#2a3b54,#1d283a)]"
+              ? "bg-linear-to-br from-[#1d283a] via-[#2d3e5a] to-[#4a5d7a]"
+              : "bg-[#1d283a]"
           )}
         >
           {/* Abstract overlays depending on tab */}
           {activeTab === "login" ? (
-             <div className="absolute inset-0 opacity-20 pointer-events-none overflow-hidden">
-               <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full border-[1px] border-white/30"></div>
-               <div className="absolute top-1/4 left-1/2 w-96 h-96 rounded-full border-[1px] border-white/20"></div>
-               <div className="absolute bottom-[-50px] right-[-50px] w-64 h-64 rounded-full bg-gradient-to-br from-indigo-500/40 to-transparent blur-3xl"></div>
-               <div className="absolute top-1/2 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent rotate-45"></div>
+              <div className="absolute inset-0 opacity-20 pointer-events-none overflow-hidden">
+               <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full border border-white/30"></div>
+               <div className="absolute top-1/4 left-1/2 w-96 h-96 rounded-full border border-white/20"></div>
+               <div className="absolute bottom-[-50px] right-[-50px] w-64 h-64 rounded-full bg-linear-to-br from-indigo-500/40 to-transparent blur-3xl"></div>
+               <div className="absolute top-1/2 left-0 w-full h-px bg-linear-to-r from-transparent via-white/20 to-transparent rotate-45"></div>
              </div>
           ) : (
              <>
@@ -130,7 +130,7 @@ export default function AuthPage() {
             {activeTab === "signup" && (
               <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-2xl border border-white/10 bg-white/5 mt-8">
                 <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWGrSkglnUuO7mfsuE9YxIHoRPRwkPOc18z-CDFrsbRyABDgDyo_p2iTSMvpIttuSHtAiE68SE4JfT1ZdaITA6mnv6wCBB5iIDjPKd46nEiU1CkHW4JIMcpsAS_81mAqg7Nbyu4EqIPy_CoosmUoo9MUijDXDFXXIZ7ZJIokYtbehOd5rZ2oTSiSOyMQBIL1Jba6cWgJb2oqG8lpmbwwxnmWcOFsqcVRDqDpfB_Xi2Y92wuRq41NBVH8PqYmCwx-kgrwBOvCeJ2Ac" alt="Preview" className="object-cover w-full h-full opacity-80" />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-primary/60 to-transparent" />
               </div>
             )}
           </div>

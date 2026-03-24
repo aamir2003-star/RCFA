@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 
@@ -15,6 +16,7 @@ export function AuthProvider({ children }) {
         setUser(response.data.user);
       } catch (error) {
         setUser(null);
+        console.log(error);
       } finally {
         setLoading(false);
       }
