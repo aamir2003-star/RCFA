@@ -23,7 +23,7 @@ export default function DevDashboard() {
           You have{" "}
           <span className="text-slate-900 dark:text-white font-bold">
             4 unresolved conflicts
-          </span>{" "}
+          </span>{" "}  
           requiring immediate pipeline attention today.
         </p>
       </div>
