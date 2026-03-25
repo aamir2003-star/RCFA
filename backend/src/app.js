@@ -1,4 +1,4 @@
-import express from 'express'
+import express from 'express';
 import { UserModel } from './models/user/user.model.js';
 import { ProjectModel } from './models/project/project.model.js';
 import { RequirementModel } from './models/requirements/requirement.model.js';
@@ -7,13 +7,16 @@ import { ConflictModel } from './models/conflict/conflict.model.js';
 import { DiscussionModel } from './models/discussion/discussion.model.js';
 import { ActivityModel } from './models/activity/activity.model.js';
 
+// ================= API ROUTES =================
+import conflictRoutes from './routes/conflict.routes.js';
+
 const app = express();
 
-// middleware (ALWAYS before routes)
+// ─── Global Middleware ─────────────────────────────────────────────────────
 app.use(express.json());
 
-// ================= IMPORT MODELS (ONLY ONCE) =================
-
+// ─── Mount API Routes ──────────────────────────────────────────────────────
+app.use('/api/v1/conflicts', conflictRoutes);
 
 // ================= SEED ROUTE =================
 app.get("/seed", async (req, res) => {
@@ -51,60 +54,72 @@ app.get("/seed", async (req, res) => {
       timeline: "3 months"
     });
 
-    // 3️⃣ Requirements
+    // 3️⃣ Requirements — include conflict-prone pairs for engine testing
     const req1 = await RequirementModel.create({
       projectId: project._id,
-      title: "Users can cancel orders anytime",
+      title: "AES-256 encryption for all user data",
+      description: "All user data must be encrypted using AES-256 encryption for privacy and GDPR compliance.",
       priority: "high",
+      category: "Security",
+      stakeholder: "Legal",
       createdBy: pm._id
     });
 
     const req2 = await RequirementModel.create({
       projectId: project._id,
-      title: "Orders cannot be cancelled after preparation",
+      title: "Dashboard response time under 1 second",
+      description: "The dashboard must load in less than 1 second with sub-100ms response time for all API calls.",
       priority: "high",
+      category: "Performance",
+      stakeholder: "PM",
+      createdBy: pm._id
+    });
+
+    const req3 = await RequirementModel.create({
+      projectId: project._id,
+      title: "Support 10,000 concurrent users",
+      description: "System must support 10,000 concurrent users with horizontal scaling and cluster replication.",
+      priority: "medium",
+      category: "Scalability",
+      stakeholder: "Architect",
+      createdBy: dev._id
+    });
+
+    const req4 = await RequirementModel.create({
+      projectId: project._id,
+      title: "Keep infrastructure cost under $5,000/month",
+      description: "Total monthly infrastructure billing must remain under $5,000 budget.",
+      priority: "medium",
+      category: "Cost",
+      stakeholder: "PM",
       createdBy: pm._id
     });
 
     // 4️⃣ Module
-    const moduleData = await ModuleModel.create({
+    await ModuleModel.create({
       projectId: project._id,
       name: "Order Module",
       assignedTo: dev._id,
-      requirements: [req1._id, req2._id]
+      requirements: [req1._id, req2._id, req3._id, req4._id]
     });
 
-    // 5️⃣ Conflict
-    const conflict = await ConflictModel.create({
-      projectId: project._id,
-      requirementA: req1._id,
-      requirementB: req2._id,
-      type: "contradiction",
-      severity: "high",
-      aiSuggestion: "Allow cancellation only before preparation"
-    });
-
-    // 6️⃣ Discussion
-    await DiscussionModel.create({
-      conflictId: conflict._id,
-      comments: [
-        {
-          userId: dev._id,
-          message: "We should restrict cancellation after preparation"
-        }
-      ]
-    });
-
-    // 7️⃣ Activity
+    // 5️⃣ Activity
     await ActivityModel.create({
       projectId: project._id,
-      action: "Project created and conflict detected",
+      action: "Project seeded for conflict detection testing",
       performedBy: pm._id
     });
 
     res.json({
-      message: "✅ Dummy data created successfully",
-      projectId: project._id
+      message: "✅ Seed data created — use projectId to trigger conflict analysis",
+      projectId: project._id,
+      analyzeUrl: `/api/v1/conflicts/analyze/${project._id}`,
+      requirements: [
+        { id: req1._id, title: req1.title },
+        { id: req2._id, title: req2.title },
+        { id: req3._id, title: req3.title },
+        { id: req4._id, title: req4.title },
+      ]
     });
 
   } catch (error) {
@@ -113,21 +128,18 @@ app.get("/seed", async (req, res) => {
   }
 });
 
-// ================= TEST ROUTE =================
-app.get("/test-user", async (req, res) => {
-  const user = await UserModel.create({
-    name: "Feneel",
-    email: "feneel@test.com",
-    password: "123456",
-    role: "BDE"
-  });
-
-  res.json(user);
-});
-
 // ================= ROOT =================
 app.get("/", (req, res) => {
-  res.send("API is running...");
+  res.json({
+    message: "RCFA API is running",
+    version: "1.0.0",
+    endpoints: {
+      seed: "GET /seed",
+      analyzeConflicts: "POST /api/v1/conflicts/analyze/:projectId",
+      getStatus: "GET /api/v1/conflicts/analyze/:projectId/status?jobId=xxx",
+      getConflicts: "GET /api/v1/conflicts/:projectId"
+    }
+  });
 });
 
-export default app
+export default app;
