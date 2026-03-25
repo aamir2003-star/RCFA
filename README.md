@@ -1,6 +1,7 @@
 # 🧠 Conflict Resolver AI — RCFA v2
 
-## 🧠 Project Overview
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
 **Conflict Resolver AI** helps software teams catch requirement contradictions before they cause expensive mid-sprint rework. It uses Google Gemini to detect logical and semantic conflicts, then enables structured collaborative resolution with full audit trails.
 
