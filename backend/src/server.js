@@ -1,6 +1,7 @@
 // src/server.js
 // HTTP server + Socket.io initialization
 
+import "./models/user/user.model.js"
 import 'dotenv/config';
 import http from 'http';
 import app from './app.js';

@@ -6,6 +6,12 @@ import { ModuleModel } from './models/module/module.model.js';
 import { ConflictModel } from './models/conflict/conflict.model.js';
 import { DiscussionModel } from './models/discussion/discussion.model.js';
 import { ActivityModel } from './models/activity/activity.model.js';
+import express from "express";
+import cors from "cors";
+import projectRoutes from "./models/project/project.routes.js";
+import authRoutes from "../src/routes/auth.routes.js";
+import { errorHandler } from "./middleware/errorHandler.js";
+import { rateLimiter } from "./middleware/rateLimiter.js";
 
 // ================= API ROUTES =================
 import conflictRoutes from './routes/conflict.routes.js';
@@ -129,6 +135,20 @@ app.get("/seed", async (req, res) => {
 });
 
 // ================= ROOT =================
+// middleware
+app.use(cors());
+app.use(express.json());
+
+// routes
+app.use("/api/projects", projectRoutes);
+app.use("/api/v1/auth", authRoutes, rateLimiter);
+
+// 👇 ALWAYS LAST
+app.use(errorHandler);
+// Apply globally
+app.use(rateLimiter);
+
+// root
 app.get("/", (req, res) => {
   res.json({
     message: "RCFA API is running",
