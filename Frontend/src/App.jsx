@@ -12,6 +12,7 @@ import { MainLayout } from "./components/layout/MainLayout";
 import DevDashboard from "./components/dashboard/DevDashboard";
 import PmDashboard from "./components/dashboard/PmDashboard";
 import BdeDashboard from "./components/dashboard/BdeDashboard";
+import AnalyticsDashboard from "./components/dashboard/AnalyticsDashboard";
 
 function App() {
   return (
@@ -42,6 +43,14 @@ function App() {
           element={
             <MainLayout role="bde">
               <BdeDashboard />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/bde/analytics"
+          element={
+            <MainLayout role="bde">
+              <AnalyticsDashboard />
             </MainLayout>
           }
         />
