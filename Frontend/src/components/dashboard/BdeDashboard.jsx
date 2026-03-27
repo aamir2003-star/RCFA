@@ -16,10 +16,6 @@ export default function BdeDashboard() {
             Real-time status of cross-team resource allocations and conflicts.
           </p>
         </div>
-        <Button className="bg-[#1e2532] hover:bg-slate-800 text-white font-bold shadow-sm transition-all h-10 px-5 rounded-lg border-0">
-          <Plus className="w-4 h-4 mr-2" />
-          Create New Project
-        </Button>
       </div>
 
       {/* Stats Grid */}
@@ -45,7 +41,9 @@ export default function BdeDashboard() {
                   {stat.value}
                 </div>
                 {!stat.isProgress && (
-                  <span className={`text-[11px] font-bold mb-0.5 ${stat.subtextColor}`}>
+                  <span
+                    className={`text-[11px] font-bold mb-0.5 ${stat.subtextColor}`}
+                  >
                     {stat.subtext}
                   </span>
                 )}
@@ -87,7 +85,9 @@ export default function BdeDashboard() {
               className="group bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md rounded-2xl shadow-lg shadow-slate-200/20 dark:shadow-none border border-slate-200 dark:border-slate-800 p-5 flex flex-col hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-500/40 hover:-translate-y-1 transition-all duration-300"
             >
               <div className="flex justify-between items-start mb-4">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${proj.iconBg}`}>
+                <div
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center ${proj.iconBg}`}
+                >
                   <proj.icon className="w-5 h-5" />
                 </div>
                 <span
@@ -107,11 +107,17 @@ export default function BdeDashboard() {
               <div className="flex items-center justify-between mt-auto">
                 <div className="flex -space-x-2">
                   <div className="w-7 h-7 rounded-full bg-slate-200 border-2 border-white dark:border-slate-900 z-30 flex items-center justify-center overflow-hidden">
-                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWGrSkglnUuO7mfsuE9YxIHoRPRwkPOc18z-CDFrsbRyABDgDyo_p2iTSMvpIttuSHtAiE68SE4JfT1ZdaITA6mnv6wCBB5iIDjPKd46nEiU1CkHW4JIMcpsAS_81mAqg7Nbyu4EqIPy_CoosmUoo9MUijDXDFXXIZ7ZJIokYtbehOd5rZ2oTSiSOyMQBIL1Jba6cWgJb2oqG8lpmbwwxnmWcOFsqcVRDqDpfB_Xi2Y92wuRq41NBVH8PqYmCwx-kgrwBOvCeJ2Ac" className="w-full h-full object-cover" />
+                    <img
+                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWGrSkglnUuO7mfsuE9YxIHoRPRwkPOc18z-CDFrsbRyABDgDyo_p2iTSMvpIttuSHtAiE68SE4JfT1ZdaITA6mnv6wCBB5iIDjPKd46nEiU1CkHW4JIMcpsAS_81mAqg7Nbyu4EqIPy_CoosmUoo9MUijDXDFXXIZ7ZJIokYtbehOd5rZ2oTSiSOyMQBIL1Jba6cWgJb2oqG8lpmbwwxnmWcOFsqcVRDqDpfB_Xi2Y92wuRq41NBVH8PqYmCwx-kgrwBOvCeJ2Ac"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   {proj.avatars > 1 && (
                     <div className="w-7 h-7 rounded-full bg-slate-300 border-2 border-white dark:border-slate-900 z-20 flex items-center justify-center overflow-hidden">
-                      <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDc2NOVjwO2-DyyUZKL6nQWJCIPoCTf6X_yQOxetpWDDffaz0RkO80r9sc4qvjwWoQT4MSp5pwzPBSG8wdeyneBA69Jbd51SCqXI6d1fZBi_pE1hj8iB5W3Je94ozDQeSJyRJui-Y2LqUEKWaj3Vg_IxMW6fJ6qLLD5uTuErFO-wEJlXThyidueRTP9YjBMXJA2fOYSrZRFOO6iSHYfk0hBlWQD2U7kpfta7ap4kN55E2FEHbYujPTneWUggwkz22px5uHexBGTwbw" className="w-full h-full object-cover" />
+                      <img
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDc2NOVjwO2-DyyUZKL6nQWJCIPoCTf6X_yQOxetpWDDffaz0RkO80r9sc4qvjwWoQT4MSp5pwzPBSG8wdeyneBA69Jbd51SCqXI6d1fZBi_pE1hj8iB5W3Je94ozDQeSJyRJui-Y2LqUEKWaj3Vg_IxMW6fJ6qLLD5uTuErFO-wEJlXThyidueRTP9YjBMXJA2fOYSrZRFOO6iSHYfk0hBlWQD2U7kpfta7ap4kN55E2FEHbYujPTneWUggwkz22px5uHexBGTwbw"
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                   )}
                   {proj.moreAvatars && (
@@ -124,7 +130,9 @@ export default function BdeDashboard() {
                 <div className="w-32 flex flex-col gap-1.5">
                   <div className="flex justify-end text-[10px] uppercase font-bold text-slate-400 tracking-wider">
                     PROGRESS
-                    <span className="text-slate-900 dark:text-white ml-2 text-xs">{proj.progress}%</span>
+                    <span className="text-slate-900 dark:text-white ml-2 text-xs">
+                      {proj.progress}%
+                    </span>
                   </div>
                   <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                     <div

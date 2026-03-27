@@ -13,6 +13,7 @@ import DevDashboard from "./components/dashboard/DevDashboard";
 import PmDashboard from "./components/dashboard/PmDashboard";
 import BdeDashboard from "./components/dashboard/BdeDashboard";
 import AnalyticsDashboard from "./components/dashboard/AnalyticsDashboard";
+import CreateProject from "./pages/CreateProject";
 
 function App() {
   return (
@@ -35,6 +36,14 @@ function App() {
           element={
             <MainLayout role="pm">
               <PmDashboard />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/pm/create-project"
+          element={
+            <MainLayout role="pm">
+              <CreateProject />
             </MainLayout>
           }
         />

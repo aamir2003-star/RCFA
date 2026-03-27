@@ -10,8 +10,10 @@ import {
   Sparkles,
 } from "lucide-react";
 import { pmStats, pmProjects, quickActions } from "../../lib/features_utils.js";
+import { useNavigate } from "react-router-dom";
 
 export default function PmDashboard() {
+  const navigate = useNavigate();
   return (
     <div className="flex flex-col gap-8 w-full max-w-full pb-10">
       {/* Header */}
@@ -32,9 +34,12 @@ export default function PmDashboard() {
             <Download className="w-4 h-4 mr-2" />
             Export Report
           </Button>
-          <Button className="h-10 bg-[#1e2532] hover:bg-slate-800 text-white font-bold shadow-sm transition-all focus:ring-[#1e2532]">
+          <Button
+            onClick={() => navigate("/pm/create-project")}
+            className="h-10 bg-[#1e2532] hover:bg-slate-800 dark:text-slate-700 text-white font-bold shadow-sm transition-all focus:ring-[#1e2532]"
+          >
             <Plus className="w-4 h-4 mr-2" />
-            New Project
+            Create New Project
           </Button>
         </div>
       </div>
@@ -121,16 +126,25 @@ export default function PmDashboard() {
                   {/* Avatars */}
                   <div className="flex -space-x-2">
                     <div className="w-8 h-8 rounded-full bg-slate-200 border-2 border-white dark:border-slate-900 z-30 shadow-sm overflow-hidden flex items-center justify-center">
-                      <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWGrSkglnUuO7mfsuE9YxIHoRPRwkPOc18z-CDFrsbRyABDgDyo_p2iTSMvpIttuSHtAiE68SE4JfT1ZdaITA6mnv6wCBB5iIDjPKd46nEiU1CkHW4JIMcpsAS_81mAqg7Nbyu4EqIPy_CoosmUoo9MUijDXDFXXIZ7ZJIokYtbehOd5rZ2oTSiSOyMQBIL1Jba6cWgJb2oqG8lpmbwwxnmWcOFsqcVRDqDpfB_Xi2Y92wuRq41NBVH8PqYmCwx-kgrwBOvCeJ2Ac" className="w-full h-full object-cover" />
+                      <img
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWGrSkglnUuO7mfsuE9YxIHoRPRwkPOc18z-CDFrsbRyABDgDyo_p2iTSMvpIttuSHtAiE68SE4JfT1ZdaITA6mnv6wCBB5iIDjPKd46nEiU1CkHW4JIMcpsAS_81mAqg7Nbyu4EqIPy_CoosmUoo9MUijDXDFXXIZ7ZJIokYtbehOd5rZ2oTSiSOyMQBIL1Jba6cWgJb2oqG8lpmbwwxnmWcOFsqcVRDqDpfB_Xi2Y92wuRq41NBVH8PqYmCwx-kgrwBOvCeJ2Ac"
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     {proj.avatars > 1 && (
                       <div className="w-8 h-8 rounded-full bg-slate-300 border-2 border-white dark:border-slate-900 z-20 shadow-sm overflow-hidden flex items-center justify-center">
-                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDc2NOVjwO2-DyyUZKL6nQWJCIPoCTf6X_yQOxetpWDDffaz0RkO80r9sc4qvjwWoQT4MSp5pwzPBSG8wdeyneBA69Jbd51SCqXI6d1fZBi_pE1hj8iB5W3Je94ozDQeSJyRJui-Y2LqUEKWaj3Vg_IxMW6fJ6qLLD5uTuErFO-wEJlXThyidueRTP9YjBMXJA2fOYSrZRFOO6iSHYfk0hBlWQD2U7kpfta7ap4kN55E2FEHbYujPTneWUggwkz22px5uHexBGTwbw" className="w-full h-full object-cover" />
+                        <img
+                          src="https://lh3.googleusercontent.com/aida-public/AB6AXuDc2NOVjwO2-DyyUZKL6nQWJCIPoCTf6X_yQOxetpWDDffaz0RkO80r9sc4qvjwWoQT4MSp5pwzPBSG8wdeyneBA69Jbd51SCqXI6d1fZBi_pE1hj8iB5W3Je94ozDQeSJyRJui-Y2LqUEKWaj3Vg_IxMW6fJ6qLLD5uTuErFO-wEJlXThyidueRTP9YjBMXJA2fOYSrZRFOO6iSHYfk0hBlWQD2U7kpfta7ap4kN55E2FEHbYujPTneWUggwkz22px5uHexBGTwbw"
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                     )}
                     {proj.avatars > 2 && (
                       <div className="w-8 h-8 rounded-full bg-slate-300 border-2 border-white dark:border-slate-900 z-15 shadow-sm overflow-hidden flex items-center justify-center">
-                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuD23eRDEqIZvpkJtRyjAwjX5duyqqlPD17S3TDvVk0gQ4W2ZyLtoNIp3nNzH2fOhTxo8RR7rhD4MLW-_vO40PAsJ8vynSstV2jmXJ_aKlq2xQoA2gMZv-IZQ3YMuGz0m523w7YB-ElDARfOQl-3mvIE_rJZwa7mRn9W4CNMUnVXD8jQWFlgayEumwUnrua5cuUnEeYMhVtZ83yziU1TJDWkBEWSp2StnUz4FUDisdsIVxRwAGobQBF3dpWDveHhBxbe2u6wGvE04yU" className="w-full h-full object-cover" />
+                        <img
+                          src="https://lh3.googleusercontent.com/aida-public/AB6AXuD23eRDEqIZvpkJtRyjAwjX5duyqqlPD17S3TDvVk0gQ4W2ZyLtoNIp3nNzH2fOhTxo8RR7rhD4MLW-_vO40PAsJ8vynSstV2jmXJ_aKlq2xQoA2gMZv-IZQ3YMuGz0m523w7YB-ElDARfOQl-3mvIE_rJZwa7mRn9W4CNMUnVXD8jQWFlgayEumwUnrua5cuUnEeYMhVtZ83yziU1TJDWkBEWSp2StnUz4FUDisdsIVxRwAGobQBF3dpWDveHhBxbe2u6wGvE04yU"
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                     )}
                     {proj.extraAvatars > 0 && (
