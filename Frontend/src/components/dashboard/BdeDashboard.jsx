@@ -2,8 +2,10 @@ import React from "react";
 import { Button } from "../ui/Button.jsx";
 import { Plus, ChevronRight, MoreHorizontal, ArrowUpRight } from "lucide-react";
 import { bdeProjects, bdeStats } from "../../lib/features_utils.js";
+import { useNavigate } from "react-router-dom";
 
 export default function BdeDashboard() {
+  const navigate = useNavigate();
   return (
     <div className="flex flex-col gap-8 w-full pb-8">
       {/* Header */}
@@ -16,6 +18,13 @@ export default function BdeDashboard() {
             Real-time status of cross-team resource allocations and conflicts.
           </p>
         </div>
+        <Button
+          onClick={() => navigate("/bde/create-project")}
+          className="h-10 bg-[#1e2532] hover:bg-slate-800 dark:text-slate-700 text-white font-bold shadow-sm transition-all focus:ring-[#1e2532]"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Create New Project
+        </Button>
       </div>
 
       {/* Stats Grid */}

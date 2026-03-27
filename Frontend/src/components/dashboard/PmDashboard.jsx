@@ -26,7 +26,7 @@ export default function PmDashboard() {
             Here is the conflict resolution status for your 8 active projects.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        {/* <div className="flex flex-wrap items-center gap-3">
           <Button
             variant="outline"
             className="h-10 text-slate-700 dark:text-slate-300 font-bold border-slate-200 dark:border-slate-700"
@@ -41,7 +41,7 @@ export default function PmDashboard() {
             <Plus className="w-4 h-4 mr-2" />
             Create New Project
           </Button>
-        </div>
+        </div> */}
       </div>
 
       {/* Stats Row */}

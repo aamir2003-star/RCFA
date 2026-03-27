@@ -40,9 +40,9 @@ function App() {
           }
         />
         <Route
-          path="/pm/create-project"
+          path="/bde/create-project"
           element={
-            <MainLayout role="pm">
+            <MainLayout role="bde">
               <CreateProject />
             </MainLayout>
           }
