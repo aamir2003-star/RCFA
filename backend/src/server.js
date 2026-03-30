@@ -1,7 +1,7 @@
 // src/server.js
 // HTTP server + Socket.io initialization
+// dotenv MUST be the very first import so all env vars are available
 
-import "./models/user/user.model.js"
 import 'dotenv/config';
 import http from 'http';
 import app from './app.js';

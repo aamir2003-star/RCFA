@@ -1,11 +1,11 @@
 // src/config/gemini.js
 // Gemini API client singleton — used by geminiAnalyzer.js
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import OpenAI from 'openai';
 
-let geminiModel = null;
+let openaiClient = null;
 
 /**
- * Returns the Gemini generative model instance.
+ * Returns the OpenAI-compatible Gemini client.
  * Falls back gracefully if GEMINI_API_KEY is not set.
  */
 export const getGeminiModel = () => {
@@ -14,11 +14,13 @@ export const getGeminiModel = () => {
         return null;
     }
 
-    if (!geminiModel) {
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        geminiModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-        console.log('✅ Gemini AI model initialized');
+    if (!openaiClient) {
+        openaiClient = new OpenAI({
+            apiKey: process.env.GEMINI_API_KEY,
+            baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
+        });
+        console.log('✅ Gemini OpenAI-compatible client initialized');
     }
 
-    return geminiModel;
+    return openaiClient;
 };

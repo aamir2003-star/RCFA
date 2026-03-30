@@ -64,26 +64,34 @@ const parseGeminiResponse = (text) => {
 };
 
 /**
- * Call Gemini for a single pair with exponential backoff retry.
- * @param {Object} model - Gemini model instance
+ * Call Gemini (via OpenAI-compatible endpoint) for a single pair with exponential backoff retry.
+ * @param {Object} client - OpenAI client instance
  * @param {Object} reqA
  * @param {Object} reqB
  * @returns {Promise<Object>}
  */
-const analyzeOnePair = async (model, reqA, reqB) => {
+const analyzeOnePair = async (client, reqA, reqB) => {
     const prompt = buildPrompt(reqA, reqB);
     let lastError = null;
 
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         try {
-            const result = await model.generateContent(prompt);
-            const text = result.response.text();
+            const response = await client.chat.completions.create({
+                model: 'gemini-flash-latest',
+                messages: [
+                    { role: 'system', content: 'You are a software requirements conflict analyzer.' },
+                    { role: 'user', content: prompt }
+                ],
+                response_format: { type: 'json_object' }
+            });
+
+            const text = response.choices[0].message.content;
 
             // Log token usage for cost tracking
-            const usage = result.response.usageMetadata;
+            const usage = response.usage;
             if (usage) {
                 console.debug(
-                    `🔢 Gemini tokens — prompt: ${usage.promptTokenCount}, response: ${usage.candidatesTokenCount}`
+                    `🔢 Gemini tokens — prompt: ${usage.prompt_tokens}, response: ${usage.completion_tokens}`
                 );
             }
 
@@ -137,10 +145,10 @@ const withConcurrencyLimit = async (pairs, fn, concurrency) => {
  * @returns {Promise<Array>} AI-detected conflicts with source: 'ai'
  */
 export const analyzeWithGemini = async (unflaggedPairs) => {
-    const model = getGeminiModel();
+    const client = getGeminiModel();
 
-    if (!model) {
-        console.warn('⚠️  Gemini model unavailable — skipping AI analysis');
+    if (!client) {
+        console.warn('⚠️  Gemini client unavailable — skipping AI analysis');
         return [];
     }
 
@@ -154,7 +162,7 @@ export const analyzeWithGemini = async (unflaggedPairs) => {
     const aiResults = await withConcurrencyLimit(
         unflaggedPairs,
         async ([reqA, reqB]) => {
-            const result = await analyzeOnePair(model, reqA, reqB);
+            const result = await analyzeOnePair(client, reqA, reqB);
             return { reqA, reqB, ...result };
         },
         MAX_CONCURRENT

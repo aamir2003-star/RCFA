@@ -1,4 +1,4 @@
-import * as projectService from "./project.service.js";
+import * as projectService from "../services/project.service.js";
 
 // CREATE
 export const createProject = async (req, res) => {
