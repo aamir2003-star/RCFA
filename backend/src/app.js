@@ -12,6 +12,7 @@ import conflictRoutes from './routes/conflict.routes.js';
 import requirementRoutes from './routes/requirement.routes.js';
 import vaultRoutes from './routes/vault.routes.js';
 import reportRoutes from './routes/report.routes.js';
+import voteRoutes from './routes/vote.routes.js';
 
 // ─── Middleware ──────────────────────────────────────────────────────────────
 import { errorHandler } from './middleware/errorHandler.js';
@@ -32,6 +33,7 @@ app.use('/api/v1/conflicts', conflictRoutes);
 app.use('/api/v1/requirements', requirementRoutes);
 app.use('/api/v1/vault', vaultRoutes);
 app.use('/api/v1/reports', reportRoutes);
+app.use('/api/v1/votes', voteRoutes);
 
 // ─── Root ────────────────────────────────────────────────────────────────────
 app.get('/', (req, res) => {

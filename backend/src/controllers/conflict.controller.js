@@ -3,7 +3,7 @@
 
 import { startJob, getJobStatus } from '../jobs/conflictScanJob.js';
 import { ConflictModel } from '../models/conflict/conflict.model.js';
-
+import { emitConflictResolved } from '../sockets/events/conflictEvents.js';
 /**
  * POST /api/v1/conflicts/analyze/:projectId
  * Triggers async conflict detection. Returns jobId and estimatedTime.
@@ -128,7 +128,7 @@ export const getConflicts = async (req, res) => {
  * PATCH /api/v1/conflicts/:id/resolve
  * Marks a conflict as resolved and emits a socket event.
  */
-import { emitConflictResolved } from '../sockets/events/conflictEvents.js';
+
 
 export const resolveConflict = async (req, res) => {
     try {
