@@ -16,141 +16,227 @@ import {
   Cpu,
   MousePointer2
 } from "lucide-react";
+import { motion } from "framer-motion";
+import ThemeToggle from "../components/ThemeToggle";
+
+
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen bg-[#f6f7f7] text-[#0f172a] font-sans">
+    <div className="min-h-screen bg-background text-foreground font-sans transition-colors duration-300">
+
       {/* Navbar */}
       <nav className="flex items-center justify-between px-8 py-6 max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
           <span className="text-2xl font-bold tracking-tighter">RCFA</span>
         </div>
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-500">
-          <a href="#features" className="hover:text-slate-900">Features</a>
-          <a href="#how-it-works" className="hover:text-slate-900">How It Works</a>
-          <a href="#reports" className="hover:text-slate-900">Reports</a>
+        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
+          <a href="#features" className="hover:text-foreground transition-colors">Features</a>
+          <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
+          <a href="#reports" className="hover:text-foreground transition-colors">Reports</a>
         </div>
+
         <div className="flex items-center gap-4 text-sm font-semibold">
-          <Link to="/login" className="px-4 py-2 hover:text-slate-900">Login</Link>
-          <Link to="/login" className="bg-[#1d283a] text-white px-5 py-2.5 rounded-md hover:bg-slate-800 transition-colors">
+          <ThemeToggle />
+          <Link to="/login" className="px-4 py-2 hover:text-foreground">Login</Link>
+          <Link to="/login" className="bg-primary text-primary-foreground px-5 py-2.5 rounded-md hover:opacity-90 transition-all">
             Get Started
           </Link>
         </div>
+
       </nav>
 
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-8 py-12 md:py-20 grid md:grid-cols-2 gap-12 items-center">
         <div>
-          <div className="mb-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="mb-4"
+          >
             <span className="bg-[#b7e4f9] text-[#0ea5e9] text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded">
               Precision Engineering
             </span>
-          </div>
-          <h1 className="text-5xl md:text-6xl font-bold leading-[1.1] mb-6 tracking-tight">
+          </motion.div>
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-5xl md:text-6xl font-bold leading-[1.1] mb-6 tracking-tight"
+          >
             Resolve Requirement <br />
-            <span className="text-[#2c4c8d]">Conflicts</span> Before <br />
+            <span className="text-[#2c4c8d] font-extrabold italic">Conflicts</span> Before <br />
             Development Begins
-          </h1>
-          <p className="text-lg text-slate-500 mb-8 max-w-lg leading-relaxed">
-            Our AI-powered engine automatically detects conflicting requirements from Legal, Developers, and PMs, providing real-time feasibility insights and collaborative resolution tools.
-          </p>
-          <div className="flex flex-wrap gap-4">
-            <Link to="/login" className="bg-[#0f172a] text-white px-6 py-3 rounded-md font-semibold hover:bg-slate-800 transition-colors">
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-lg text-muted-foreground mb-8 max-w-lg leading-relaxed font-medium"
+          >
+            Our <span className="text-foreground font-bold underline decoration-[#0ea5e9]/30">AI-powered engine</span> automatically detects conflicting requirements from Legal, Developers, and PMs, providing real-time feasibility insights and collaborative resolution tools.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="flex flex-wrap gap-4"
+          >
+            <Link to="/login" className="bg-foreground text-background px-6 py-3 rounded-md font-bold hover:opacity-90 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-slate-900/10">
               Get Started Free
             </Link>
-            <button className="bg-white border border-slate-200 px-6 py-3 rounded-md font-semibold text-slate-700 hover:bg-slate-50 transition-colors border-b-2">
+            <button className="bg-card border border-border px-6 py-3 rounded-md font-bold text-foreground hover:bg-muted transition-all hover:scale-105 active:scale-95 border-b-2">
               Watch Demo
             </button>
-          </div>
+          </motion.div>
+
         </div>
 
         {/* Hero Card Graphic */}
-        <div className="relative group perspective-1000">
-          <div className="bg-white rounded-xl shadow-2xl p-6 border border-slate-100 transform transition-transform duration-500 hover:scale-[1.02]">
+        <motion.div
+          initial={{ opacity: 0, x: 50, rotateY: 10 }}
+          whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1, type: "spring", bounce: 0.3 }}
+          className="relative group perspective-1000"
+        >
+          <motion.div
+            whileHover={{ y: -10, rotateX: 2, rotateY: -2, scale: 1.02 }}
+            className="bg-card rounded-xl shadow-2xl p-6 border border-border transform transition-all duration-500"
+          >
+
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-blue-500" />
-                <span className="text-sm font-bold">Detected Conflict #842</span>
+                <span className="text-sm font-extrabold uppercase tracking-tight">Detected Conflict <span className="text-blue-600">#842</span></span>
               </div>
-              <span className="text-[10px] font-bold bg-red-50 text-red-500 px-2 py-1 rounded-sm uppercase tracking-wider uppercase">High Risk</span>
+              <motion.span
+                animate={{ opacity: [0.6, 1, 0.6] }}
+                transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                className="text-[10px] font-black bg-destructive/10 text-destructive px-2 py-1 rounded-sm uppercase tracking-widest"
+
+              >
+                High Risk
+              </motion.span>
             </div>
 
             <div className="space-y-4">
-              <div className="bg-[#f0f4f9] p-4 rounded-lg relative">
+              <motion.div
+                whileHover={{ scale: 1.03, backgroundColor: "#eff6ff" }}
+                className="bg-[#f0f4f9] p-4 rounded-lg relative overflow-hidden transition-colors"
+              >
                 <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0">
-                    <Globe className="w-4 h-4 text-slate-600" />
+                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                    <Globe className="w-4 h-4 text-muted-foreground" />
                   </div>
                   <div>
-                    <div className="text-[10px] uppercase font-bold text-slate-400 mb-1">Legal Requirement</div>
-                    <div className="text-sm font-medium leading-tight">Mandatory AES-256 encryption for all data at rest and in transit.</div>
+                    <div className="text-[10px] uppercase font-black text-muted-foreground mb-1 tracking-tighter">Legal Requirement</div>
+                    <div className="text-sm font-bold leading-tight text-foreground">Mandatory <span className="text-blue-600 underline underline-offset-2">AES-256 encryption</span> for all data at rest.</div>
                   </div>
+
                 </div>
-              </div>
+              </motion.div>
 
               <div className="flex justify-center -my-2 relative z-10">
-                <div className="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center text-xs font-bold border-4 border-white">VS</div>
+                <motion.div
+                  animate={{ scale: [1, 1.15, 1], rotate: [0, 5, -5, 0] }}
+                  transition={{ repeat: Infinity, duration: 3 }}
+                  className="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center text-xs font-black border-4 border-white shadow-lg"
+                >
+                  VS
+                </motion.div>
               </div>
 
-              <div className="bg-[#f8f9fa] p-4 rounded-lg">
+              <motion.div
+                whileHover={{ scale: 1.03, backgroundColor: "#fff7ed" }}
+                className="bg-[#f8f9fa] p-4 rounded-lg transition-colors border border-transparent hover:border-orange-100"
+              >
                 <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0">
-                    <Cpu className="w-4 h-4 text-slate-600" />
+                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                    <Cpu className="w-4 h-4 text-muted-foreground" />
                   </div>
                   <div>
-                    <div className="text-[10px] uppercase font-bold text-slate-400 mb-1">Developer Constraint</div>
-                    <div className="text-sm font-medium leading-tight">Support 10,000 concurrent users with &lt;100ms latency.</div>
+                    <div className="text-[10px] uppercase font-black text-muted-foreground mb-1 tracking-tighter">Developer Constraint</div>
+                    <div className="text-sm font-bold leading-tight text-foreground">Support <span className="text-orange-600">10,000 concurrent users</span> with &lt;100ms latency.</div>
                   </div>
+
                 </div>
-              </div>
+              </motion.div>
 
               <div className="pt-4 space-y-4">
-                <div>
-                  <div className="flex justify-between text-[10px] font-bold uppercase mb-1">
-                    <span className="text-slate-400">Timeline Impact</span>
+                <div className="group/item">
+                  <div className="flex justify-between text-[10px] font-black uppercase mb-1 tracking-widest">
+                    <span className="text-slate-400 group-hover/item:text-slate-600 transition-colors">Timeline Impact</span>
                     <span className="text-orange-500">+2 Weeks</span>
                   </div>
                   <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-red-600 w-[75%]"></div>
+                    <motion.div
+                      initial={{ width: 0 }}
+                      whileInView={{ width: "75%" }}
+                      transition={{ duration: 1.2, ease: "easeOut" }}
+                      className="h-full bg-red-600 shadow-[0_0_8px_rgba(220,38,38,0.4)]"
+                    ></motion.div>
                   </div>
                 </div>
-                <div>
-                  <div className="flex justify-between text-[10px] font-bold uppercase mb-1">
-                    <span className="text-slate-400">Budget Increase</span>
+                <div className="group/item">
+                  <div className="flex justify-between text-[10px] font-black uppercase mb-1 tracking-widest">
+                    <span className="text-slate-400 group-hover/item:text-slate-600 transition-colors">Budget Increase</span>
                     <span className="text-orange-500">+15%</span>
                   </div>
                   <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-red-600 w-[45%]"></div>
+                    <motion.div
+                      initial={{ width: 0 }}
+                      whileInView={{ width: "45%" }}
+                      transition={{ duration: 1.2, ease: "easeOut", delay: 0.1 }}
+                      className="h-full bg-red-600 shadow-[0_0_8px_rgba(220,38,38,0.4)]"
+                    ></motion.div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+              <div className="flex items-center justify-between pt-4 border-t border-border">
                 <div className="flex -space-x-2">
                   {[1, 2, 3].map(i => (
-                    <div key={i} className="w-6 h-6 rounded-full border-2 border-white bg-slate-300 overflow-hidden">
-                      <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="avatar" />
-                    </div>
+                    <motion.div 
+                      key={i} 
+                      whileHover={{ y: -8, scale: 1.1, zIndex: 10 }}
+                      className="w-8 h-8 rounded-full border-2 border-card bg-muted overflow-hidden cursor-pointer shadow-sm"
+                    >
+                      <img src={`https://i.pravatar.cc/100?img=${i + 15}`} alt="avatar" />
+                    </motion.div>
                   ))}
-                  <div className="w-6 h-6 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-bold">+2</div>
+                  <div className="w-8 h-8 rounded-full border-2 border-card bg-muted flex items-center justify-center text-[10px] font-black text-muted-foreground shadow-sm">+2</div>
                 </div>
                 <div className="flex gap-2">
-                  <button className="text-[10px] font-bold uppercase text-slate-400 hover:text-slate-600">Dismiss</button>
-                  <button className="text-[10px] font-bold uppercase bg-[#0f172a] text-white px-3 py-2 rounded">View Correlation</button>
+                  <button className="text-[10px] font-black uppercase text-secondary-foreground hover:text-primary transition-colors">Dismiss</button>
+                  <motion.button 
+                    whileHover={{ scale: 1.05, backgroundColor: "var(--foreground)", color: "var(--background)" }}
+                    whileTap={{ scale: 0.95 }}
+                    className="text-[10px] font-black uppercase bg-primary text-primary-foreground px-4 py-2.5 rounded shadow-xl transition-all"
+                  >
+                    View Correlation
+                  </motion.button>
                 </div>
               </div>
+
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* Trusted By Section */}
-      <section className="py-12 bg-[#f6f7f7]">
+      <section className="py-12 bg-background">
         <div className="max-w-7xl mx-auto px-8">
           <div className="text-center mb-8">
-            <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-slate-400">Trusted by Leading Engineering and Product Teams</span>
+            <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground">Trusted by Leading Engineering and Product Teams</span>
           </div>
-          <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-40 grayscale group">
+          <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-40 grayscale dark:invert group">
             <span className="text-lg font-bold tracking-tighter hover:grayscale-0 transition-all cursor-default">GLOBAL_CORE</span>
             <span className="text-lg font-bold tracking-tighter hover:grayscale-0 transition-all cursor-default">NEXUSIO</span>
             <span className="text-lg font-bold tracking-tighter hover:grayscale-0 transition-all cursor-default">STRATUM</span>
@@ -160,111 +246,195 @@ const LandingPage = () => {
         </div>
       </section>
 
+
       {/* Features Section - Architected for Accuracy */}
       <section id="features" className="py-20 max-w-7xl mx-auto px-8">
         <div className="mb-12">
           <h2 className="text-3xl font-bold mb-4">Architected for Accuracy</h2>
-          <p className="text-slate-500 max-w-xl text-sm leading-relaxed">
+          <p className="text-muted-foreground max-w-xl text-sm leading-relaxed">
             Our system doesn't just find problems, it mathematically calculates the feasibility of every architectural decision.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-6 md:grid-rows-2 gap-4 h-full md:h-[600px]">
+
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: { staggerChildren: 0.15 }
+            }
+          }}
+          className="grid md:grid-cols-6 md:grid-rows-2 gap-4 h-full md:h-[600px]"
+        >
           {/* AI Powered Detection */}
-          <div className="md:col-span-4 bg-white rounded-xl p-10 border border-slate-100 shadow-sm flex flex-col justify-between">
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 30 },
+              visible: { opacity: 1, y: 0 }
+            }}
+            whileHover={{ y: -8, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)" }}
+            className="md:col-span-4 bg-card rounded-xl p-10 border border-border shadow-sm flex flex-col justify-between group/card transition-all"
+          >
             <div>
-              <div className="w-10 h-10 bg-[#0ea5e9] rounded-md flex items-center justify-center mb-6">
-                <Zap className="w-5 h-5 text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-4">AI-Powered Detection</h3>
-              <p className="text-slate-500 text-sm max-w-sm mb-6 leading-relaxed">
-                Proprietary NLP engine scans PRDs, legal docs, and Jira tickets to map logical inconsistencies in milliseconds.
+              <motion.div 
+                whileHover={{ rotate: 180, scale: 1.1 }}
+                className="w-12 h-12 bg-[#0ea5e9] rounded-xl flex items-center justify-center mb-8 shadow-lg shadow-[#0ea5e9]/20"
+              >
+                <Zap className="w-6 h-6 text-white" />
+              </motion.div>
+              <h3 className="text-2xl font-black mb-4 tracking-tighter">AI-Powered Detection</h3>
+              <p className="text-muted-foreground text-base max-w-sm mb-6 leading-relaxed font-medium">
+                Proprietary <span className="text-foreground font-bold">NLP engine</span> scans PRDs, legal docs, and Jira tickets to map logical inconsistencies in milliseconds.
               </p>
             </div>
-            <a href="#" className="flex items-center gap-2 text-xs font-bold uppercase group">
-              Learn about the engine <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+            <a href="#" className="flex items-center gap-2 text-xs font-black uppercase text-blue-600 group">
+              Learn about the engine <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
             </a>
-          </div>
+
+          </motion.div>
 
           {/* Collaborative Voting */}
-          <div className="md:col-span-2 bg-[#022f5c] text-white rounded-xl p-10 border border-slate-800 shadow-sm flex flex-col justify-between overflow-hidden relative">
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, x: 30 },
+              visible: { opacity: 1, x: 0 }
+            }}
+            whileHover={{ scale: 1.02 }}
+            className="md:col-span-2 bg-[#022f5c] text-white rounded-xl p-10 border border-slate-800 shadow-xl flex flex-col justify-between overflow-hidden relative group/card"
+          >
             <div className="relative z-10">
-              <div className="w-10 h-10 bg-white/10 rounded-md flex items-center justify-center mb-6 backdrop-blur">
-                <Users className="w-5 h-5 text-white" />
+              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-8 backdrop-blur border border-white/10 group-hover/card:bg-white/20 transition-colors">
+                <Users className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold mb-4">Collaborative Voting</h3>
-              <p className="text-white/60 text-sm mb-6 leading-relaxed">
-                Reach consensus faster with structured revelation workflows for every stakeholder.
+              <h3 className="text-2xl font-black mb-4 tracking-tighter">Collaborative Voting</h3>
+              <p className="text-white/70 text-base mb-6 leading-relaxed font-medium">
+                Reach <span className="text-white font-bold underline decoration-white/30">consensus faster</span> with structured revelation workflows for every stakeholder.
               </p>
             </div>
-            <div className="space-y-3 relative z-10">
+            <div className="space-y-4 relative z-10">
               {[1, 2].map(i => (
-                <div key={i} className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                  <div className={`h-full bg-blue-300 w-[${i === 1 ? '85%' : '60%'}]`}></div>
+                <div key={i} className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    whileInView={{ width: i === 1 ? '85%' : '60%' }}
+                    transition={{ duration: 1.5, delay: 0.5 }}
+                    className="h-full bg-[#0ea5e9]/60"
+                  ></motion.div>
                 </div>
               ))}
             </div>
-          </div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+          </motion.div>
 
           {/* Feasibility Matrix */}
-          <div className="md:col-span-2 bg-[#f0f4f9] rounded-xl p-10 border border-slate-100 shadow-sm flex flex-col justify-between">
+          <motion.div 
+            variants={{
+              hidden: { opacity: 0, x: -30 },
+              visible: { opacity: 1, x: 0 }
+            }}
+            whileHover={{ y: -8 }}
+            className="md:col-span-2 bg-secondary rounded-xl p-10 border border-border shadow-sm flex flex-col justify-between group/card hover:bg-card transition-all"
+          >
             <div>
-              <div className="w-10 h-10 bg-[#1d283a] rounded-md flex items-center justify-center mb-6">
-                <LayoutGrid className="w-5 h-5 text-white" />
+              <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mb-8 shadow-lg">
+                <LayoutGrid className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold mb-4">Feasibility Matrix</h3>
-              <p className="text-slate-500 text-sm mb-6 leading-relaxed">
-                Visualize the intersection of cost, timeline, and technical risk in a real-time heat map.
+              <h3 className="text-2xl font-black mb-4 tracking-tighter">Feasibility Matrix</h3>
+              <p className="text-muted-foreground text-sm mb-6 leading-relaxed font-bold">
+                Visualize the <span className="text-foreground italic">intersection</span> of cost, timeline, and technical risk.
               </p>
             </div>
-          </div>
+          </motion.div>
+
 
           {/* Enterprise Reporting */}
-          <div className="md:col-span-4 bg-[#e8e9e9] rounded-xl p-10 border border-slate-100 shadow-sm flex items-center gap-12">
+          <motion.div 
+            variants={{
+              hidden: { opacity: 0, y: 30 },
+              visible: { opacity: 1, y: 0 }
+            }}
+            whileHover={{ y: -8 }}
+            className="md:col-span-4 bg-muted rounded-xl p-10 border border-border shadow-sm flex items-center gap-12 group/card hover:bg-card transition-all"
+          >
             <div className="flex-1">
-              <h3 className="text-xl font-bold mb-4">Enterprise Reporting</h3>
-              <p className="text-slate-500 text-sm mb-6 leading-relaxed">
-                Generate board-ready audit trails of every requirement change and resolution decision.
+              <h3 className="text-2xl font-black mb-4 tracking-tighter">Enterprise Reporting</h3>
+              <p className="text-muted-foreground text-base mb-8 leading-relaxed font-medium">
+                Generate <span className="text-foreground font-bold uppercase tracking-tight">board-ready audit trails</span> of every requirement change and resolution decision.
               </p>
-              <button className="bg-white px-4 py-2 rounded-md text-xs font-bold">Preview Reports</button>
+              <motion.button 
+                whileHover={{ scale: 1.05, backgroundColor: "var(--foreground)", color: "var(--background)" }}
+                className="bg-card px-6 py-3 rounded-lg text-xs font-black uppercase tracking-widest border border-border transition-all shadow-sm"
+              >
+                Preview Reports
+              </motion.button>
             </div>
             <div className="flex-1 hidden lg:block">
-              <div className="bg-white rounded p-4 h-32 w-full shadow-inner border border-slate-200">
-                <div className="h-2 w-3/4 bg-slate-100 mb-2"></div>
-                <div className="h-2 w-full bg-slate-50 mb-2"></div>
-                <div className="h-8 w-full bg-[#f8f9fa] mt-4"></div>
+              <div className="bg-background rounded-xl p-6 h-40 w-full shadow-inner border border-border space-y-4 transition-colors">
+                <motion.div initial={{ width: 0 }} whileInView={{ width: "80%" }} transition={{ duration: 1 }} className="h-2.5 bg-slate-200 dark:bg-slate-700 rounded-full"></motion.div>
+                <motion.div initial={{ width: 0 }} whileInView={{ width: "100%" }} transition={{ duration: 1, delay: 0.2 }} className="h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full"></motion.div>
+                <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.5 }} className="h-16 w-full bg-card rounded-lg shadow-sm border border-border flex items-center px-4">
+                  <div className="w-full h-2 bg-blue-100 dark:bg-blue-900/30 rounded-full overflow-hidden">
+                    <motion.div initial={{ x: "-100%" }} animate={{ x: "100%" }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }} className="w-1/3 h-full bg-blue-500"></motion.div>
+                  </div>
+                </motion.div>
               </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+
+        </motion.div>
       </section>
 
       {/* Workflow Section */}
-      <section id="how-it-works" className="py-24 bg-white border-y border-slate-100">
+      <section id="how-it-works" className="py-24 bg-background border-y border-border transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4">The RCFA Workflow</h2>
-            <p className="text-slate-500 max-w-2xl mx-auto text-sm">
+            <p className="text-muted-foreground max-w-2xl mx-auto text-sm">
               From raw documents to resolved conflicts in four high-efficiency steps.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-12">
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: { staggerChildren: 0.1 }
+              }
+            }}
+            className="grid md:grid-cols-4 gap-12"
+          >
             {[
               { icon: Shield, title: "Upload", desc: "Import documents from Jira, Confluence, or raw PDF/DOCX files." },
               { icon: Search, title: "Analyze", desc: "Our AI maps logic clusters and identifies hidden dependencies." },
               { icon: Users, title: "Collaborate", desc: "Stakeholders review detected conflicts and discuss trade-offs." },
               { icon: CheckCircle, title: "Resolve", desc: "Approve one version of truth and export the updated feasibility report." }
             ].map((step, i) => (
-              <div key={i} className="text-center flex flex-col items-center group">
-                <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center mb-6 group-hover:bg-slate-200 transition-colors">
-                  <step.icon className="w-5 h-5 text-slate-800" />
+              <motion.div
+                key={i}
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0 }
+                }}
+                whileHover={{ y: -12, scale: 1.05 }}
+                className="text-center flex flex-col items-center group cursor-pointer"
+              >
+                <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-[#0f172a] group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-2xl group-hover:shadow-slate-900/20 group-hover:rotate-6">
+                  <step.icon className="w-6 h-6 transition-transform group-hover:scale-110" />
                 </div>
-                <h4 className="font-bold mb-3">{step.title}</h4>
-                <p className="text-slate-400 text-xs leading-relaxed px-4">{step.desc}</p>
-              </div>
+                <h4 className="text-lg font-black mb-3 group-hover:text-[#0ea5e9] transition-colors">{step.title}</h4>
+                <p className="text-slate-500 text-xs leading-relaxed px-4 font-medium group-hover:text-slate-900 transition-colors">{step.desc}</p>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -298,41 +468,42 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#f6f7f7] pt-20 pb-8 px-8 border-t border-slate-100">
+      <footer className="bg-background pt-20 pb-8 px-8 border-t border-border transition-colors duration-300">
         <div className="max-w-7xl mx-auto grid md:grid-cols-5 gap-12 mb-20">
           <div className="md:col-span-2">
             <div className="text-xl font-bold mb-6">RCFA</div>
-            <p className="text-slate-400 text-[10px] leading-relaxed max-w-xs uppercase font-medium">
+            <p className="text-muted-foreground text-[10px] leading-relaxed max-w-xs uppercase font-medium">
               Precision engineering conflict resolution for modern enterprises.
             </p>
           </div>
           <div>
             <h5 className="font-bold text-xs uppercase mb-6 tracking-wider">Product</h5>
-            <ul className="space-y-4 text-[10px] text-slate-400 font-bold uppercase">
-              <li><a href="#" className="hover:text-slate-900">Features</a></li>
-              <li><a href="#" className="hover:text-slate-900">Security</a></li>
-              <li><a href="#" className="hover:text-slate-900">Integrations</a></li>
+            <ul className="space-y-4 text-[10px] text-muted-foreground font-bold uppercase">
+              <li><a href="#" className="hover:text-foreground transition-colors">Features</a></li>
+              <li><a href="#" className="hover:text-foreground transition-colors">Security</a></li>
+              <li><a href="#" className="hover:text-foreground transition-colors">Integrations</a></li>
             </ul>
           </div>
           <div>
             <h5 className="font-bold text-xs uppercase mb-6 tracking-wider">Company</h5>
-            <ul className="space-y-4 text-[10px] text-slate-400 font-bold uppercase">
-              <li><a href="#" className="hover:text-slate-900">About Us</a></li>
-              <li><a href="#" className="hover:text-slate-900">Careers</a></li>
-              <li><a href="#" className="hover:text-slate-900">Blog</a></li>
+            <ul className="space-y-4 text-[10px] text-muted-foreground font-bold uppercase">
+              <li><a href="#" className="hover:text-foreground transition-colors">About Us</a></li>
+              <li><a href="#" className="hover:text-foreground transition-colors">Careers</a></li>
+              <li><a href="#" className="hover:text-foreground transition-colors">Blog</a></li>
             </ul>
           </div>
           <div>
             <h5 className="font-bold text-xs uppercase mb-6 tracking-wider">Legal</h5>
-            <ul className="space-y-4 text-[10px] text-slate-400 font-bold uppercase">
-              <li><a href="#" className="hover:text-slate-900">Privacy</a></li>
-              <li><a href="#" className="hover:text-slate-900">Terms</a></li>
-              <li><a href="#" className="hover:text-slate-900">Security</a></li>
+            <ul className="space-y-4 text-[10px] text-muted-foreground font-bold uppercase">
+              <li><a href="#" className="hover:text-foreground transition-colors">Privacy</a></li>
+              <li><a href="#" className="hover:text-foreground transition-colors">Terms</a></li>
+              <li><a href="#" className="hover:text-foreground transition-colors">Security</a></li>
             </ul>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto border-t border-slate-200 pt-8 flex justify-between items-center text-[8px] font-bold text-slate-400 uppercase tracking-widest">
-          <div>© 2024 REQUIREMENT CONFLICT & FEASIBILITY ANALYZER. ENGINEERED FOR PRECISION.</div>
+        <div className="max-w-7xl mx-auto border-t border-border pt-8 flex justify-between items-center text-[8px] font-bold text-muted-foreground uppercase tracking-widest">
+          <div>© 2026 REQUIREMENT CONFLICT & FEASIBILITY ANALYZER. ENGINEERED FOR PRECISION.</div>
+
           <div className="flex gap-4">
             <Globe className="w-3 h-3" />
             <LayoutGrid className="w-3 h-3" />

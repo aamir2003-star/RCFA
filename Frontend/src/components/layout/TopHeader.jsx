@@ -2,6 +2,8 @@ import React from "react";
 import { useTheme } from "../../contexts/ThemeContext";
 import { Bell, Search, Sun, Moon, HelpCircle, Settings } from "lucide-react";
 import { Avatar, AvatarFallback } from "../ui/Avatar";
+import ThemeToggle from "../ThemeToggle";
+
 
 export function TopHeader({ role }) {
   const { theme, setTheme } = useTheme();
@@ -69,16 +71,8 @@ export function TopHeader({ role }) {
           </button>
         )}
 
-        <button
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:scale-110 active:scale-95 transition-all"
-        >
-          {theme === "dark" ? (
-            <Sun className="w-5 h-5" />
-          ) : (
-            <Moon className="w-5 h-5" />
-          )}
-        </button>
+        <ThemeToggle />
+
 
         <div className="flex items-center gap-3 select-none cursor-pointer group">
           {role === "pm" || role === "dev" ? (

@@ -3,9 +3,9 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 const ThemeContext = createContext();
 
-export function ThemeProvider({ children }) {
-  // Use simple string directly, no lazy initialization block
-  const [theme, setTheme] = useState(localStorage.getItem("theme") || "system");
+export function ThemeProvider({ children, defaultTheme = "system", storageKey = "theme" }) {
+  const [theme, setTheme] = useState(localStorage.getItem(storageKey) || defaultTheme);
+
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -32,9 +32,10 @@ export function ThemeProvider({ children }) {
 
   // Custom function to update React State and LocalStorage simultaneously
   const changeTheme = (newTheme) => {
-    localStorage.setItem("theme", newTheme);
+    localStorage.setItem(storageKey, newTheme);
     setTheme(newTheme);
   };
+
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme: changeTheme }}>
