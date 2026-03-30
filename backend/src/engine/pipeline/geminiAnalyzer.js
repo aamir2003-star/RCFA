@@ -22,15 +22,25 @@ const buildPrompt = (reqA, reqB) => `
 You are a software requirements conflict analyzer.
 Analyze these two requirements for logical, semantic, or technical conflicts.
 
-Requirement A: ${reqA.description}
-Requirement B: ${reqB.description}
+Requirement A: ${reqA.description} (Priority: ${reqA.priority}, Stakeholder: ${reqA.stakeholder})
+Requirement B: ${reqB.description} (Priority: ${reqB.priority}, Stakeholder: ${reqB.stakeholder})
 
 Respond ONLY in JSON format:
 {
   "conflicted": true | false,
   "conflictType": "string (e.g. Security vs Performance)",
   "confidence": 0.0 to 1.0,
-  "explanation": "one sentence"
+  "explanation": "one sentence summary",
+  "feasibility": {
+    "timelineImpact": "+X%",
+    "costImpact": "+Y%",
+    "riskLevel": "Low|Medium|High|Critical"
+  },
+  "resolutions": [
+    { "title": "Option 1", "description": "short desc", "strategyType": "Compromise|Strict|Alternative|Hybrid" },
+    { "title": "Option 2", "description": "short desc", "strategyType": "Compromise|Strict|Alternative|Hybrid" },
+    { "title": "Option 3", "description": "short desc", "strategyType": "Compromise|Strict|Alternative|Hybrid" }
+  ]
 }
 `.trim();
 
@@ -42,20 +52,23 @@ Respond ONLY in JSON format:
  */
 const parseGeminiResponse = (text) => {
     try {
-        // Extract JSON block from markdown code fences if present
         const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) ||
             text.match(/(\{[\s\S]*\})/);
 
         const raw = jsonMatch ? jsonMatch[1] : text;
         const parsed = JSON.parse(raw.trim());
 
+        if (!parsed.conflicted) return { conflicted: false };
+
         return {
-            conflicted: Boolean(parsed.conflicted),
+            conflicted: true,
             conflictType: parsed.conflictType || 'Unknown',
             confidence: typeof parsed.confidence === 'number'
                 ? Math.min(1, Math.max(0, parsed.confidence))
                 : 0.5,
             explanation: parsed.explanation || '',
+            feasibility: parsed.feasibility || null,
+            resolutions: parsed.resolutions || []
         };
     } catch {
         console.warn('⚠️  Failed to parse Gemini response:', text.substring(0, 200));
@@ -176,6 +189,8 @@ export const analyzeWithGemini = async (unflaggedPairs) => {
         ruleConfidence: r.confidence,
         source: 'ai',
         explanation: r.explanation,
+        feasibility: r.feasibility,
+        resolutions: r.resolutions
     }));
 
     console.log(`✅ Step 5 — Gemini detected ${aiConflicts.length} conflicts from ${unflaggedPairs.length} pairs`);

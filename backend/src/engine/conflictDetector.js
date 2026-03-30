@@ -93,6 +93,7 @@ export const runConflictDetection = async (projectId, jobId, onProgress = null) 
                 explanation: conflict.explanation || '',
                 feasibility: conflict.feasibility,
                 affectedModules: conflict.affectedModules,
+                resolutions: conflict.resolutions,
                 status: 'open',
             });
 

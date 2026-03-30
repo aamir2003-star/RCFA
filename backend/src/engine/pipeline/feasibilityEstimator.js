@@ -62,10 +62,10 @@ const getAffectedModules = (reqA, reqB) => {
  * @returns {{ timelineImpact, costImpact, riskLevel, affectedModules }}
  */
 export const estimateFeasibility = (conflict) => {
-    const { reqA, reqB, conflictType } = conflict;
+    const { reqA, reqB, conflictType, feasibility: aiFeasibility } = conflict;
 
-    // Look up impact from table, fallback to default
-    const feasibility = FEASIBILITY_TABLE[conflictType] || DEFAULT_FEASIBILITY;
+    // Use AI feasibility if available, otherwise look up from table
+    const feasibility = aiFeasibility || FEASIBILITY_TABLE[conflictType] || DEFAULT_FEASIBILITY;
 
     const affectedModules = getAffectedModules(reqA, reqB);
 

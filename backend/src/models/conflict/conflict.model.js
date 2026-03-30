@@ -96,10 +96,23 @@ const conflictSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["open", "resolved", "ignored"],
-      default: "open"
+      default: "open",
+      index: true
     },
 
     aiSuggestion: String,
+
+    resolutions: [
+      {
+        title: { type: String, required: true },
+        description: { type: String, required: true },
+        strategyType: {
+          type: String,
+          enum: ["Compromise", "Strict", "Alternative", "Hybrid"],
+          default: "Compromise"
+        }
+      }
+    ],
 
     resolvedBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -108,5 +121,7 @@ const conflictSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+conflictSchema.index({ projectId: 1, status: 1 });
 
 export const ConflictModel = mongoose.model("Conflict", conflictSchema);

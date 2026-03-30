@@ -19,11 +19,22 @@ export const createProject = async (req, res) => {
   }
 };
 
-// GET ALL
+// GET ALL with Pagination
 export const getAllProjects = async (req, res) => {
   try {
-    const projects = await projectService.getAllProjects();
+    const { page, limit, sort } = req.query;
+    const projects = await projectService.getAllProjects({ page, limit, sort });
     res.json(projects);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// GET PROJECT STATS
+export const getProjectStats = async (req, res) => {
+  try {
+    const stats = await projectService.getProjectStats(req.params.id);
+    res.json(stats);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

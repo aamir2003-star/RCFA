@@ -45,7 +45,8 @@ const requirementSchema = new mongoose.Schema(
 
     moduleId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Module"
+      ref: "Module",
+      index: true
     },
 
     dependencies: [

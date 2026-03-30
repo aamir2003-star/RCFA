@@ -14,8 +14,28 @@ export const createRequirement = async (data) => {
     return requirement;
 };
 
-export const getAllRequirements = async (query = {}) => {
-    return await RequirementModel.find(query).populate("createdBy", "name email role");
+export const getAllRequirements = async (query = {}, options = {}) => {
+    const { page = 1, limit = 10, sort = { createdAt: -1 } } = options;
+    const skip = (page - 1) * limit;
+
+    const [requirements, total] = await Promise.all([
+        RequirementModel.find(query)
+            .populate("createdBy", "name email role")
+            .sort(sort)
+            .skip(skip)
+            .limit(limit),
+        RequirementModel.countDocuments(query)
+    ]);
+
+    return {
+        requirements,
+        pagination: {
+            total,
+            page: Number(page),
+            pages: Math.ceil(total / limit),
+            hasNext: skip + requirements.length < total
+        }
+    };
 };
 
 export const getRequirementById = async (id) => {

@@ -14,10 +14,10 @@ export const createRequirement = async (req, res, next) => {
 
 export const getRequirements = async (req, res, next) => {
     try {
-        const { projectId } = req.query;
+        const { projectId, page, limit, sort } = req.query;
         const filter = projectId ? { projectId } : {};
-        const requirements = await requirementService.getAllRequirements(filter);
-        res.json(requirements);
+        const result = await requirementService.getAllRequirements(filter, { page, limit, sort });
+        res.json(result);
     } catch (error) {
         next(error);
     }
