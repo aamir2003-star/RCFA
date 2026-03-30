@@ -17,19 +17,23 @@ import {
   History,
   Activity,
   X,
+  Briefcase
 } from "lucide-react";
+import useAuthStore from "../../stores/useAuthStore";
+import useProjectStore from "../../stores/useProjectStore";
 
 export function Sidebar({ role, isOpen, onClose }) {
   const location = useLocation();
-  let title = "Resolver AI";
-  let subtitle = "";
+  const { user } = useAuthStore();
+  const { currentProject } = useProjectStore();
+
+  let title = currentProject?.name || "Resolver AI";
+  let subtitle = currentProject ? "ACTIVE PROJECT" : "";
 
   if (role === "bde") {
-    title = "Conflict Resolver AI";
     subtitle = "BDE DASHBOARD";
   } else if (role === "pm") {
-    title = "Conflict Resolver AI";
-    subtitle = "PREMIUM SAAS";
+    subtitle = subtitle || "PREMIUM SAAS";
   }
 
   // NavLink renderer component block
@@ -200,17 +204,15 @@ export function Sidebar({ role, isOpen, onClose }) {
       {/* User profile brief for all roles */}
       <div className="p-4 border-t border-slate-200/50 dark:border-slate-800/50 flex items-center justify-between bg-white/50 dark:bg-[#080b11]/50 backdrop-blur-md">
         <div className="flex items-center gap-3 cursor-pointer group">
-          <div className="w-9 h-9 rounded-full bg-linear-to-tr from-orange-400 to-rose-400 shadow-sm border-2 border-white dark:border-[#080b11] group-hover:scale-105 transition-transform duration-300"></div>
+          <div className="w-9 h-9 rounded-full bg-linear-to-tr from-indigo-400 to-blue-400 shadow-sm border-2 border-white dark:border-[#080b11] group-hover:scale-105 transition-transform duration-300 flex items-center justify-center text-white font-bold text-xs">
+            {user?.name?.[0] || "U"}
+          </div>
           <div>
             <div className="text-[13px] font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-              Alex Rivera
+              {user?.name || "Guest User"}
             </div>
-            <div className="text-xs text-muted-foreground">
-              {role === "pm"
-                ? "Project Manager"
-                : role === "bde"
-                  ? "BDE"
-                  : "Senior Dev"}
+            <div className="text-xs text-muted-foreground uppercase tracking-tighter">
+              {user?.role || role || "User"}
             </div>
           </div>
         </div>

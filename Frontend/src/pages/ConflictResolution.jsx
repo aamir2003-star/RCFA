@@ -1,29 +1,50 @@
-import React from "react";
-import {
-    ChevronRight,
-    CheckCircle,
-    Reply,
-    ThumbsUp,
-    ThumbsDown,
-    Paperclip,
-    FileIcon,
-    Download,
-    Bold,
-    Italic,
-    Link as LinkIcon,
-    Code as CodeIcon,
-    AtSign,
-    PlusCircle,
-    MoreHorizontal,
-    Sparkles,
-    UserPlus,
-    Trash2
-} from "lucide-react";
-import { Button } from "../components/ui/Button";
+import { useParams } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "../lib/api";
+import useAuthStore from "../stores/useAuthStore";
+import useProjectStore from "../stores/useProjectStore";
 import { discussionMessages, discussionParticipants } from "../lib/features_utils";
 import { cn } from "../lib/utils";
 
 export default function ConflictResolution() {
+    const { id } = useParams(); // Conflict ID
+    const queryClient = useQueryClient();
+    const { user } = useAuthStore();
+    const { currentProject } = useProjectStore();
+
+    // Fetch Conflict Details
+    const { data: conflict, isLoading, error } = useQuery({
+        queryKey: ["conflict", id],
+        queryFn: async () => {
+            const response = await api.get(`/conflicts/${currentProject?._id}`);
+            // Find the specific conflict in the list (temporary until individual GET /conflicts/:id is added)
+            return response.data.conflicts.find(c => c._id === id);
+        },
+        enabled: !!id && !!currentProject?._id
+    });
+
+    // Vote Mutation
+    const voteMutation = useMutation({
+        mutationFn: async (voteData) => {
+            return await api.post("/votes", voteData);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(["conflict", id]);
+            // In a real app, Socket.io would handle the update, but invalidation ensures sync
+        }
+    });
+
+    if (isLoading) return <div className="p-10 text-center font-black animate-pulse">Loading intelligence...</div>;
+    if (error || !conflict) return <div className="p-10 text-center text-red-500 font-bold">Conflict not found or error loading.</div>;
+
+    const handleVote = (resolutionId) => {
+        voteMutation.mutate({
+            conflictId: id,
+            choice: resolutionId,
+            comment: "Stakeholder decision via Triage Center"
+        });
+    };
+
     return (
         <div className="flex flex-col h-full xl:flex-row gap-8 overflow-hidden">
             {/* Main Discussion Area */}
@@ -31,25 +52,36 @@ export default function ConflictResolution() {
                 {/* Discussion Header */}
                 <div className="p-8 border-b border-slate-200 dark:border-slate-800 sticky top-0 bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md z-20">
                     <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">
-                        <span>Project Alpha</span>
+                        <span>{currentProject?.name || "Project"}</span>
                         <ChevronRight className="w-3 h-3" />
-                        <span className="text-indigo-600 dark:text-indigo-400">#CONF-124</span>
+                        <span className="text-indigo-600 dark:text-indigo-400">#{id.slice(-6).toUpperCase()}</span>
                     </div>
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                         <div className="space-y-2">
-                            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Data Retention Mismatch: User Privacy vs. Compliance</h1>
+                            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                                {conflict.conflictType}
+                            </h1>
                             <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30 text-[10px] font-black uppercase tracking-wider">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                    Open
+                                <div className={cn(
+                                    "flex items-center gap-2 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border",
+                                    conflict.status === 'open'
+                                        ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30"
+                                        : "bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700"
+                                )}>
+                                    <span className={cn("w-1.5 h-1.5 rounded-full", conflict.status === 'open' ? "bg-emerald-500" : "bg-slate-400")}></span>
+                                    {conflict.status}
                                 </div>
-                                <span className="text-xs font-bold text-slate-400 tracking-tight italic">Created 2 days ago by Sarah Chen</span>
+                                <span className="text-xs font-bold text-slate-400 tracking-tight italic">
+                                    Severity Score: {conflict.severityScore} ({conflict.severityColor})
+                                </span>
                             </div>
                         </div>
-                        <Button className="bg-indigo-600 hover:bg-indigo-500 text-white font-black px-6 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-indigo-600/20 transition-all active:scale-95 text-xs uppercase tracking-widest">
-                            <CheckCircle className="w-4 h-4" />
-                            Mark as Resolved
-                        </Button>
+                        {conflict.status === 'open' && (
+                            <Button className="bg-indigo-600 hover:bg-indigo-500 text-white font-black px-6 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-indigo-600/20 transition-all active:scale-95 text-xs uppercase tracking-widest">
+                                <CheckCircle className="w-4 h-4" />
+                                Resolve Conflict
+                            </Button>
+                        )}
                     </div>
                 </div>
 
@@ -124,39 +156,96 @@ export default function ConflictResolution() {
 
                 {/* Conflicting Requirements */}
                 <div className="bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/10 dark:shadow-none space-y-6">
-                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Conflicting Requirements</h3>
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Affected Requirements</h3>
                     <div className="space-y-3">
-                        <RequirementTiny iconBg="bg-indigo-100 dark:bg-indigo-900/30" id="REQ-802" title="GDPR Privacy & Data Deletion Protocol" />
-                        <RequirementTiny iconBg="bg-amber-100 dark:bg-amber-900/30" id="REQ-415" title="Financial Compliance Audit Trail" />
+                        <RequirementTiny
+                            iconBg="bg-indigo-100 dark:bg-indigo-900/30"
+                            id={`REQ-${conflict.requirementA?._id?.slice(-4).toUpperCase()}`}
+                            title={conflict.requirementA?.title}
+                        />
+                        <RequirementTiny
+                            iconBg="bg-amber-100 dark:bg-amber-900/30"
+                            id={`REQ-${conflict.requirementB?._id?.slice(-4).toUpperCase()}`}
+                            title={conflict.requirementB?.title}
+                        />
                     </div>
                 </div>
 
-                {/* AI Progress Summary */}
+                {/* AI Resolution Strategies */}
+                {conflict.resolutions?.length > 0 && (
+                    <div className="bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/10 dark:shadow-none space-y-6">
+                        <div className="flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-indigo-500" />
+                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">AI Proposed Strategies</h3>
+                        </div>
+                        <div className="space-y-4">
+                            {conflict.resolutions.map((res) => (
+                                <div key={res._id} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 hover:border-indigo-500/50 transition-all group">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest bg-indigo-50 dark:bg-indigo-900/20 px-2 py-0.5 rounded-md">
+                                            {res.strategyType}
+                                        </span>
+                                        <button
+                                            onClick={() => handleVote(res._id)}
+                                            disabled={voteMutation.isLoading}
+                                            className="text-[9px] font-black text-slate-400 hover:text-indigo-600 uppercase tracking-widest flex items-center gap-1 transition-colors"
+                                        >
+                                            <ThumbsUp className="w-3 h-3" />
+                                            Vote
+                                        </button>
+                                    </div>
+                                    <p className="text-xs font-black text-slate-900 dark:text-white mb-1 group-hover:text-indigo-600 transition-colors">
+                                        {res.title}
+                                    </p>
+                                    <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
+                                        {res.description}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Feasibility Impact */}
                 <div className="bg-linear-to-br from-[#1e2532] to-slate-900 rounded-3xl p-6 relative overflow-hidden text-white shadow-2xl shadow-indigo-500/20 border border-indigo-500/20 group hover:-translate-y-1 transition-all duration-500 mt-auto">
                     <div className="flex items-center gap-2.5 mb-5 relative z-10">
                         <div className="w-8 h-8 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 shadow-lg shadow-indigo-500/10">
                             <Sparkles className="w-5 h-5 animate-pulse" />
                         </div>
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">AI Progress Summary</h3>
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">Intelligent Impact Audit</h3>
                     </div>
                     <div className="space-y-4 relative z-10">
-                        <p className="text-sm font-medium leading-relaxed text-slate-300">
-                            <span className="text-white font-black">85%</span> of participants lean towards <span className="text-indigo-400 font-black">Alex's masking solution</span>.
-                        </p>
-                        <div className="space-y-2">
-                            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                <span>Resolution Probability</span>
-                                <span>75%</span>
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div className="space-y-1">
+                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Timeline Hit</p>
+                                <p className="text-xl font-black text-indigo-400">{conflict.feasibility?.timelineImpact || "N/A"}</p>
                             </div>
-                            <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                                <div className="h-full bg-indigo-500 rounded-full w-[75%] shadow-[0_0_10px_rgba(99,102,241,0.5)]"></div>
+                            <div className="space-y-1">
+                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Budget Hit</p>
+                                <p className="text-xl font-black text-amber-400">{conflict.feasibility?.costImpact || "N/A"}</p>
                             </div>
                         </div>
-                        <p className="text-[11px] text-slate-400 font-bold border-l-2 border-indigo-500/30 pl-3 py-1 italic">
-                            Potential blockers: Needs final approval from Compliance Officer.
-                        </p>
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                <span>Risk Level</span>
+                                <span className={cn(
+                                    "font-black",
+                                    conflict.feasibility?.riskLevel === 'High' ? "text-red-400" : "text-emerald-400"
+                                )}>{conflict.feasibility?.riskLevel || "Low"}</span>
+                            </div>
+                            <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                                <div className={cn(
+                                    "h-full rounded-full transition-all duration-1000",
+                                    conflict.feasibility?.riskLevel === 'High' ? "bg-red-500 w-[85%]" : "bg-emerald-500 w-[30%]"
+                                )}></div>
+                            </div>
+                        </div>
+                        {conflict.explanation && (
+                            <p className="text-[11px] text-slate-400 font-bold border-l-2 border-indigo-500/30 pl-3 py-1 italic">
+                                {conflict.explanation}
+                            </p>
+                        )}
                     </div>
-                    <div className="absolute -right-12 -bottom-12 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000"></div>
                 </div>
             </aside>
         </div>

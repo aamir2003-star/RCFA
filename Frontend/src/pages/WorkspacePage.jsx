@@ -2,10 +2,27 @@ import React from "react";
 import { ModuleCard } from "../components/workspace/ModuleCard";
 import { TeamSidebar } from "../components/workspace/TeamSidebar";
 import { workspaceModules } from "../lib/features_utils";
-import { Plus, Search, Filter, LayoutGrid, List } from "lucide-react";
+import { Plus, Search, Filter, LayoutGrid, List, AlertCircle, FileCheck, History, Code, Shield, Cpu, Database } from "lucide-react";
 import { Button } from "../components/ui/Button";
+import useProjectStore from "../stores/useProjectStore";
+import useModuleStore from "../stores/useModuleStore";
+import { useEffect } from "react";
 
 export default function WorkspacePage() {
+    const { currentProject, projectStats } = useProjectStore();
+    const { modules, fetchModules, loading } = useModuleStore();
+
+    useEffect(() => {
+        if (currentProject?._id) {
+            fetchModules(currentProject._id);
+        }
+    }, [currentProject?._id, fetchModules]);
+
+    const getIconForModule = (index) => {
+        const icons = [Code, Shield, Cpu, Database];
+        return icons[index % icons.length];
+    };
+
     return (
         <div className="flex flex-col gap-8 w-full max-w-full pb-10">
             {/* Page Header */}
@@ -13,13 +30,28 @@ export default function WorkspacePage() {
                 <div className="flex items-center gap-4">
                     <div className="flex flex-col">
                         <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
-                            Project Alpha: Workspace
+                            {currentProject?.name || "Select a Project"}
                         </h1>
-                        <p className="text-sm font-bold text-slate-500 mt-1 uppercase tracking-widest flex items-center gap-2">
-                            <span>Infrastructure Development</span>
-                            <span className="w-1 h-1 bg-slate-300 dark:bg-slate-700 rounded-full"></span>
-                            <span>Conflict Resolution</span>
-                        </p>
+                        <div className="flex items-center gap-6 mt-2">
+                            <div className="flex items-center gap-2">
+                                <FileCheck className="w-4 h-4 text-indigo-500" />
+                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">
+                                    {projectStats?.requirements?.total || 0} Requirements
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <AlertCircle className="w-4 h-4 text-red-500" />
+                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">
+                                    {projectStats?.conflicts?.total || 0} Conflicts
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2 text-emerald-500">
+                                <History className="w-4 h-4" />
+                                <span className="text-xs font-black uppercase tracking-widest">
+                                    Active Sprint
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -58,8 +90,20 @@ export default function WorkspacePage() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {workspaceModules.map((module) => (
-                            <ModuleCard key={module.id} module={module} />
+                        {modules?.map((module, idx) => (
+                            <ModuleCard
+                                key={module._id}
+                                module={{
+                                    ...module,
+                                    title: module.name,
+                                    desc: module.description,
+                                    icon: getIconForModule(idx),
+                                    iconBg: "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400",
+                                    status: "Active",
+                                    statusColor: "bg-emerald-50 text-emerald-600",
+                                    reqCount: module.requirementCount || 0
+                                }}
+                            />
                         ))}
 
                         {/* Add New Module Placeholder Card */}

@@ -7,6 +7,10 @@ import { AppError } from '../utils/AppError.js';
 // ─── Register ────────────────────────────────────────────────────────────────
 export const register = async (req, res, next) => {
   try {
+    // Map fullName to name if needed
+    if (!req.body.name && req.body.fullName) {
+      req.body.name = req.body.fullName;
+    }
     const { user, accessToken, refreshToken } = await registerUser(req.body);
     const { password, ...safeUser } = user.toObject();
 

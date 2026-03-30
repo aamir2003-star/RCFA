@@ -52,19 +52,27 @@ export const getProjectStats = async (projectId) => {
     ])
   ]);
 
-  // Format results
-  const reqStats = stats[0].reduce((acc, curr) => ({ ...acc, [curr._id]: curr.count }), {});
-  const conflictStats = stats[1].reduce((acc, curr) => ({ ...acc, [curr._id]: curr.count }), {});
+  // Format results with mapping
+  const reqStats = stats[0].reduce((acc, curr) => ({ ...acc, [curr._id]: curr.count }), {
+    approved: 0,
+    draft: 0
+  });
+
+  const rawConflictStats = stats[1].reduce((acc, curr) => ({ ...acc, [curr._id]: curr.count }), {});
+
+  const conflictStats = {
+    high: rawConflictStats.Red || 0,
+    medium: (rawConflictStats.Orange || 0) + (rawConflictStats.Yellow || 0),
+    low: rawConflictStats.Green || 0,
+    total: Object.values(rawConflictStats).reduce((a, b) => a + b, 0)
+  };
 
   return {
     requirements: {
       total: Object.values(reqStats).reduce((a, b) => a + b, 0),
       ...reqStats
     },
-    conflicts: {
-      total: Object.values(conflictStats).reduce((a, b) => a + b, 0),
-      ...conflictStats
-    }
+    conflicts: conflictStats
   };
 };
 

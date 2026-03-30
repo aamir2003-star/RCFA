@@ -8,7 +8,7 @@ import { Input } from "../components/ui/Input";
 import { Button } from "../components/ui/Button";
 import { Modal } from "../components/ui/Modal";
 import { cn } from "../lib/utils";
-import { useAuth } from "../contexts/AuthContext";
+import useAuthStore from "../stores/useAuthStore";
 import { LoginForm } from "../components/auth/LoginForm";
 import { SignupForm } from "../components/auth/SignupForm";
 
@@ -21,8 +21,8 @@ export default function AuthPage() {
   const [authError, setAuthError] = useState("");
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
   const [forgotSuccess, setForgotSuccess] = useState(false);
-  
-  const { login, register: signupUser } = useAuth() || {}; 
+
+  const { login, register: signupUser } = useAuthStore();
   const navigate = useNavigate();
 
   const forgotForm = useForm({
@@ -31,24 +31,26 @@ export default function AuthPage() {
   });
 
   const onLoginSubmit = async (data) => {
-    try {
-      setAuthError("");
-      if (login) await login(data);
-      console.log("Login Data", data);
-      navigate("/");
-    } catch (err) {
-      setAuthError(err?.response?.data?.message || "Invalid email or password");
+    setAuthError("");
+    const result = await login(data.email, data.password);
+    if (result.success) {
+      const user = useAuthStore.getState().user;
+      const role = user.role?.toLowerCase() || "dev";
+      navigate(`/${role}/dashboard`);
+    } else {
+      setAuthError(result.message);
     }
   };
 
   const onSignupSubmit = async (data) => {
-    try {
-      setAuthError("");
-      if (signupUser) await signupUser(data);
-      console.log("Signup Data", data);
-      navigate("/");
-    } catch (err) {
-      setAuthError(err?.response?.data?.message || "Email already in use");
+    setAuthError("");
+    const result = await signupUser(data);
+    if (result.success) {
+      const user = useAuthStore.getState().user;
+      const role = user.role?.toLowerCase() || "dev";
+      navigate(`/${role}/dashboard`);
+    } else {
+      setAuthError(result.message);
     }
   };
 
@@ -70,29 +72,29 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-0 md:p-4 bg-slate-50 dark:bg-slate-950 font-display">
       <div className="flex w-full md:max-w-5xl bg-white dark:bg-slate-900 md:rounded-xl overflow-hidden shadow-2xl min-h-screen md:min-h-[700px]">
-        
+
         {/* Left Side: Branding */}
         <div
           className={cn(
             "hidden lg:flex lg:w-1/2 relative flex-col justify-between p-12 text-white overflow-hidden transition-all duration-500",
-            activeTab === "login" 
+            activeTab === "login"
               ? "bg-linear-to-br from-[#1d283a] via-[#2d3e5a] to-[#4a5d7a]"
               : "bg-[#1d283a]"
           )}
         >
           {/* Abstract overlays depending on tab */}
           {activeTab === "login" ? (
-              <div className="absolute inset-0 opacity-20 pointer-events-none overflow-hidden">
-               <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full border border-white/30"></div>
-               <div className="absolute top-1/4 left-1/2 w-96 h-96 rounded-full border border-white/20"></div>
-               <div className="absolute bottom-[-50px] right-[-50px] w-64 h-64 rounded-full bg-linear-to-br from-indigo-500/40 to-transparent blur-3xl"></div>
-               <div className="absolute top-1/2 left-0 w-full h-px bg-linear-to-r from-transparent via-white/20 to-transparent rotate-45"></div>
-             </div>
+            <div className="absolute inset-0 opacity-20 pointer-events-none overflow-hidden">
+              <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full border border-white/30"></div>
+              <div className="absolute top-1/4 left-1/2 w-96 h-96 rounded-full border border-white/20"></div>
+              <div className="absolute bottom-[-50px] right-[-50px] w-64 h-64 rounded-full bg-linear-to-br from-indigo-500/40 to-transparent blur-3xl"></div>
+              <div className="absolute top-1/2 left-0 w-full h-px bg-linear-to-r from-transparent via-white/20 to-transparent rotate-45"></div>
+            </div>
           ) : (
-             <>
-               <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
-               <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
-             </>
+            <>
+              <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+              <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+            </>
           )}
 
           <div className="z-10 mt-4 max-w-md">
@@ -102,9 +104,9 @@ export default function AuthPage() {
               </div>
               <span className="text-xl font-bold tracking-tight">Conflict Resolver AI</span>
             </div>
-            
+
             <h1 className="text-4xl lg:text-5xl font-bold leading-tight mb-6 transition-all">
-              {activeTab === "login" 
+              {activeTab === "login"
                 ? "Mastering Harmony through Intelligent Resolution."
                 : "Detect conflicts before they become bugs."
               }
@@ -138,7 +140,7 @@ export default function AuthPage() {
 
         {/* Right Side: Form */}
         <div className="w-full lg:w-1/2 bg-white dark:bg-slate-900 flex flex-col pt-6 pb-12 px-6 sm:px-12 md:px-16 justify-center overflow-y-auto">
-          
+
           {/* Mobile Header */}
           <div className="lg:hidden flex justify-between items-center mb-10 mt-4">
             <div className="flex items-center gap-2">
@@ -156,8 +158,8 @@ export default function AuthPage() {
                 {activeTab === "login" ? "Welcome back" : "Create an account"}
               </h2>
               <p className="text-slate-500 dark:text-slate-400">
-                {activeTab === "login" 
-                  ? "Enter your credentials to access your workspace." 
+                {activeTab === "login"
+                  ? "Enter your credentials to access your workspace."
                   : "Get started with 14 days of free premium access."}
               </p>
             </div>
@@ -198,13 +200,13 @@ export default function AuthPage() {
 
             {/* Forms */}
             {activeTab === "login" ? (
-              <LoginForm 
-                onSubmit={onLoginSubmit} 
+              <LoginForm
+                onSubmit={onLoginSubmit}
                 onForgotPassword={() => setIsForgotModalOpen(true)}
                 onToggleSignup={() => setActiveTab("signup")}
               />
             ) : (
-              <SignupForm 
+              <SignupForm
                 onSubmit={onSignupSubmit}
                 onToggleLogin={() => setActiveTab("login")}
               />
@@ -221,13 +223,13 @@ export default function AuthPage() {
       </div>
 
       {/* Forgot Password Modal */}
-      <Modal 
-        isOpen={isForgotModalOpen} 
+      <Modal
+        isOpen={isForgotModalOpen}
         onClose={() => {
           setIsForgotModalOpen(false);
           setForgotSuccess(false);
           forgotForm.reset();
-        }} 
+        }}
         title={!forgotSuccess ? "Reset Password" : ""}
       >
         {!forgotSuccess ? (
@@ -236,9 +238,9 @@ export default function AuthPage() {
               Enter your email address and we'll send you a link to reset your password.
             </p>
             <div>
-              <Input 
-                type="email" 
-                placeholder="name@company.com" 
+              <Input
+                type="email"
+                placeholder="name@company.com"
                 {...forgotForm.register("email")}
               />
               {forgotForm.formState.errors.email && <p className="mt-1.5 text-xs text-red-500">{forgotForm.formState.errors.email.message}</p>}

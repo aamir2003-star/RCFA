@@ -69,3 +69,21 @@ export const deleteRequirement = async (id) => {
 
     return requirement;
 };
+export const bulkCreateRequirements = async (requirements, projectId, createdBy) => {
+    const formattedRequirements = requirements.map(req => ({
+        ...req,
+        projectId,
+        createdBy
+    }));
+
+    const docs = await RequirementModel.insertMany(formattedRequirements);
+
+    // Log activity
+    await ActivityModel.create({
+        projectId,
+        action: `Imported ${docs.length} requirements via CSV`,
+        performedBy: createdBy
+    });
+
+    return docs;
+};

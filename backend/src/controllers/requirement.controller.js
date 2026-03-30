@@ -1,4 +1,6 @@
 import * as requirementService from "../services/requirement.service.js";
+import { parseRequirementsCSV } from "../services/csv.service.js";
+import fs from 'fs';
 
 export const createRequirement = async (req, res, next) => {
     try {
@@ -57,6 +59,35 @@ export const deleteRequirement = async (req, res, next) => {
             return res.status(404).json({ message: "Requirement not found" });
         }
         res.json({ message: "Requirement deleted successfully" });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const uploadRequirements = async (req, res, next) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: "No CSV file uploaded" });
+        }
+
+        const { projectId } = req.body;
+        if (!projectId) {
+            return res.status(400).json({ message: "Project ID is required" });
+        }
+
+        const requirements = await parseRequirementsCSV(req.file.path);
+        const docs = await requirementService.bulkCreateRequirements(
+            requirements,
+            projectId,
+            req.user?._id
+        );
+
+        res.status(201).json({
+            message: `Successfully imported ${docs.length} requirements`,
+            count: docs.length,
+            requirements: docs,
+            filePath: req.file.path // Return path for reference
+        });
     } catch (error) {
         next(error);
     }

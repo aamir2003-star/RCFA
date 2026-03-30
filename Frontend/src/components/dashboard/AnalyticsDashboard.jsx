@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Download, FileText, Rocket, AlertTriangle, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
+import { Calendar, Download, FileText, Rocket, AlertTriangle, CheckCircle2, AlertCircle, Clock, BarChart } from 'lucide-react';
+import useProjectStore from '../../stores/useProjectStore';
 
 const IconMap = {
   FileText, Rocket, AlertTriangle, CheckCircle2, AlertCircle, Clock
@@ -191,21 +192,82 @@ const initialDashboardData = {
 };
 
 const AnalyticsDashboard = () => {
-  // Use state to make it easy to replace with backend data fetching
-  const [dashboardData, _] = useState(initialDashboardData);
-  const [isLoading, __] = useState(false);
+  const { currentProject, projectStats, fetchProjectStats } = useProjectStore();
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Example of where backend fetch would go
   useEffect(() => {
-    // async function fetchData() {
-    //   setIsLoading(true);
-    //   const response = await fetch('/api/dashboard/analytics');
-    //   const data = await response.json();
-    //   setDashboardData(data);
-    //   setIsLoading(false);
-    // }
-    // fetchData();
-  }, []);
+    if (currentProject?._id) {
+      setIsLoading(true);
+      fetchProjectStats(currentProject._id).finally(() => setIsLoading(false));
+    }
+  }, [currentProject?._id, fetchProjectStats]);
+
+  // Map dynamic stats to UI format
+  const reqTotal = projectStats?.requirements?.total || 0;
+  const reqApproved = projectStats?.requirements?.approved || 0;
+  const reqClarity = reqTotal > 0 ? Math.round((reqApproved / reqTotal) * 100) : 0;
+
+  const conflictTotal = projectStats?.conflicts?.total || 0;
+  const highConflicts = projectStats?.conflicts?.high || 0;
+
+  const dynamicStats = [
+    {
+      title: "Requirement Clarity",
+      value: `${reqClarity}%`,
+      change: "+2.4%",
+      isPositive: true,
+      iconName: "FileText",
+      colorClass: "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400",
+      progressClass: "bg-emerald-500",
+      progressValue: `${reqClarity}%`
+    },
+    {
+      title: "Project Readiness",
+      value: "75.0%",
+      change: "+1.2%",
+      isPositive: true,
+      iconName: "Rocket",
+      colorClass: "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400",
+      progressClass: "bg-indigo-500",
+      progressValue: "75%"
+    },
+    {
+      title: "Open Conflicts",
+      value: conflictTotal.toString(),
+      change: highConflicts > 0 ? `+${highConflicts} Critical` : "Stable",
+      isPositive: highConflicts === 0,
+      iconName: "AlertTriangle",
+      colorClass: highConflicts > 0 ? "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400" : "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400",
+      progressClass: highConflicts > 0 ? "bg-red-500" : "bg-blue-500",
+      progressValue: "15%"
+    }
+  ];
+
+  const conflictsByType = [
+    { type: "High Severity", percentage: conflictTotal > 0 ? Math.round((projectStats?.conflicts?.high / conflictTotal) * 100) : 0, colorClass: "bg-red-500" },
+    { type: "Medium Severity", percentage: conflictTotal > 0 ? Math.round((projectStats?.conflicts?.medium / conflictTotal) * 100) : 0, colorClass: "bg-amber-500" },
+    { type: "Low Severity", percentage: conflictTotal > 0 ? Math.round((projectStats?.conflicts?.low / conflictTotal) * 100) : 0, colorClass: "bg-indigo-400" }
+  ];
+
+  if (!currentProject) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8 bg-white dark:bg-[#111827] rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-800">
+        <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl flex items-center justify-center mb-6">
+          <BarChart className="w-10 h-10 text-indigo-600 dark:text-indigo-400" />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">No Project Selected</h2>
+        <p className="text-gray-500 dark:text-gray-400 max-w-sm mb-8">
+          Please select a project from the dashboard to view its real-time health analytics and conflict metrics.
+        </p>
+        <button
+          onClick={() => window.location.href = '/bde/dashboard'}
+          className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/25"
+        >
+          Go to Dashboard
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className={`w-full max-w-7xl mx-auto pb-8 ${isLoading ? 'opacity-50' : 'opacity-100'} transition-opacity duration-200`}>
@@ -213,7 +275,7 @@ const AnalyticsDashboard = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">Project Health Overview</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Real-time performance metrics and conflict analysis for <span className="font-bold text-gray-700 dark:text-gray-300">{dashboardData.projectName}</span></p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Real-time performance metrics and conflict analysis for <span className="font-bold text-gray-700 dark:text-gray-300">{currentProject?.name || initialDashboardData.projectName}</span></p>
         </div>
         <div className="flex items-center space-x-3">
           <button className="flex items-center px-4 py-2 bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm">
@@ -229,21 +291,21 @@ const AnalyticsDashboard = () => {
 
       {/* Top Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        {dashboardData.stats.map((stat, i) => (
+        {dynamicStats.map((stat, i) => (
           <StatCard key={i} {...stat} />
         ))}
       </div>
 
       {/* Middle Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <ConflictTrendsChart data={dashboardData.trends} />
-        <ConflictsByType data={dashboardData.conflictsByType} alert={dashboardData.criticalAlert} />
+        <ConflictTrendsChart data={initialDashboardData.trends} />
+        <ConflictsByType data={conflictsByType} alert={initialDashboardData.criticalAlert} />
       </div>
 
       {/* Bottom Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DevelopmentProgress data={dashboardData.developmentProgress} />
-        <RecentConflictResolutions data={dashboardData.recentResolutions} />
+        <DevelopmentProgress data={initialDashboardData.developmentProgress} />
+        <RecentConflictResolutions data={initialDashboardData.recentResolutions} />
       </div>
     </div>
   )

@@ -1,10 +1,43 @@
 import React, { useState } from 'react';
 import { Zap, Lightbulb, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import useProjectStore from '../stores/useProjectStore';
 
 export default function CreateProject() {
   const navigate = useNavigate();
-  const [overview, setOverview] = useState('');
+  const { createProject, uploadRequirementsCSV, loading } = useProjectStore();
+  const [formData, setFormData] = useState({
+    name: '',
+    clientName: '',
+    description: '',
+    timeline: '',
+    budget: ''
+  });
+  const [requirementFile, setRequirementFile] = useState(null);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    setRequirementFile(e.target.files[0]);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.name) return alert("Project Name is required");
+
+    const result = await createProject(formData);
+    if (result.success) {
+      if (requirementFile) {
+        await uploadRequirementsCSV(result.project._id, requirementFile);
+      }
+      navigate('/bde/dashboard');
+    } else {
+      alert("Error creating project: " + result.message);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -23,13 +56,16 @@ export default function CreateProject() {
             <h2 className="text-lg font-semibold text-[#1e2532] dark:text-white">Project Details</h2>
           </div>
 
-          <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+          <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Row 1: Project Name + Client Name */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Project Name</label>
                 <input
                   type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
                   placeholder="e.g. Infrastructure Modernizatio..."
                   className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-slate-700/50 rounded-lg px-3 py-2.5 text-sm text-[#1e2532] dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
                 />
@@ -38,6 +74,9 @@ export default function CreateProject() {
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Client Name</label>
                 <input
                   type="text"
+                  name="clientName"
+                  value={formData.clientName}
+                  onChange={handleChange}
                   placeholder="Search or select client"
                   className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-slate-700/50 rounded-lg px-3 py-2.5 text-sm text-[#1e2532] dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
                 />
@@ -48,9 +87,10 @@ export default function CreateProject() {
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Project Overview</label>
               <textarea
+                name="description"
                 rows={6}
-                value={overview}
-                onChange={(e) => setOverview(e.target.value)}
+                value={formData.description}
+                onChange={handleChange}
                 placeholder="Describe the project scope, objectives, and any potential conflict zones..."
                 className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-slate-700/50 rounded-lg px-3 py-2.5 text-sm text-[#1e2532] dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all resize-none"
               />
@@ -62,6 +102,9 @@ export default function CreateProject() {
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Expected Timeline</label>
                 <input
                   type="date"
+                  name="timeline"
+                  value={formData.timeline}
+                  onChange={handleChange}
                   className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-slate-700/50 rounded-lg px-3 py-2.5 text-sm text-slate-400 dark:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
                 />
               </div>
@@ -71,6 +114,9 @@ export default function CreateProject() {
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">$</span>
                   <input
                     type="number"
+                    name="budget"
+                    value={formData.budget}
+                    onChange={handleChange}
                     placeholder="50,000"
                     className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-slate-700/50 rounded-lg pl-7 pr-3 py-2.5 text-sm text-[#1e2532] dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
                   />
@@ -79,16 +125,27 @@ export default function CreateProject() {
             </div>
 
             {/* Assign Project Manager */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Assign Project Manager</label>
-              <div className="relative">
-                <select className="w-full appearance-none bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-slate-700/50 rounded-lg px-3 py-2.5 text-sm text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all cursor-pointer">
-                  <option value="">Select a team lead</option>
-                  <option value="pm1">Alice Johnson</option>
-                  <option value="pm2">Bob Smith</option>
-                  <option value="pm3">Carol Williams</option>
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Assign Project Manager</label>
+                <div className="relative">
+                  <select className="w-full appearance-none bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-slate-700/50 rounded-lg px-3 py-2.5 text-sm text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all cursor-pointer">
+                    <option value="">Select a team lead</option>
+                    <option value="pm1">Alice Johnson</option>
+                    <option value="pm2">Bob Smith</option>
+                    <option value="pm3">Carol Williams</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Requirement CSV (Optional)</label>
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileChange}
+                  className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-slate-700/50 rounded-lg px-3 py-2 text-sm text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all cursor-pointer file:mr-4 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100"
+                />
               </div>
             </div>
 
@@ -96,9 +153,10 @@ export default function CreateProject() {
             <div className="flex items-center gap-3 pt-2">
               <button
                 type="submit"
-                className="flex items-center gap-2 bg-[#1e2532] dark:bg-white text-white dark:text-[#1e2532] font-semibold px-6 py-2.5 rounded-xl hover:opacity-90 transition-all text-sm"
+                disabled={loading}
+                className="flex items-center gap-2 bg-[#1e2532] dark:bg-white text-white dark:text-[#1e2532] font-semibold px-6 py-2.5 rounded-xl hover:opacity-90 transition-all text-sm disabled:opacity-50"
               >
-                Generate Project
+                {loading ? "Generating..." : "Generate Project"}
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3l14 9-14 9V3z" />
                 </svg>
