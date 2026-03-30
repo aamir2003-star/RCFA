@@ -19,12 +19,9 @@ import {
 import { motion } from "framer-motion";
 import ThemeToggle from "../components/ThemeToggle";
 
-
-
 const LandingPage = () => {
   return (
     <div className="min-h-screen bg-background text-foreground font-sans transition-colors duration-300">
-
       {/* Navbar */}
       <nav className="flex items-center justify-between px-8 py-6 max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
@@ -43,7 +40,6 @@ const LandingPage = () => {
             Get Started
           </Link>
         </div>
-
       </nav>
 
       {/* Hero Section */}
@@ -95,7 +91,6 @@ const LandingPage = () => {
               Watch Demo
             </button>
           </motion.div>
-
         </div>
 
         {/* Hero Card Graphic */}
@@ -110,7 +105,6 @@ const LandingPage = () => {
             whileHover={{ y: -10, rotateX: 2, rotateY: -2, scale: 1.02 }}
             className="bg-card rounded-xl shadow-2xl p-6 border border-border transform transition-all duration-500"
           >
-
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-blue-500" />
@@ -120,17 +114,15 @@ const LandingPage = () => {
                 animate={{ opacity: [0.6, 1, 0.6] }}
                 transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
                 className="text-[10px] font-black bg-destructive/10 text-destructive px-2 py-1 rounded-sm uppercase tracking-widest"
-
               >
                 High Risk
               </motion.span>
             </div>
 
             <div className="space-y-4">
-<<<<<<< HEAD
               <motion.div
                 whileHover={{ scale: 1.03, backgroundColor: "#eff6ff" }}
-                className="bg-[#f0f4f9] p-4 rounded-lg relative overflow-hidden transition-colors"
+                className="bg-[#f0f4f9] p-4 rounded-lg relative overflow-hidden transition-colors border border-transparent hover:border-blue-100"
               >
                 <div className="flex gap-3">
                   <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
@@ -140,22 +132,8 @@ const LandingPage = () => {
                     <div className="text-[10px] uppercase font-black text-muted-foreground mb-1 tracking-tighter">Legal Requirement</div>
                     <div className="text-sm font-bold leading-tight text-foreground">Mandatory <span className="text-blue-600 underline underline-offset-2">AES-256 encryption</span> for all data at rest.</div>
                   </div>
-
                 </div>
               </motion.div>
-=======
-              <div className="bg-[#f0f4f9] p-4 rounded-lg relative">
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0">
-                    <Globe className="w-4 h-4 text-slate-600" />
-                  </div>
-                  <div>
-                    <div className="text-[10px] uppercase font-bold text-slate-400 mb-1">Legal Requirement</div>
-                    <div className="text-sm font-medium leading-tight">Mandatory AES-256 encryption for all data at rest and in transit.</div>
-                  </div>
-                </div>
-              </div>
->>>>>>> 6d6309f (feat: implement vault, report, and requirement management modules with associated API routes and controllers)
 
               <div className="flex justify-center -my-2 relative z-10">
                 <motion.div
@@ -172,7 +150,6 @@ const LandingPage = () => {
                 className="bg-[#f8f9fa] p-4 rounded-lg transition-colors border border-transparent hover:border-orange-100"
               >
                 <div className="flex gap-3">
-<<<<<<< HEAD
                   <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
                     <Cpu className="w-4 h-4 text-muted-foreground" />
                   </div>
@@ -180,76 +157,45 @@ const LandingPage = () => {
                     <div className="text-[10px] uppercase font-black text-muted-foreground mb-1 tracking-tighter">Developer Constraint</div>
                     <div className="text-sm font-bold leading-tight text-foreground">Support <span className="text-orange-600">10,000 concurrent users</span> with &lt;100ms latency.</div>
                   </div>
-
                 </div>
               </motion.div>
+            </div>
 
-              <div className="pt-4 space-y-4">
-                <div className="group/item">
-                  <div className="flex justify-between text-[10px] font-black uppercase mb-1 tracking-widest">
-                    <span className="text-slate-400 group-hover/item:text-slate-600 transition-colors">Timeline Impact</span>
-                    <span className="text-orange-500">+2 Weeks</span>
-                  </div>
-                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: "75%" }}
-                      transition={{ duration: 1.2, ease: "easeOut" }}
-                      className="h-full bg-red-600 shadow-[0_0_8px_rgba(220,38,38,0.4)]"
-                    ></motion.div>
-                  </div>
+            <div className="pt-6 space-y-4">
+              <div className="group/item">
+                <div className="flex justify-between text-[10px] font-black uppercase mb-1 tracking-widest">
+                  <span className="text-slate-400 group-hover/item:text-slate-600 transition-colors">Timeline Impact</span>
+                  <span className="text-orange-500 font-black">+2 Weeks</span>
                 </div>
-                <div className="group/item">
-                  <div className="flex justify-between text-[10px] font-black uppercase mb-1 tracking-widest">
-                    <span className="text-slate-400 group-hover/item:text-slate-600 transition-colors">Budget Increase</span>
-                    <span className="text-orange-500">+15%</span>
-                  </div>
-                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: "45%" }}
-                      transition={{ duration: 1.2, ease: "easeOut", delay: 0.1 }}
-                      className="h-full bg-red-600 shadow-[0_0_8px_rgba(220,38,38,0.4)]"
-                    ></motion.div>
-=======
-                  <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0">
-                    <Cpu className="w-4 h-4 text-slate-600" />
-                  </div>
-                  <div>
-                    <div className="text-[10px] uppercase font-bold text-slate-400 mb-1">Developer Constraint</div>
-                    <div className="text-sm font-medium leading-tight">Support 10,000 concurrent users with &lt;100ms latency.</div>
-                  </div>
+                <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    whileInView={{ width: "75%" }}
+                    transition={{ duration: 1.2, ease: "easeOut" }}
+                    className="h-full bg-red-600 shadow-[0_0_8px_rgba(220,38,38,0.4)]"
+                  ></motion.div>
+                </div>
+              </div>
+              <div className="group/item">
+                <div className="flex justify-between text-[10px] font-black uppercase mb-1 tracking-widest">
+                  <span className="text-slate-400 group-hover/item:text-slate-600 transition-colors">Budget Increase</span>
+                  <span className="text-orange-500 font-black">+15%</span>
+                </div>
+                <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    whileInView={{ width: "45%" }}
+                    transition={{ duration: 1.2, ease: "easeOut", delay: 0.1 }}
+                    className="h-full bg-red-600 shadow-[0_0_8px_rgba(220,38,38,0.4)]"
+                  ></motion.div>
                 </div>
               </div>
 
-              <div className="pt-4 space-y-4">
-                <div>
-                  <div className="flex justify-between text-[10px] font-bold uppercase mb-1">
-                    <span className="text-slate-400">Timeline Impact</span>
-                    <span className="text-orange-500">+2 Weeks</span>
-                  </div>
-                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-red-600 w-[75%]"></div>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-[10px] font-bold uppercase mb-1">
-                    <span className="text-slate-400">Budget Increase</span>
-                    <span className="text-orange-500">+15%</span>
-                  </div>
-                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-red-600 w-[45%]"></div>
->>>>>>> 6d6309f (feat: implement vault, report, and requirement management modules with associated API routes and controllers)
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-4 border-t border-border">
+              <div className="flex items-center justify-between pt-6 border-t border-border">
                 <div className="flex -space-x-2">
                   {[1, 2, 3].map(i => (
-<<<<<<< HEAD
-                    <motion.div 
-                      key={i} 
+                    <motion.div
+                      key={i}
                       whileHover={{ y: -8, scale: 1.1, zIndex: 10 }}
                       className="w-8 h-8 rounded-full border-2 border-card bg-muted overflow-hidden cursor-pointer shadow-sm"
                     >
@@ -260,27 +206,15 @@ const LandingPage = () => {
                 </div>
                 <div className="flex gap-2">
                   <button className="text-[10px] font-black uppercase text-secondary-foreground hover:text-primary transition-colors">Dismiss</button>
-                  <motion.button 
+                  <motion.button
                     whileHover={{ scale: 1.05, backgroundColor: "var(--foreground)", color: "var(--background)" }}
                     whileTap={{ scale: 0.95 }}
                     className="text-[10px] font-black uppercase bg-primary text-primary-foreground px-4 py-2.5 rounded shadow-xl transition-all"
                   >
                     View Correlation
                   </motion.button>
-=======
-                    <div key={i} className="w-6 h-6 rounded-full border-2 border-white bg-slate-300 overflow-hidden">
-                      <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="avatar" />
-                    </div>
-                  ))}
-                  <div className="w-6 h-6 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-bold">+2</div>
-                </div>
-                <div className="flex gap-2">
-                  <button className="text-[10px] font-bold uppercase text-slate-400 hover:text-slate-600">Dismiss</button>
-                  <button className="text-[10px] font-bold uppercase bg-[#0f172a] text-white px-3 py-2 rounded">View Correlation</button>
->>>>>>> 6d6309f (feat: implement vault, report, and requirement management modules with associated API routes and controllers)
                 </div>
               </div>
-
             </div>
           </motion.div>
         </motion.div>
@@ -302,39 +236,14 @@ const LandingPage = () => {
         </div>
       </section>
 
-<<<<<<< HEAD
-=======
-      {/* Trusted By Section */}
-      <section className="py-12 bg-[#f6f7f7]">
-        <div className="max-w-7xl mx-auto px-8">
-          <div className="text-center mb-8">
-            <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-slate-400">Trusted by Leading Engineering and Product Teams</span>
-          </div>
-          <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-40 grayscale group">
-            <span className="text-lg font-bold tracking-tighter hover:grayscale-0 transition-all cursor-default">GLOBAL_CORE</span>
-            <span className="text-lg font-bold tracking-tighter hover:grayscale-0 transition-all cursor-default">NEXUSIO</span>
-            <span className="text-lg font-bold tracking-tighter hover:grayscale-0 transition-all cursor-default">STRATUM</span>
-            <span className="text-lg font-bold tracking-tighter hover:grayscale-0 transition-all cursor-default">VELOCITY</span>
-            <span className="text-lg font-bold tracking-tighter hover:grayscale-0 transition-all cursor-default">ZENITH</span>
-          </div>
-        </div>
-      </section>
->>>>>>> 6d6309f (feat: implement vault, report, and requirement management modules with associated API routes and controllers)
-
-      {/* Features Section - Architected for Accuracy */}
-      <section id="features" className="py-20 max-w-7xl mx-auto px-8">
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold mb-4">Architected for Accuracy</h2>
-<<<<<<< HEAD
-          <p className="text-muted-foreground max-w-xl text-sm leading-relaxed">
-=======
-          <p className="text-slate-500 max-w-xl text-sm leading-relaxed">
->>>>>>> 6d6309f (feat: implement vault, report, and requirement management modules with associated API routes and controllers)
+      {/* Features Section */}
+      <section id="features" className="py-24 max-w-7xl mx-auto px-8">
+        <div className="mb-16">
+          <h2 className="text-4xl font-bold mb-4 tracking-tight">Architected for Accuracy</h2>
+          <p className="text-muted-foreground max-w-xl text-base leading-relaxed font-medium">
             Our system doesn't just find problems, it mathematically calculates the feasibility of every architectural decision.
           </p>
         </div>
-
-<<<<<<< HEAD
 
         <motion.div
           initial="hidden"
@@ -347,7 +256,7 @@ const LandingPage = () => {
               transition: { staggerChildren: 0.15 }
             }
           }}
-          className="grid md:grid-cols-6 md:grid-rows-2 gap-4 h-full md:h-[600px]"
+          className="grid md:grid-cols-6 md:grid-rows-2 gap-6 h-full md:h-[600px]"
         >
           {/* AI Powered Detection */}
           <motion.div
@@ -359,7 +268,7 @@ const LandingPage = () => {
             className="md:col-span-4 bg-card rounded-xl p-10 border border-border shadow-sm flex flex-col justify-between group/card transition-all"
           >
             <div>
-              <motion.div 
+              <motion.div
                 whileHover={{ rotate: 180, scale: 1.1 }}
                 className="w-12 h-12 bg-[#0ea5e9] rounded-xl flex items-center justify-center mb-8 shadow-lg shadow-[#0ea5e9]/20"
               >
@@ -373,7 +282,6 @@ const LandingPage = () => {
             <a href="#" className="flex items-center gap-2 text-xs font-black uppercase text-blue-600 group">
               Learn about the engine <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
             </a>
-
           </motion.div>
 
           {/* Collaborative Voting */}
@@ -410,7 +318,7 @@ const LandingPage = () => {
           </motion.div>
 
           {/* Feasibility Matrix */}
-          <motion.div 
+          <motion.div
             variants={{
               hidden: { opacity: 0, x: -30 },
               visible: { opacity: 1, x: 0 }
@@ -429,9 +337,8 @@ const LandingPage = () => {
             </div>
           </motion.div>
 
-
           {/* Enterprise Reporting */}
-          <motion.div 
+          <motion.div
             variants={{
               hidden: { opacity: 0, y: 30 },
               visible: { opacity: 1, y: 0 }
@@ -444,7 +351,7 @@ const LandingPage = () => {
               <p className="text-muted-foreground text-base mb-8 leading-relaxed font-medium">
                 Generate <span className="text-foreground font-bold uppercase tracking-tight">board-ready audit trails</span> of every requirement change and resolution decision.
               </p>
-              <motion.button 
+              <motion.button
                 whileHover={{ scale: 1.05, backgroundColor: "var(--foreground)", color: "var(--background)" }}
                 className="bg-card px-6 py-3 rounded-lg text-xs font-black uppercase tracking-widest border border-border transition-all shadow-sm"
               >
@@ -455,104 +362,26 @@ const LandingPage = () => {
               <div className="bg-background rounded-xl p-6 h-40 w-full shadow-inner border border-border space-y-4 transition-colors">
                 <motion.div initial={{ width: 0 }} whileInView={{ width: "80%" }} transition={{ duration: 1 }} className="h-2.5 bg-slate-200 dark:bg-slate-700 rounded-full"></motion.div>
                 <motion.div initial={{ width: 0 }} whileInView={{ width: "100%" }} transition={{ duration: 1, delay: 0.2 }} className="h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full"></motion.div>
-                <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.5 }} className="h-16 w-full bg-card rounded-lg shadow-sm border border-border flex items-center px-4">
+                <div className="h-16 w-full bg-card rounded-lg shadow-sm border border-border flex items-center px-4">
                   <div className="w-full h-2 bg-blue-100 dark:bg-blue-900/30 rounded-full overflow-hidden">
                     <motion.div initial={{ x: "-100%" }} animate={{ x: "100%" }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }} className="w-1/3 h-full bg-blue-500"></motion.div>
                   </div>
-                </motion.div>
+                </div>
               </div>
             </div>
           </motion.div>
-
         </motion.div>
-=======
-        <div className="grid md:grid-cols-6 md:grid-rows-2 gap-4 h-full md:h-[600px]">
-          {/* AI Powered Detection */}
-          <div className="md:col-span-4 bg-white rounded-xl p-10 border border-slate-100 shadow-sm flex flex-col justify-between">
-            <div>
-              <div className="w-10 h-10 bg-[#0ea5e9] rounded-md flex items-center justify-center mb-6">
-                <Zap className="w-5 h-5 text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-4">AI-Powered Detection</h3>
-              <p className="text-slate-500 text-sm max-w-sm mb-6 leading-relaxed">
-                Proprietary NLP engine scans PRDs, legal docs, and Jira tickets to map logical inconsistencies in milliseconds.
-              </p>
-            </div>
-            <a href="#" className="flex items-center gap-2 text-xs font-bold uppercase group">
-              Learn about the engine <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-            </a>
-          </div>
-
-          {/* Collaborative Voting */}
-          <div className="md:col-span-2 bg-[#022f5c] text-white rounded-xl p-10 border border-slate-800 shadow-sm flex flex-col justify-between overflow-hidden relative">
-            <div className="relative z-10">
-              <div className="w-10 h-10 bg-white/10 rounded-md flex items-center justify-center mb-6 backdrop-blur">
-                <Users className="w-5 h-5 text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-4">Collaborative Voting</h3>
-              <p className="text-white/60 text-sm mb-6 leading-relaxed">
-                Reach consensus faster with structured revelation workflows for every stakeholder.
-              </p>
-            </div>
-            <div className="space-y-3 relative z-10">
-              {[1, 2].map(i => (
-                <div key={i} className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                  <div className={`h-full bg-blue-300 w-[${i === 1 ? '85%' : '60%'}]`}></div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Feasibility Matrix */}
-          <div className="md:col-span-2 bg-[#f0f4f9] rounded-xl p-10 border border-slate-100 shadow-sm flex flex-col justify-between">
-            <div>
-              <div className="w-10 h-10 bg-[#1d283a] rounded-md flex items-center justify-center mb-6">
-                <LayoutGrid className="w-5 h-5 text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-4">Feasibility Matrix</h3>
-              <p className="text-slate-500 text-sm mb-6 leading-relaxed">
-                Visualize the intersection of cost, timeline, and technical risk in a real-time heat map.
-              </p>
-            </div>
-          </div>
-
-          {/* Enterprise Reporting */}
-          <div className="md:col-span-4 bg-[#e8e9e9] rounded-xl p-10 border border-slate-100 shadow-sm flex items-center gap-12">
-            <div className="flex-1">
-              <h3 className="text-xl font-bold mb-4">Enterprise Reporting</h3>
-              <p className="text-slate-500 text-sm mb-6 leading-relaxed">
-                Generate board-ready audit trails of every requirement change and resolution decision.
-              </p>
-              <button className="bg-white px-4 py-2 rounded-md text-xs font-bold">Preview Reports</button>
-            </div>
-            <div className="flex-1 hidden lg:block">
-              <div className="bg-white rounded p-4 h-32 w-full shadow-inner border border-slate-200">
-                <div className="h-2 w-3/4 bg-slate-100 mb-2"></div>
-                <div className="h-2 w-full bg-slate-50 mb-2"></div>
-                <div className="h-8 w-full bg-[#f8f9fa] mt-4"></div>
-              </div>
-            </div>
-          </div>
-        </div>
->>>>>>> 6d6309f (feat: implement vault, report, and requirement management modules with associated API routes and controllers)
       </section>
 
       {/* Workflow Section */}
       <section id="how-it-works" className="py-24 bg-background border-y border-border transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-8">
           <div className="text-center mb-16">
-<<<<<<< HEAD
-            <h2 className="text-4xl font-bold mb-4">The RCFA Workflow</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-sm">
-=======
-            <h2 className="text-4xl font-bold mb-4">SpectraAI Workflow</h2>
-            <p className="text-slate-500 max-w-2xl mx-auto text-sm">
->>>>>>> 6d6309f (feat: implement vault, report, and requirement management modules with associated API routes and controllers)
+            <h2 className="text-4xl font-bold mb-4 tracking-tight">SpectraAI Workflow</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-base font-medium">
               From raw documents to resolved conflicts in four high-efficiency steps.
             </p>
           </div>
-
-<<<<<<< HEAD
 
           <motion.div
             initial="hidden"
@@ -567,16 +396,12 @@ const LandingPage = () => {
             }}
             className="grid md:grid-cols-4 gap-12"
           >
-=======
-          <div className="grid md:grid-cols-4 gap-12">
->>>>>>> 6d6309f (feat: implement vault, report, and requirement management modules with associated API routes and controllers)
             {[
               { icon: Shield, title: "Upload", desc: "Import documents from Jira, Confluence, or raw PDF/DOCX files." },
               { icon: Search, title: "Analyze", desc: "Our AI maps logic clusters and identifies hidden dependencies." },
               { icon: Users, title: "Collaborate", desc: "Stakeholders review detected conflicts and discuss trade-offs." },
               { icon: CheckCircle, title: "Resolve", desc: "Approve one version of truth and export the updated feasibility report." }
             ].map((step, i) => (
-<<<<<<< HEAD
               <motion.div
                 key={i}
                 variants={{
@@ -586,31 +411,20 @@ const LandingPage = () => {
                 whileHover={{ y: -12, scale: 1.05 }}
                 className="text-center flex flex-col items-center group cursor-pointer"
               >
-                <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-[#0f172a] group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-2xl group-hover:shadow-slate-900/20 group-hover:rotate-6">
+                <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-[#0f172a] dark:group-hover:bg-primary group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-2xl group-hover:shadow-primary/20 group-hover:rotate-6">
                   <step.icon className="w-6 h-6 transition-transform group-hover:scale-110" />
                 </div>
-                <h4 className="text-lg font-black mb-3 group-hover:text-[#0ea5e9] transition-colors">{step.title}</h4>
-                <p className="text-slate-500 text-xs leading-relaxed px-4 font-medium group-hover:text-slate-900 transition-colors">{step.desc}</p>
+                <h4 className="text-lg font-black mb-3 group-hover:text-primary transition-colors">{step.title}</h4>
+                <p className="text-muted-foreground text-xs leading-relaxed px-4 font-medium group-hover:text-foreground transition-colors">{step.desc}</p>
               </motion.div>
             ))}
           </motion.div>
-=======
-              <div key={i} className="text-center flex flex-col items-center group">
-                <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center mb-6 group-hover:bg-slate-200 transition-colors">
-                  <step.icon className="w-5 h-5 text-slate-800" />
-                </div>
-                <h4 className="font-bold mb-3">{step.title}</h4>
-                <p className="text-slate-400 text-xs leading-relaxed px-4">{step.desc}</p>
-              </div>
-            ))}
-          </div>
->>>>>>> 6d6309f (feat: implement vault, report, and requirement management modules with associated API routes and controllers)
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 max-w-7xl mx-auto px-8">
-        <div className="bg-[#021831] rounded-[2rem] p-12 md:p-24 text-center relative overflow-hidden">
+      <section className="py-24 max-w-7xl mx-auto px-8">
+        <div className="bg-[#021831] rounded-[3rem] p-12 md:p-24 text-center relative overflow-hidden shadow-2xl">
           {/* Dots Background Pattern */}
           <div className="absolute inset-0 opacity-10 pointer-events-none"
             style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
@@ -621,15 +435,14 @@ const LandingPage = () => {
               Stop development rework. <br />
               Start analyzing today.
             </h2>
-            <p className="text-slate-400 mb-10 text-sm">
-              Join over 250+ engineering teams that use RCFA to reduce <br className="hidden md:block" />
-              project delays by 35% on average.
+            <p className="text-slate-400 mb-10 text-base max-w-lg mx-auto font-medium leading-relaxed">
+              Join over 250+ engineering teams that use RCFA to reduce project delays by 35% on average.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Link to="/login" className="bg-[#b7e4f9] text-slate-900 px-8 py-3 rounded-md font-bold hover:bg-white transition-colors">
+              <Link to="/login" className="bg-[#b7e4f9] text-slate-900 px-10 py-4 rounded-xl font-black uppercase tracking-widest hover:bg-white transition-all hover:scale-105 shadow-xl shadow-blue-500/10">
                 Get Started for Free
               </Link>
-              <button className="bg-[#112d4a] text-white px-8 py-3 rounded-md font-bold hover:bg-[#1a3a5a] transition-colors border border-white/10">
+              <button className="bg-[#112d4a] text-white px-10 py-4 rounded-xl font-black uppercase tracking-widest hover:bg-[#1a3a5a] transition-all border border-white/10 hover:scale-105">
                 Schedule a Demo
               </button>
             </div>
@@ -638,76 +451,45 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-background pt-20 pb-8 px-8 border-t border-border transition-colors duration-300">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-5 gap-12 mb-20">
+      <footer className="bg-background pt-24 pb-12 px-8 border-t border-border transition-colors duration-300">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-5 gap-16 mb-24">
           <div className="md:col-span-2">
-            <div className="text-xl font-bold mb-6">RCFA</div>
-<<<<<<< HEAD
-            <p className="text-muted-foreground text-[10px] leading-relaxed max-w-xs uppercase font-medium">
-=======
-            <p className="text-slate-400 text-[10px] leading-relaxed max-w-xs uppercase font-medium">
->>>>>>> 6d6309f (feat: implement vault, report, and requirement management modules with associated API routes and controllers)
-              Precision engineering conflict resolution for modern enterprises.
+            <div className="text-2xl font-black mb-6 tracking-tighter">SpectraAI</div>
+            <p className="text-muted-foreground text-xs leading-relaxed max-w-xs uppercase font-black tracking-[0.1em] opacity-60">
+              Precision engineering conflict resolution for modern enterprises. Built for scale.
             </p>
           </div>
           <div>
-            <h5 className="font-bold text-xs uppercase mb-6 tracking-wider">Product</h5>
-<<<<<<< HEAD
-            <ul className="space-y-4 text-[10px] text-muted-foreground font-bold uppercase">
+            <h5 className="font-black text-xs uppercase mb-8 tracking-widest">Product</h5>
+            <ul className="space-y-4 text-xs text-muted-foreground font-bold uppercase tracking-wider">
               <li><a href="#" className="hover:text-foreground transition-colors">Features</a></li>
               <li><a href="#" className="hover:text-foreground transition-colors">Security</a></li>
               <li><a href="#" className="hover:text-foreground transition-colors">Integrations</a></li>
-=======
-            <ul className="space-y-4 text-[10px] text-slate-400 font-bold uppercase">
-              <li><a href="#" className="hover:text-slate-900">Features</a></li>
-              <li><a href="#" className="hover:text-slate-900">Security</a></li>
-              <li><a href="#" className="hover:text-slate-900">Integrations</a></li>
->>>>>>> 6d6309f (feat: implement vault, report, and requirement management modules with associated API routes and controllers)
             </ul>
           </div>
           <div>
-            <h5 className="font-bold text-xs uppercase mb-6 tracking-wider">Company</h5>
-<<<<<<< HEAD
-            <ul className="space-y-4 text-[10px] text-muted-foreground font-bold uppercase">
+            <h5 className="font-black text-xs uppercase mb-8 tracking-widest">Company</h5>
+            <ul className="space-y-4 text-xs text-muted-foreground font-bold uppercase tracking-wider">
               <li><a href="#" className="hover:text-foreground transition-colors">About Us</a></li>
               <li><a href="#" className="hover:text-foreground transition-colors">Careers</a></li>
               <li><a href="#" className="hover:text-foreground transition-colors">Blog</a></li>
-=======
-            <ul className="space-y-4 text-[10px] text-slate-400 font-bold uppercase">
-              <li><a href="#" className="hover:text-slate-900">About Us</a></li>
-              <li><a href="#" className="hover:text-slate-900">Careers</a></li>
-              <li><a href="#" className="hover:text-slate-900">Blog</a></li>
->>>>>>> 6d6309f (feat: implement vault, report, and requirement management modules with associated API routes and controllers)
             </ul>
           </div>
           <div>
-            <h5 className="font-bold text-xs uppercase mb-6 tracking-wider">Legal</h5>
-<<<<<<< HEAD
-            <ul className="space-y-4 text-[10px] text-muted-foreground font-bold uppercase">
+            <h5 className="font-black text-xs uppercase mb-8 tracking-widest">Legal</h5>
+            <ul className="space-y-4 text-xs text-muted-foreground font-bold uppercase tracking-wider">
               <li><a href="#" className="hover:text-foreground transition-colors">Privacy</a></li>
               <li><a href="#" className="hover:text-foreground transition-colors">Terms</a></li>
               <li><a href="#" className="hover:text-foreground transition-colors">Security</a></li>
             </ul>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto border-t border-border pt-8 flex justify-between items-center text-[8px] font-bold text-muted-foreground uppercase tracking-widest">
+        <div className="max-w-7xl mx-auto border-t border-border pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">
           <div>© 2026 REQUIREMENT CONFLICT & FEASIBILITY ANALYZER. ENGINEERED FOR PRECISION.</div>
-
-=======
-            <ul className="space-y-4 text-[10px] text-slate-400 font-bold uppercase">
-              <li><a href="#" className="hover:text-slate-900">Privacy</a></li>
-              <li><a href="#" className="hover:text-slate-900">Terms</a></li>
-              <li><a href="#" className="hover:text-slate-900">Security</a></li>
-            </ul>
-          </div>
-        </div>
-        <div className="max-w-7xl mx-auto border-t border-slate-200 pt-8 flex justify-between items-center text-[8px] font-bold text-slate-400 uppercase tracking-widest">
-          <div>© 2026 REQUIREMENT CONFLICT & FEASIBILITY ANALYZER. ENGINEERED FOR PRECISION.</div>
->>>>>>> 6d6309f (feat: implement vault, report, and requirement management modules with associated API routes and controllers)
-          <div className="flex gap-4">
-            <Globe className="w-3 h-3" />
-            <LayoutGrid className="w-3 h-3" />
-            <Shield className="w-3 h-3" />
+          <div className="flex gap-6">
+            <Globe className="w-4 h-4 hover:text-foreground transition-colors cursor-pointer" />
+            <LayoutGrid className="w-4 h-4 hover:text-foreground transition-colors cursor-pointer" />
+            <Shield className="w-4 h-4 hover:text-foreground transition-colors cursor-pointer" />
           </div>
         </div>
       </footer>
