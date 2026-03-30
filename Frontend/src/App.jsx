@@ -8,6 +8,7 @@ import {
 import { AuthProvider } from "./contexts/AuthContext";
 
 import AuthPage from "./pages/AuthPage";
+import LandingPage from "./pages/LandingPage";
 import { MainLayout } from "./components/layout/MainLayout";
 import DevDashboard from "./components/dashboard/DevDashboard";
 import PmDashboard from "./components/dashboard/PmDashboard";
@@ -21,6 +22,7 @@ function App() {
       {/* <AuthProvider> */}
       <Routes>
         {/* Public Routes */}
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<AuthPage />} />
 
         <Route
