@@ -543,6 +543,42 @@ export const resolutionSuggestions = [
   }
 ];
 
+export const pmConflicts = [
+  {
+    id: "CONF-124",
+    title: "Schema Mismatch vs GDPR",
+    project: "Project Phoenix",
+    status: "Critical",
+    impact: "High",
+    reqA: "REQ-08",
+    reqB: "REQ-14",
+    time: "2h ago",
+    owner: "Architecture Team"
+  },
+  {
+    id: "CONF-125",
+    title: "Auth Token Expiry Overlap",
+    project: "Project Phoenix",
+    status: "Active",
+    impact: "Medium",
+    reqA: "REQ-22",
+    reqB: "REQ-45",
+    time: "5h ago",
+    owner: "Security Team"
+  },
+  {
+    id: "CONF-120",
+    title: "UI Theme Variable Collision",
+    project: "Lumen UI",
+    status: "Resolved",
+    impact: "Low",
+    reqA: "REQ-05",
+    reqB: "REQ-09",
+    time: "Yesterday",
+    owner: "Frontend Team"
+  }
+];
+
 // { ------------------ Activity Timeline ------------------ }
 
 export const timelineActivities = [

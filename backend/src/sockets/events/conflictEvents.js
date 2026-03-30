@@ -45,3 +45,22 @@ export const emitAnalysisProgress = (projectId, jobId, progress, message) => {
         // Silent fallback
     }
 };
+
+/**
+ * Emit a conflict:resolved event.
+ * @param {string} projectId
+ * @param {string} conflictId
+ */
+export const emitConflictResolved = (projectId, conflictId) => {
+    try {
+        const io = getIO();
+        io.to(`project:${projectId}`).emit('conflict:resolved', {
+            projectId,
+            conflictId,
+            timestamp: new Date().toISOString(),
+        });
+        console.debug(`📡 Emitted conflict:resolved for ${conflictId}`);
+    } catch {
+        // Silent fallback
+    }
+};

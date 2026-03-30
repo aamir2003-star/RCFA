@@ -9,6 +9,9 @@ import projectRoutes from './routes/project.routes.js';
 import moduleRoutes from './routes/module.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import conflictRoutes from './routes/conflict.routes.js';
+import requirementRoutes from './routes/requirement.routes.js';
+import vaultRoutes from './routes/vault.routes.js';
+import reportRoutes from './routes/report.routes.js';
 
 // ─── Middleware ──────────────────────────────────────────────────────────────
 import { errorHandler } from './middleware/errorHandler.js';
@@ -22,10 +25,13 @@ app.use(express.json());
 app.use(rateLimiter);
 
 // ─── Mount API Routes ────────────────────────────────────────────────────────
-app.use('/api/projects', projectRoutes);
+app.use('/api/v1/projects', projectRoutes);
 app.use('/api/v1/modules', moduleRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/conflicts', conflictRoutes);
+app.use('/api/v1/requirements', requirementRoutes);
+app.use('/api/v1/vault', vaultRoutes);
+app.use('/api/v1/reports', reportRoutes);
 
 // ─── Root ────────────────────────────────────────────────────────────────────
 app.get('/', (req, res) => {

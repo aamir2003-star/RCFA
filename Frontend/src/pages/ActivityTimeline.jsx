@@ -1,5 +1,4 @@
 import React from "react";
-import { MainLayout } from "../components/layout/MainLayout";
 import {
     Search,
     Calendar,
@@ -19,110 +18,108 @@ import { cn } from "../lib/utils";
 
 export default function ActivityTimeline() {
     return (
-        <MainLayout role="pm">
-            <div className="flex flex-col xl:flex-row gap-8 h-full">
-                {/* Sidebar Filters */}
-                <aside className="w-full xl:w-80 flex flex-col gap-8 shrink-0">
-                    <div className="bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/10 dark:shadow-none space-y-8">
-                        <div className="space-y-4">
-                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Search Trail</h3>
-                            <div className="relative group">
-                                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-                                <input
-                                    type="text"
-                                    placeholder="Search activities..."
-                                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-sm font-medium focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Event Types</h3>
-                            <div className="space-y-2">
-                                <FilterToggle label="Conflicts" icon={AlertTriangle} color="text-red-500" defaultChecked />
-                                <FilterToggle label="Requirements" icon={PlusCircle} color="text-indigo-500" defaultChecked />
-                                <FilterToggle label="Resolutions" icon={CheckCircle} color="text-emerald-500" defaultChecked />
-                                <FilterToggle label="Discussions" icon={MessageCircle} color="text-blue-500" defaultChecked />
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Projects</h3>
-                            <button className="w-full flex items-center justify-between p-3.5 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-sm border border-indigo-100 dark:border-indigo-900/30">
-                                <span>All Projects</span>
-                                <ChevronDown className="w-4 h-4" />
-                            </button>
-                        </div>
-
-                        <Button className="w-full bg-[#1e2532] hover:bg-slate-800 text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-slate-900/10 transition-all active:scale-95">
-                            <Download className="w-4.5 h-4.5" />
-                            Export Audit Log
-                        </Button>
-                    </div>
-                </aside>
-
-                {/* Main Timeline Section */}
-                <div className="flex-1 space-y-10 pb-10">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div className="space-y-1">
-                            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">System Activity</h1>
-                            <p className="text-sm font-bold text-slate-500">Real-time audit trail of all project modifications and AI resolutions.</p>
-                        </div>
-                        <div className="flex gap-3">
-                            <button className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-[#0f1115] border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 hover:bg-slate-50 transition-all shadow-sm">
-                                <Calendar className="w-4 h-4" />
-                                Oct 2023
-                            </button>
-                            <button className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-[#0f1115] border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 hover:bg-slate-50 transition-all shadow-sm">
-                                <Filter className="w-4 h-4" />
-                                Filter
-                            </button>
+        <div className="flex flex-col xl:flex-row gap-8 h-full">
+            {/* Sidebar Filters */}
+            <aside className="w-full xl:w-80 flex flex-col gap-8 shrink-0">
+                <div className="bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/10 dark:shadow-none space-y-8">
+                    <div className="space-y-4">
+                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Search Trail</h3>
+                        <div className="relative group">
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                            <input
+                                type="text"
+                                placeholder="Search activities..."
+                                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-sm font-medium focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+                            />
                         </div>
                     </div>
 
-                    {/* Timeline View */}
-                    <div className="relative">
-                        {/* Vertical Connector Line */}
-                        <div className="absolute left-7 top-4 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-800/50 rounded-full"></div>
+                    <div className="space-y-4">
+                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Event Types</h3>
+                        <div className="space-y-2">
+                            <FilterToggle label="Conflicts" icon={AlertTriangle} color="text-red-500" defaultChecked />
+                            <FilterToggle label="Requirements" icon={PlusCircle} color="text-indigo-500" defaultChecked />
+                            <FilterToggle label="Resolutions" icon={CheckCircle} color="text-emerald-500" defaultChecked />
+                            <FilterToggle label="Discussions" icon={MessageCircle} color="text-blue-500" defaultChecked />
+                        </div>
+                    </div>
 
-                        <div className="space-y-12 relative">
-                            {/* Group: Today */}
-                            <div className="relative">
-                                <div className="flex items-center gap-4 mb-10">
-                                    <div className="z-10 bg-indigo-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-lg shadow-indigo-600/20 ml-2">Today</div>
-                                </div>
+                    <div className="space-y-4">
+                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Projects</h3>
+                        <button className="w-full flex items-center justify-between p-3.5 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-sm border border-indigo-100 dark:border-indigo-900/30">
+                            <span>All Projects</span>
+                            <ChevronDown className="w-4 h-4" />
+                        </button>
+                    </div>
 
-                                <div className="space-y-10 pl-2">
-                                    {timelineActivities.filter(a => a.date === 'Today').map(item => (
-                                        <TimelineEntry key={item.id} item={item} />
-                                    ))}
-                                </div>
+                    <Button className="w-full bg-[#1e2532] hover:bg-slate-800 text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-slate-900/10 transition-all active:scale-95">
+                        <Download className="w-4.5 h-4.5" />
+                        Export Audit Log
+                    </Button>
+                </div>
+            </aside>
+
+            {/* Main Timeline Section */}
+            <div className="flex-1 space-y-10 pb-10">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="space-y-1">
+                        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">System Activity</h1>
+                        <p className="text-sm font-bold text-slate-500">Real-time audit trail of all project modifications and AI resolutions.</p>
+                    </div>
+                    <div className="flex gap-3">
+                        <button className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-[#0f1115] border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 hover:bg-slate-50 transition-all shadow-sm">
+                            <Calendar className="w-4 h-4" />
+                            Oct 2023
+                        </button>
+                        <button className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-[#0f1115] border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 hover:bg-slate-50 transition-all shadow-sm">
+                            <Filter className="w-4 h-4" />
+                            Filter
+                        </button>
+                    </div>
+                </div>
+
+                {/* Timeline View */}
+                <div className="relative">
+                    {/* Vertical Connector Line */}
+                    <div className="absolute left-7 top-4 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-800/50 rounded-full"></div>
+
+                    <div className="space-y-12 relative">
+                        {/* Group: Today */}
+                        <div className="relative">
+                            <div className="flex items-center gap-4 mb-10">
+                                <div className="z-10 bg-indigo-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-lg shadow-indigo-600/20 ml-2">Today</div>
                             </div>
 
-                            {/* Group: Yesterday */}
-                            <div className="relative">
-                                <div className="flex items-center gap-4 mb-10">
-                                    <div className="z-10 bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] ml-2">Yesterday</div>
-                                </div>
+                            <div className="space-y-10 pl-2">
+                                {timelineActivities.filter(a => a.date === 'Today').map(item => (
+                                    <TimelineEntry key={item.id} item={item} />
+                                ))}
+                            </div>
+                        </div>
 
-                                <div className="space-y-10 pl-2">
-                                    {timelineActivities.filter(a => a.date === 'Yesterday').map(item => (
-                                        <TimelineEntry key={item.id} item={item} />
-                                    ))}
-                                </div>
+                        {/* Group: Yesterday */}
+                        <div className="relative">
+                            <div className="flex items-center gap-4 mb-10">
+                                <div className="z-10 bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] ml-2">Yesterday</div>
                             </div>
 
-                            {/* Load More Button */}
-                            <div className="flex justify-center pt-8">
-                                <button className="px-8 py-3 rounded-2xl border-2 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-[11px] font-black uppercase tracking-widest hover:bg-indigo-50 dark:hover:bg-indigo-500/5 hover:border-indigo-500/30 transition-all active:scale-95">
-                                    View Older Activities
-                                </button>
+                            <div className="space-y-10 pl-2">
+                                {timelineActivities.filter(a => a.date === 'Yesterday').map(item => (
+                                    <TimelineEntry key={item.id} item={item} />
+                                ))}
                             </div>
+                        </div>
+
+                        {/* Load More Button */}
+                        <div className="flex justify-center pt-8">
+                            <button className="px-8 py-3 rounded-2xl border-2 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-[11px] font-black uppercase tracking-widest hover:bg-indigo-50 dark:hover:bg-indigo-500/5 hover:border-indigo-500/30 transition-all active:scale-95">
+                                View Older Activities
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
-        </MainLayout>
+        </div>
     );
 }
 

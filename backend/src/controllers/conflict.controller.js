@@ -123,3 +123,36 @@ export const getConflicts = async (req, res) => {
         });
     }
 };
+
+/**
+ * PATCH /api/v1/conflicts/:id/resolve
+ * Marks a conflict as resolved and emits a socket event.
+ */
+import { emitConflictResolved } from '../sockets/events/conflictEvents.js';
+
+export const resolveConflict = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const conflict = await ConflictModel.findByIdAndUpdate(
+            id,
+            { status: 'resolved' },
+            { new: true }
+        );
+
+        if (!conflict) {
+            return res.status(404).json({ success: false, message: 'Conflict not found' });
+        }
+
+        // Emit socket event for real-time UI update
+        emitConflictResolved(conflict.projectId, id);
+
+        return res.json({
+            success: true,
+            message: 'Conflict resolved successfully',
+            conflict,
+        });
+    } catch (err) {
+        console.error('resolveConflict error:', err);
+        return res.status(500).json({ success: false, message: err.message });
+    }
+};

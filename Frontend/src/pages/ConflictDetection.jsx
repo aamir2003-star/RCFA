@@ -1,5 +1,4 @@
 import React from "react";
-import { MainLayout } from "../components/layout/MainLayout";
 import {
     ChevronRight,
     AlertTriangle,
@@ -24,149 +23,147 @@ export default function ConflictDetection() {
     const { id, status, impact, reqA, reqB, aiAnalysis } = conflictDetails;
 
     return (
-        <MainLayout role="pm">
-            <div className="flex flex-col gap-8 pb-10">
-                {/* Breadcrumbs & Title Section */}
-                <div className="flex flex-col gap-4">
-                    <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest">
-                        <span className="hover:text-indigo-600 cursor-pointer transition-colors">Projects</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
-                        <span className="hover:text-indigo-600 cursor-pointer transition-colors">Project Phoenix</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
-                        <span className="hover:text-indigo-600 cursor-pointer transition-colors">Conflicts</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
-                        <span className="text-slate-900 dark:text-white font-black">{id}</span>
-                    </div>
-
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                        <div className="space-y-1.5">
-                            <div className="flex items-center gap-3">
-                                <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Conflict {id}</h1>
-                                <div className="flex gap-2">
-                                    <span className="px-2.5 py-1 rounded-lg bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-500/20 text-[10px] font-black uppercase tracking-wider">
-                                        {status} Conflict
-                                    </span>
-                                    <span className="px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-500/20 text-[10px] font-black uppercase tracking-wider">
-                                        {impact} Impact
-                                    </span>
-                                </div>
-                            </div>
-                            <p className="text-sm font-bold text-slate-500 flex items-center gap-2">
-                                Detected between
-                                <span className="text-indigo-600 dark:text-indigo-400">{reqA.id}: {reqA.title}</span>
-                                <span>&</span>
-                                <span className="text-indigo-600 dark:text-indigo-400">{reqB.id}: {reqB.title}</span>
-                            </p>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                            <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-[#0f1115] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs font-black uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-slate-900 transition-all shadow-sm">
-                                <MessageSquare className="w-4 h-4" />
-                                Start Discussion
-                            </button>
-                            <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-[#0f1115] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs font-black uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-slate-900 transition-all shadow-sm">
-                                <Edit className="w-4 h-4" />
-                                Edit
-                            </button>
-                            <Button className="bg-indigo-600 hover:bg-indigo-500 text-white font-black px-6 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-indigo-600/20 transition-all active:scale-95 text-xs uppercase tracking-widest">
-                                <CheckCircle className="w-4 h-4" />
-                                Resolve Conflict
-                            </Button>
-                        </div>
-                    </div>
+        <div className="flex flex-col gap-8 pb-10">
+            {/* Breadcrumbs & Title Section */}
+            <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                    <span className="hover:text-indigo-600 cursor-pointer transition-colors">Projects</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                    <span className="hover:text-indigo-600 cursor-pointer transition-colors">Project Phoenix</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                    <span className="hover:text-indigo-600 cursor-pointer transition-colors">Conflicts</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                    <span className="text-slate-900 dark:text-white font-black">{id}</span>
                 </div>
 
-                {/* Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                    {/* Left: Comparison View */}
-                    <div className="lg:col-span-8 flex flex-col gap-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <RequirementCard req={reqA} />
-                            <RequirementCard req={reqB} />
-                        </div>
-
-                        {/* AI Analysis Logic Box */}
-                        <div className="bg-indigo-50/50 dark:bg-indigo-500/5 border border-indigo-100 dark:border-indigo-500/20 rounded-3xl p-8 relative overflow-hidden group">
-                            <div className="flex items-start gap-5 relative z-10">
-                                <div className="mt-1 bg-indigo-600 text-white p-3 rounded-2xl shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-transform duration-500">
-                                    <BrainCircuit className="w-6 h-6" />
-                                </div>
-                                <div className="space-y-2">
-                                    <h3 className="text-indigo-900 dark:text-indigo-300 font-black text-sm uppercase tracking-widest">AI Logic Conflict Detection</h3>
-                                    <p className="text-slate-700 dark:text-slate-300 text-[15px] leading-relaxed font-medium">
-                                        {aiAnalysis}
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
-                        </div>
-                    </div>
-
-                    {/* Right: AI Resolution Sidebar */}
-                    <aside className="lg:col-span-4 flex flex-col gap-6">
-                        <div className="bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/10 dark:shadow-none flex flex-col gap-4">
-                            <div className="flex items-center justify-between px-1">
-                                <h3 className="text-slate-900 dark:text-white font-black text-xs uppercase tracking-widest flex items-center gap-2">
-                                    <Bolt className="w-4 h-4 text-indigo-500" />
-                                    Resolution Suggestions
-                                </h3>
-                                <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 px-2.5 py-1 bg-indigo-50 dark:bg-indigo-500/10 rounded-full tracking-tight">
-                                    {resolutionSuggestions.length} Proposals
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                    <div className="space-y-1.5">
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Conflict {id}</h1>
+                            <div className="flex gap-2">
+                                <span className="px-2.5 py-1 rounded-lg bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-500/20 text-[10px] font-black uppercase tracking-wider">
+                                    {status} Conflict
+                                </span>
+                                <span className="px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-500/20 text-[10px] font-black uppercase tracking-wider">
+                                    {impact} Impact
                                 </span>
                             </div>
-
-                            <div className="space-y-4">
-                                {resolutionSuggestions.map((suggestion) => (
-                                    <SuggestionCard key={suggestion.id} suggestion={suggestion} />
-                                ))}
-                            </div>
-
-                            {/* Helpful Tools */}
-                            <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
-                                <p className="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest text-center">Helpful Assistant Tools</p>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <button className="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 hover:border-indigo-500/30 hover:bg-white transition-all group gap-2">
-                                        <History className="w-5 h-5 text-slate-400 group-hover:text-indigo-500 transition-colors" />
-                                        <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-tighter">View History</span>
-                                    </button>
-                                    <button className="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 hover:border-indigo-500/30 hover:bg-white transition-all group gap-2">
-                                        <Users className="w-5 h-5 text-slate-400 group-hover:text-indigo-500 transition-colors" />
-                                        <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-tighter">Invite Team</span>
-                                    </button>
-                                </div>
-                            </div>
                         </div>
-                    </aside>
-                </div>
-
-                {/* Bottom Bar Controls */}
-                <div className="mt-4 pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-6">
-                    <div className="flex items-center gap-4">
-                        <div className="flex -space-x-2.5">
-                            {[1, 2, 3].map(i => (
-                                <div key={i} className="size-8 rounded-full border-2 border-white dark:border-[#0f1115] bg-slate-200 overflow-hidden">
-                                    <img src={`https://i.pravatar.cc/100?u=user${i}`} alt="Avatar" className="w-full h-full object-cover" />
-                                </div>
-                            ))}
-                            <div className="size-8 rounded-full border-2 border-white dark:border-[#0f1115] bg-indigo-50 dark:bg-slate-800 flex items-center justify-center text-[10px] font-black text-indigo-600 dark:text-indigo-400">
-                                +2
-                            </div>
-                        </div>
-                        <p className="text-xs text-slate-500 font-bold italic tracking-tight">Requirement owners have been notified via Slack sync.</p>
+                        <p className="text-sm font-bold text-slate-500 flex items-center gap-2">
+                            Detected between
+                            <span className="text-indigo-600 dark:text-indigo-400">{reqA.id}: {reqA.title}</span>
+                            <span>&</span>
+                            <span className="text-indigo-600 dark:text-indigo-400">{reqB.id}: {reqB.title}</span>
+                        </p>
                     </div>
 
-                    <div className="flex items-center gap-6">
-                        <button className="text-slate-400 hover:text-red-500 text-xs font-black uppercase tracking-widest transition-colors">
-                            Dismiss Conflict
+                    <div className="flex items-center gap-3">
+                        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-[#0f1115] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs font-black uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-slate-900 transition-all shadow-sm">
+                            <MessageSquare className="w-4 h-4" />
+                            Start Discussion
                         </button>
-                        <div className="h-4 w-px bg-slate-200 dark:bg-slate-800"></div>
-                        <Button className="bg-[#1e2532] hover:bg-slate-800 text-white font-black px-8 py-3 rounded-2xl shadow-xl shadow-slate-900/10 transition-all active:scale-95 text-xs uppercase tracking-widest">
-                            Finalize Resolution
+                        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-[#0f1115] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs font-black uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-slate-900 transition-all shadow-sm">
+                            <Edit className="w-4 h-4" />
+                            Edit
+                        </button>
+                        <Button className="bg-indigo-600 hover:bg-indigo-500 text-white font-black px-6 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-indigo-600/20 transition-all active:scale-95 text-xs uppercase tracking-widest">
+                            <CheckCircle className="w-4 h-4" />
+                            Resolve Conflict
                         </Button>
                     </div>
                 </div>
             </div>
-        </MainLayout>
+
+            {/* Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                {/* Left: Comparison View */}
+                <div className="lg:col-span-8 flex flex-col gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <RequirementCard req={reqA} />
+                        <RequirementCard req={reqB} />
+                    </div>
+
+                    {/* AI Analysis Logic Box */}
+                    <div className="bg-indigo-50/50 dark:bg-indigo-500/5 border border-indigo-100 dark:border-indigo-500/20 rounded-3xl p-8 relative overflow-hidden group">
+                        <div className="flex items-start gap-5 relative z-10">
+                            <div className="mt-1 bg-indigo-600 text-white p-3 rounded-2xl shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-transform duration-500">
+                                <BrainCircuit className="w-6 h-6" />
+                            </div>
+                            <div className="space-y-2">
+                                <h3 className="text-indigo-900 dark:text-indigo-300 font-black text-sm uppercase tracking-widest">AI Logic Conflict Detection</h3>
+                                <p className="text-slate-700 dark:text-slate-300 text-[15px] leading-relaxed font-medium">
+                                    {aiAnalysis}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
+                    </div>
+                </div>
+
+                {/* Right: AI Resolution Sidebar */}
+                <aside className="lg:col-span-4 flex flex-col gap-6">
+                    <div className="bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/10 dark:shadow-none flex flex-col gap-4">
+                        <div className="flex items-center justify-between px-1">
+                            <h3 className="text-slate-900 dark:text-white font-black text-xs uppercase tracking-widest flex items-center gap-2">
+                                <Bolt className="w-4 h-4 text-indigo-500" />
+                                Resolution Suggestions
+                            </h3>
+                            <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 px-2.5 py-1 bg-indigo-50 dark:bg-indigo-500/10 rounded-full tracking-tight">
+                                {resolutionSuggestions.length} Proposals
+                            </span>
+                        </div>
+
+                        <div className="space-y-4">
+                            {resolutionSuggestions.map((suggestion) => (
+                                <SuggestionCard key={suggestion.id} suggestion={suggestion} />
+                            ))}
+                        </div>
+
+                        {/* Helpful Tools */}
+                        <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
+                            <p className="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest text-center">Helpful Assistant Tools</p>
+                            <div className="grid grid-cols-2 gap-3">
+                                <button className="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 hover:border-indigo-500/30 hover:bg-white transition-all group gap-2">
+                                    <History className="w-5 h-5 text-slate-400 group-hover:text-indigo-500 transition-colors" />
+                                    <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-tighter">View History</span>
+                                </button>
+                                <button className="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 hover:border-indigo-500/30 hover:bg-white transition-all group gap-2">
+                                    <Users className="w-5 h-5 text-slate-400 group-hover:text-indigo-500 transition-colors" />
+                                    <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-tighter">Invite Team</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+
+            {/* Bottom Bar Controls */}
+            <div className="mt-4 pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                    <div className="flex -space-x-2.5">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="size-8 rounded-full border-2 border-white dark:border-[#0f1115] bg-slate-200 overflow-hidden">
+                                <img src={`https://i.pravatar.cc/100?u=user${i}`} alt="Avatar" className="w-full h-full object-cover" />
+                            </div>
+                        ))}
+                        <div className="size-8 rounded-full border-2 border-white dark:border-[#0f1115] bg-indigo-50 dark:bg-slate-800 flex items-center justify-center text-[10px] font-black text-indigo-600 dark:text-indigo-400">
+                            +2
+                        </div>
+                    </div>
+                    <p className="text-xs text-slate-500 font-bold italic tracking-tight">Requirement owners have been notified via Slack sync.</p>
+                </div>
+
+                <div className="flex items-center gap-6">
+                    <button className="text-slate-400 hover:text-red-500 text-xs font-black uppercase tracking-widest transition-colors">
+                        Dismiss Conflict
+                    </button>
+                    <div className="h-4 w-px bg-slate-200 dark:bg-slate-800"></div>
+                    <Button className="bg-[#1e2532] hover:bg-slate-800 text-white font-black px-8 py-3 rounded-2xl shadow-xl shadow-slate-900/10 transition-all active:scale-95 text-xs uppercase tracking-widest">
+                        Finalize Resolution
+                    </Button>
+                </div>
+            </div>
+        </div>
     );
 }
 

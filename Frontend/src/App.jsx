@@ -18,15 +18,21 @@ import CreateProject from "./pages/CreateProject";
 import WorkspacePage from "./pages/WorkspacePage";
 import RequirementEditor from "./pages/RequirementEditor";
 import ConflictDetection from "./pages/ConflictDetection";
+import ConflictListPage from "./pages/ConflictListPage";
 import ActivityTimeline from "./pages/ActivityTimeline";
 import ConflictResolution from "./pages/ConflictResolution";
 import TeamManagement from "./pages/TeamManagement";
+import PmSettings from "./pages/PmSettings";
 import BdeTeams from "./pages/BdeTeams";
 import BdeSettings from "./pages/BdeSettings";
 import DevModules from "./pages/DevModules";
 import DevConflicts from "./pages/DevConflicts";
 import DevDiscussions from "./pages/DevDiscussions";
 import DevSettings from "./pages/DevSettings";
+import Notifications from "./pages/Notifications";
+import NotFound from "./pages/NotFound";
+import BdeReports from "./pages/BdeReports";
+import DevVault from "./pages/DevVault";
 
 function App() {
   return (
@@ -48,25 +54,49 @@ function App() {
         <Route
           path="/dev/modules"
           element={
-            <DevModules />
+            <MainLayout role="dev">
+              <DevModules />
+            </MainLayout>
           }
         />
         <Route
           path="/dev/conflicts"
           element={
-            <DevConflicts />
+            <MainLayout role="dev">
+              <DevConflicts />
+            </MainLayout>
           }
         />
         <Route
           path="/dev/discussions"
           element={
-            <DevDiscussions />
+            <MainLayout role="dev">
+              <DevDiscussions />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/dev/vault"
+          element={
+            <MainLayout role="dev">
+              <DevVault />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/dev/editor"
+          element={
+            <MainLayout role="dev">
+              <RequirementEditor role="dev" />
+            </MainLayout>
           }
         />
         <Route
           path="/dev/settings"
           element={
-            <DevSettings />
+            <MainLayout role="dev">
+              <DevSettings />
+            </MainLayout>
           }
         />
         <Route
@@ -80,37 +110,73 @@ function App() {
         <Route
           path="/pm/workspace"
           element={
-            <WorkspacePage />
+            <MainLayout role="pm">
+              <WorkspacePage />
+            </MainLayout>
           }
         />
         <Route
           path="/pm/editor"
           element={
-            <RequirementEditor />
+            <MainLayout role="pm">
+              <RequirementEditor role="pm" />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/pm/conflicts"
+          element={
+            <MainLayout role="pm">
+              <ConflictListPage />
+            </MainLayout>
           }
         />
         <Route
           path="/pm/conflicts/:id"
           element={
-            <ConflictDetection />
+            <MainLayout role="pm">
+              <ConflictDetection />
+            </MainLayout>
           }
         />
         <Route
           path="/pm/timeline"
           element={
-            <ActivityTimeline />
+            <MainLayout role="pm">
+              <ActivityTimeline />
+            </MainLayout>
           }
         />
         <Route
           path="/pm/conflicts/:id/discussion"
           element={
-            <ConflictResolution />
+            <MainLayout role="pm">
+              <ConflictResolution />
+            </MainLayout>
           }
         />
         <Route
           path="/pm/team"
           element={
-            <TeamManagement />
+            <MainLayout role="pm">
+              <TeamManagement />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/pm/analytics"
+          element={
+            <MainLayout role="pm">
+              <AnalyticsDashboard />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/pm/settings"
+          element={
+            <MainLayout role="pm">
+              <PmSettings />
+            </MainLayout>
           }
         />
         <Route
@@ -148,15 +214,36 @@ function App() {
         <Route
           path="/bde/teams"
           element={
-            <BdeTeams />
+            <MainLayout role="bde">
+              <BdeTeams />
+            </MainLayout>
           }
         />
         <Route
           path="/bde/settings"
           element={
-            <BdeSettings />
+            <MainLayout role="bde">
+              <BdeSettings />
+            </MainLayout>
           }
         />
+        <Route
+          path="/bde/reports"
+          element={
+            <MainLayout role="bde">
+              <BdeReports />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <MainLayout role="pm">
+              <Notifications />
+            </MainLayout>
+          }
+        />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       {/* </AuthProvider> */}
     </Router>

@@ -1,11 +1,11 @@
 import React from "react";
 import { useTheme } from "../../contexts/ThemeContext";
-import { Bell, Search, Sun, Moon, HelpCircle, Settings } from "lucide-react";
+import { Bell, Search, Sun, Moon, HelpCircle, Settings, Menu } from "lucide-react";
 import { Avatar, AvatarFallback } from "../ui/Avatar";
 import ThemeToggle from "../ThemeToggle";
 
 
-export function TopHeader({ role }) {
+export function TopHeader({ role, onMenuClick }) {
   const { theme, setTheme } = useTheme();
 
   let searchPlaceholder = "Search...";
@@ -29,8 +29,15 @@ export function TopHeader({ role }) {
   }
 
   return (
-    <header className="h-16 bg-white/70 dark:bg-[#0f1115]/70 backdrop-blur-md flex items-center justify-between px-6 shrink-0 z-50 shadow-sm border-b border-slate-200/50 dark:border-slate-800/50 sticky top-0 transition-colors duration-300">
-      <div className="flex-1 flex items-center gap-4">
+    <header className="h-16 bg-white/70 dark:bg-[#0f1115]/70 backdrop-blur-md flex items-center justify-between px-4 md:px-6 shrink-0 z-50 shadow-sm border-b border-slate-200/50 dark:border-slate-800/50 sticky top-0 transition-colors duration-300">
+      <div className="flex-1 flex items-center gap-3 md:gap-4">
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden p-2 -ml-2 text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+          aria-label="Toggle Menu"
+        >
+          <Menu className="w-6 h-6" />
+        </button>
         {role === "bde" && (
           <div className="text-sm text-muted-foreground flex items-center gap-2">
             <span>Dashboard</span>

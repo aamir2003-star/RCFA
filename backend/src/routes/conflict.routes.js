@@ -31,4 +31,14 @@ router.get('/analyze/:projectId/status', getAnalysisStatus);
  */
 router.get('/:projectId', getConflicts);
 
+/**
+ * PATCH /api/v1/conflicts/:id/resolve
+ * Resolve a conflict.
+ */
+import authenticate from '../middleware/authenticate.js';
+import authorize from '../middleware/authorize.js';
+import { resolveConflict } from '../controllers/conflict.controller.js';
+
+router.patch('/:id/resolve', authenticate, authorize('PM'), resolveConflict);
+
 export default router;

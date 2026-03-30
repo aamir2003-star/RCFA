@@ -16,9 +16,10 @@ import {
   Box,
   History,
   Activity,
+  X,
 } from "lucide-react";
 
-export function Sidebar({ role }) {
+export function Sidebar({ role, isOpen, onClose }) {
   const location = useLocation();
   let title = "Resolver AI";
   let subtitle = "";
@@ -35,6 +36,7 @@ export function Sidebar({ role }) {
   const SidebarLink = ({ to, icon: Icon, label, badge, activePaths = [] }) => (
     <NavLink
       to={to}
+      onClick={onClose}
       className={({ isActive }) => {
         const isManuallyActive = activePaths.some(
           (p) =>
@@ -62,8 +64,17 @@ export function Sidebar({ role }) {
   );
 
   return (
-    <div className="w-64 bg-white/90 dark:bg-[#080b11]/90 backdrop-blur-xl flex flex-col h-full shrink-0 shadow-2xl shadow-indigo-500/5 dark:shadow-none border-r border-slate-200/50 dark:border-slate-800/50 z-20 transition-colors duration-300">
-      <div className="p-6 flex flex-col gap-1">
+    <div className={cn(
+      "fixed lg:static top-16 lg:top-0 bottom-0 left-0 w-64 bg-white/90 dark:bg-[#080b11]/90 backdrop-blur-xl flex flex-col h-[calc(100vh-64px)] lg:h-full shrink-0 shadow-2xl shadow-indigo-500/5 dark:shadow-none border-r border-slate-200/50 dark:border-slate-800/50 z-50 transition-all duration-300 transform",
+      isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+    )}>
+      <div className="p-6 flex flex-col gap-1 relative">
+        <button
+          onClick={onClose}
+          className="lg:hidden absolute top-6 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+        >
+          <X className="w-5 h-5" />
+        </button>
         <div className="flex items-center gap-3 font-extrabold text-lg tracking-tight text-slate-900 dark:text-white group cursor-pointer">
           <div className="w-8 h-8 bg-linear-to-tr from-indigo-600 to-blue-500 rounded-lg flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 group-active:scale-95 transition-all duration-300">
             <Layers className="text-white w-5 h-5" />
@@ -86,6 +97,8 @@ export function Sidebar({ role }) {
               label="Dashboard"
             />
             <SidebarLink to="/dev/modules" icon={Box} label="My Modules" />
+            <SidebarLink to="/dev/editor" icon={FileText} label="Specifications" />
+            <SidebarLink to="/dev/vault" icon={Layers} label="Technical Vault" />
             <SidebarLink
               to="/dev/conflicts"
               icon={AlertTriangle}
@@ -132,7 +145,9 @@ export function Sidebar({ role }) {
               icon={History}
               label="Timeline"
             />
+            <SidebarLink to="/pm/analytics" icon={BarChart} label="Analytics" />
             <SidebarLink to="/pm/team" icon={Users} label="Team" />
+            <SidebarLink to="/pm/settings" icon={Settings} label="Settings" />
           </>
         )}
 
@@ -144,6 +159,7 @@ export function Sidebar({ role }) {
               label="Dashboard"
             />
             <SidebarLink to="/bde/projects" icon={Folder} label="Projects" />
+            <SidebarLink to="/bde/reports" icon={FileText} label="Reporting" />
             <SidebarLink to="/bde/teams" icon={Users} label="Teams" />
             <SidebarLink
               to="/bde/analytics"
