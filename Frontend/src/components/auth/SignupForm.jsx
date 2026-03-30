@@ -30,7 +30,7 @@ export const SignupForm = ({ onSubmit, onToggleLogin }) => {
           Select your role
         </label>
         <div className="grid grid-cols-3 gap-3">
-          {["bde", "pm", "dev"].map((role, idx) => {
+          {["bde", "pm", "dev"].map((role) => {
             const icons = { bde: Briefcase, pm: User, dev: Code };
             const Icon = icons[role];
             const labels = { bde: "BDE", pm: "PM", dev: "DEV" };

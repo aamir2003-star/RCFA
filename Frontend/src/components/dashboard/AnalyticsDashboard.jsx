@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar, Download, FileText, Rocket, AlertTriangle, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 
 const IconMap = {
@@ -35,42 +35,42 @@ const StatCard = ({ title, value, change, isPositive, iconName, colorClass, prog
 };
 
 const ConflictTrendsChart = ({ data }) => (
-    <div className="bg-white dark:bg-[#111827] rounded-xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm col-span-1 lg:col-span-2 relative min-h-[300px] flex flex-col">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Conflict Trends</h3>
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center">
-             <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 mr-2"></span>
-             <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">Detected</span>
-          </div>
-          <div className="flex items-center">
-             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2"></span>
-             <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">Resolved</span>
-          </div>
+  <div className="bg-white dark:bg-[#111827] rounded-xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm col-span-1 lg:col-span-2 relative min-h-[300px] flex flex-col">
+    <div className="flex justify-between items-center mb-6">
+      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Conflict Trends</h3>
+      <div className="flex items-center space-x-4">
+        <div className="flex items-center">
+          <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 mr-2"></span>
+          <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">Detected</span>
         </div>
-      </div>
-      <div className="flex-1 relative w-full border-l border-b border-gray-100 dark:border-gray-800 pb-2 pl-2 flex items-end">
-        {/* Mock Chart Area - When integrating charting library (e.g., Recharts), place it here */}
-        <div className="absolute left-0 bottom-0 top-0 w-full flex flex-col justify-between text-xs text-gray-400 dark:text-gray-600 pb-8 pr-6 -ml-6">
-           <span className="text-right w-5">100</span>
-           <span className="text-right w-5">75</span>
-           <span className="text-right w-5">50</span>
-           <span className="text-right w-5">25</span>
-           <span className="text-right w-5">0</span>
-        </div>
-        <div className="absolute left-0 bottom-0 w-full flex justify-between text-xs text-gray-400 dark:text-gray-600 pl-8 pr-4 -mb-6">
-           {data?.labels?.map((label, i) => (
-               <span key={i}>{label}</span>
-           ))}
+        <div className="flex items-center">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2"></span>
+          <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">Resolved</span>
         </div>
       </div>
     </div>
+    <div className="flex-1 relative w-full border-l border-b border-gray-100 dark:border-gray-800 pb-2 pl-2 flex items-end">
+      {/* Mock Chart Area - When integrating charting library (e.g., Recharts), place it here */}
+      <div className="absolute left-0 bottom-0 top-0 w-full flex flex-col justify-between text-xs text-gray-400 dark:text-gray-600 pb-8 pr-6 -ml-6">
+        <span className="text-right w-5">100</span>
+        <span className="text-right w-5">75</span>
+        <span className="text-right w-5">50</span>
+        <span className="text-right w-5">25</span>
+        <span className="text-right w-5">0</span>
+      </div>
+      <div className="absolute left-0 bottom-0 w-full flex justify-between text-xs text-gray-400 dark:text-gray-600 pl-8 pr-4 -mb-6">
+        {data?.labels?.map((label, i) => (
+          <span key={i}>{label}</span>
+        ))}
+      </div>
+    </div>
+  </div>
 );
 
 const ConflictsByType = ({ data, alert }) => (
   <div className="bg-white dark:bg-[#111827] rounded-xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col">
     <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6">Conflicts by Type</h3>
-    
+
     <div className="space-y-5 flex-1">
       {data.map((item, index) => (
         <div key={index}>
@@ -101,60 +101,60 @@ const ConflictsByType = ({ data, alert }) => (
 
 const DevelopmentProgress = ({ data }) => (
   <div className="bg-white dark:bg-[#111827] rounded-xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm col-span-1 lg:col-span-1">
-     <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6">Development Progress</h3>
-     
-     <div className="space-y-6">
-        {data.map((item, index) => (
-          <div key={index} className="grid grid-cols-12 gap-4 items-center">
-             <div className="col-span-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{item.module}</div>
-             <div className="col-span-8 flex bg-gray-100 dark:bg-gray-800 rounded-sm h-6 overflow-hidden">
-                <div className="bg-emerald-500 h-full transition-all duration-500" style={{width: `${item.completed}%`}}></div>
-                <div className="bg-indigo-500 h-full transition-all duration-500" style={{width: `${item.inProgress}%`}}></div>
-             </div>
+    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6">Development Progress</h3>
+
+    <div className="space-y-6">
+      {data.map((item, index) => (
+        <div key={index} className="grid grid-cols-12 gap-4 items-center">
+          <div className="col-span-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{item.module}</div>
+          <div className="col-span-8 flex bg-gray-100 dark:bg-gray-800 rounded-sm h-6 overflow-hidden">
+            <div className="bg-emerald-500 h-full transition-all duration-500" style={{ width: `${item.completed}%` }}></div>
+            <div className="bg-indigo-500 h-full transition-all duration-500" style={{ width: `${item.inProgress}%` }}></div>
           </div>
-        ))}
-     </div>
-     
-     <div className="mt-8 flex justify-between items-center text-xs">
-        <div className="flex space-x-4">
-           <div className="flex items-center">
-              <span className="w-2 h-2 bg-emerald-500 rounded-sm mr-2"></span>
-              <span className="font-semibold text-gray-700 dark:text-gray-300">Completed</span>
-           </div>
-           <div className="flex items-center">
-              <span className="w-2 h-2 bg-indigo-500 rounded-sm mr-2"></span>
-              <span className="font-semibold text-gray-700 dark:text-gray-300">In Progress</span>
-           </div>
         </div>
-        <button className="font-semibold text-gray-900 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-           View Roadmap
-        </button>
-     </div>
+      ))}
+    </div>
+
+    <div className="mt-8 flex justify-between items-center text-xs">
+      <div className="flex space-x-4">
+        <div className="flex items-center">
+          <span className="w-2 h-2 bg-emerald-500 rounded-sm mr-2"></span>
+          <span className="font-semibold text-gray-700 dark:text-gray-300">Completed</span>
+        </div>
+        <div className="flex items-center">
+          <span className="w-2 h-2 bg-indigo-500 rounded-sm mr-2"></span>
+          <span className="font-semibold text-gray-700 dark:text-gray-300">In Progress</span>
+        </div>
+      </div>
+      <button className="font-semibold text-gray-900 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+        View Roadmap
+      </button>
+    </div>
   </div>
 );
 
 const RecentConflictResolutions = ({ data }) => (
-   <div className="bg-white dark:bg-[#111827] rounded-xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm col-span-1 lg:col-span-1">
-      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6">Recent Conflict Resolutions</h3>
-      
-      <div className="space-y-6">
-         {data.map((item, index) => {
-            const Icon = IconMap[item.iconName] || CheckCircle2;
-            return (
-              <div key={index} className="flex items-start">
-                  <div className={`${item.iconBgClass} p-2 rounded-full mr-4 shrink-0`}>
-                    <Icon className={`w-5 h-5 ${item.iconColorClass}`} />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">{item.title}</h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{item.description}</p>
-                  </div>
-                  <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap ml-4">{item.time}</span>
-              </div>
-            );
-         })}
-      </div>
-   </div>
+  <div className="bg-white dark:bg-[#111827] rounded-xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm col-span-1 lg:col-span-1">
+    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6">Recent Conflict Resolutions</h3>
+
+    <div className="space-y-6">
+      {data.map((item, index) => {
+        const Icon = IconMap[item.iconName] || CheckCircle2;
+        return (
+          <div key={index} className="flex items-start">
+            <div className={`${item.iconBgClass} p-2 rounded-full mr-4 shrink-0`}>
+              <Icon className={`w-5 h-5 ${item.iconColorClass}`} />
+            </div>
+            <div className="flex-1">
+              <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">{item.title}</h4>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{item.description}</p>
+            </div>
+            <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap ml-4">{item.time}</span>
+          </div>
+        );
+      })}
+    </div>
+  </div>
 );
 
 // --- Mock Initial Data for UI ---
@@ -192,8 +192,8 @@ const initialDashboardData = {
 
 const AnalyticsDashboard = () => {
   // Use state to make it easy to replace with backend data fetching
-  const [dashboardData, setDashboardData] = useState(initialDashboardData);
-  const [isLoading, setIsLoading] = useState(false);
+  const [dashboardData, _] = useState(initialDashboardData);
+  const [isLoading, __] = useState(false);
 
   // Example of where backend fetch would go
   useEffect(() => {
@@ -209,42 +209,42 @@ const AnalyticsDashboard = () => {
 
   return (
     <div className={`w-full max-w-7xl mx-auto pb-8 ${isLoading ? 'opacity-50' : 'opacity-100'} transition-opacity duration-200`}>
-       {/* Header Section */}
-       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <div>
-             <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">Project Health Overview</h1>
-             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Real-time performance metrics and conflict analysis for <span className="font-bold text-gray-700 dark:text-gray-300">{dashboardData.projectName}</span></p>
-          </div>
-          <div className="flex items-center space-x-3">
-             <button className="flex items-center px-4 py-2 bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm">
-                <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-                Last 30 Days
-             </button>
-             <button className="flex items-center px-4 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg text-sm font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors shadow-sm">
-                <Download className="w-4 h-4 mr-2" />
-                Export Report
-             </button>
-          </div>
-       </div>
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">Project Health Overview</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Real-time performance metrics and conflict analysis for <span className="font-bold text-gray-700 dark:text-gray-300">{dashboardData.projectName}</span></p>
+        </div>
+        <div className="flex items-center space-x-3">
+          <button className="flex items-center px-4 py-2 bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm">
+            <Calendar className="w-4 h-4 mr-2 text-gray-500" />
+            Last 30 Days
+          </button>
+          <button className="flex items-center px-4 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg text-sm font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors shadow-sm">
+            <Download className="w-4 h-4 mr-2" />
+            Export Report
+          </button>
+        </div>
+      </div>
 
-       {/* Top Stats */}
-       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          {dashboardData.stats.map((stat, i) => (
-             <StatCard key={i} {...stat} />
-          ))}
-       </div>
+      {/* Top Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        {dashboardData.stats.map((stat, i) => (
+          <StatCard key={i} {...stat} />
+        ))}
+      </div>
 
-       {/* Middle Charts */}
-       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <ConflictTrendsChart data={dashboardData.trends} />
-          <ConflictsByType data={dashboardData.conflictsByType} alert={dashboardData.criticalAlert} />
-       </div>
+      {/* Middle Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <ConflictTrendsChart data={dashboardData.trends} />
+        <ConflictsByType data={dashboardData.conflictsByType} alert={dashboardData.criticalAlert} />
+      </div>
 
-       {/* Bottom Section */}
-       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <DevelopmentProgress data={dashboardData.developmentProgress} />
-          <RecentConflictResolutions data={dashboardData.recentResolutions} />
-       </div>
+      {/* Bottom Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <DevelopmentProgress data={dashboardData.developmentProgress} />
+        <RecentConflictResolutions data={dashboardData.recentResolutions} />
+      </div>
     </div>
   )
 }

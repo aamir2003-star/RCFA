@@ -13,7 +13,6 @@ import { pmStats, pmProjects, quickActions } from "../../lib/features_utils.js";
 import { useNavigate } from "react-router-dom";
 
 export default function PmDashboard() {
-  const navigate = useNavigate();
   return (
     <div className="flex flex-col gap-8 w-full max-w-full pb-10">
       {/* Header */}
@@ -49,9 +48,8 @@ export default function PmDashboard() {
         {pmStats.map((stat, i) => (
           <div
             key={i}
-            className={`bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md rounded-2xl p-5 shadow-lg shadow-slate-200/20 dark:shadow-none border border-slate-200 dark:border-slate-800 relative overflow-hidden hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-500/30 transition-all duration-300 ${
-              stat.borderLeft || ""
-            }`}
+            className={`bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md rounded-2xl p-5 shadow-lg shadow-slate-200/20 dark:shadow-none border border-slate-200 dark:border-slate-800 relative overflow-hidden hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-500/30 transition-all duration-300 ${stat.borderLeft || ""
+              }`}
           >
             <div className="flex items-center justify-between mb-4">
               <div
@@ -60,9 +58,8 @@ export default function PmDashboard() {
                 <stat.icon className="w-4.5 h-4.5" />
               </div>
               <div
-                className={`text-xs font-bold flex items-center ${
-                  stat.trendUp ? "text-emerald-500" : "text-red-500"
-                }`}
+                className={`text-xs font-bold flex items-center ${stat.trendUp ? "text-emerald-500" : "text-red-500"
+                  }`}
               >
                 {stat.trendUp ? (
                   <TrendingUp className="w-3.5 h-3.5 mr-1" />
@@ -184,38 +181,33 @@ export default function PmDashboard() {
                 className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-indigo-500/5 hover:-translate-y-0.5 group ${action.bg}`}
               >
                 <div
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
-                    action.iconBg
-                  } ${
-                    action.isDark
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${action.iconBg
+                    } ${action.isDark
                       ? "text-white"
                       : "text-slate-600 dark:text-slate-300"
-                  }`}
+                    }`}
                 >
                   <action.icon className="w-5 h-5" />
                 </div>
                 <div className="text-left flex-1 min-w-0">
                   <div
-                    className={`font-bold text-sm ${
-                      action.isDark
+                    className={`font-bold text-sm ${action.isDark
                         ? "text-white"
                         : "text-[#1e2532] dark:text-white"
-                    } truncate`}
+                      } truncate`}
                   >
                     {action.title}
                   </div>
                   <div
-                    className={`text-xs mt-0.5 truncate font-semibold ${
-                      action.isDark ? "text-slate-400" : "text-slate-500"
-                    }`}
+                    className={`text-xs mt-0.5 truncate font-semibold ${action.isDark ? "text-slate-400" : "text-slate-500"
+                      }`}
                   >
                     {action.desc}
                   </div>
                 </div>
                 <ChevronRight
-                  className={`w-4 h-4 shrink-0 transition-transform group-hover:translate-x-1 ${
-                    action.isDark ? "text-slate-400" : "text-slate-300"
-                  }`}
+                  className={`w-4 h-4 shrink-0 transition-transform group-hover:translate-x-1 ${action.isDark ? "text-slate-400" : "text-slate-300"
+                    }`}
                 />
               </button>
             ))}

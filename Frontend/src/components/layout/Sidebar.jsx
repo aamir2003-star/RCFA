@@ -14,6 +14,8 @@ import {
   AlertTriangle,
   MessageSquare,
   Box,
+  History,
+  Activity,
 } from "lucide-react";
 
 export function Sidebar({ role }) {
@@ -109,9 +111,13 @@ export function Sidebar({ role }) {
               icon={LayoutDashboard}
               label="Dashboard"
             />
-            <SidebarLink to="/pm/projects" icon={Folder} label="Projects" />
             <SidebarLink
-              to="/pm/requirements"
+              to="/pm/workspace"
+              icon={Box}
+              label="Workspace"
+            />
+            <SidebarLink
+              to="/pm/editor"
               icon={FileText}
               label="Requirements"
             />
@@ -120,6 +126,11 @@ export function Sidebar({ role }) {
               icon={AlertTriangle}
               label="Conflicts"
               badge={12}
+            />
+            <SidebarLink
+              to="/pm/timeline"
+              icon={History}
+              label="Timeline"
             />
             <SidebarLink to="/pm/team" icon={Users} label="Team" />
           </>
