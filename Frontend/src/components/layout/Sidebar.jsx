@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/static-components */
 import React from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "../../lib/utils.js";
 import {
   Layers,
@@ -25,7 +25,8 @@ import useProjectStore from "../../stores/useProjectStore";
 export function Sidebar({ role, isOpen, onClose }) {
   const location = useLocation();
   const { user } = useAuthStore();
-  const { currentProject } = useProjectStore();
+  const { currentProject, clearCurrentProject } = useProjectStore();
+  const navigate = useNavigate();
 
   let title = currentProject?.name || "Spectra AI";
   let subtitle = currentProject ? "ACTIVE PROJECT" : "";
@@ -35,6 +36,13 @@ export function Sidebar({ role, isOpen, onClose }) {
   } else if (role === "pm") {
     subtitle = subtitle || "PREMIUM SAAS";
   }
+
+  const handleHeaderClick = () => {
+    if (currentProject) {
+      clearCurrentProject();
+      navigate(`/${role}/dashboard`);
+    }
+  };
 
   // NavLink renderer component block
   const SidebarLink = ({ to, icon: Icon, label, badge, activePaths = [] }) => (
@@ -79,11 +87,17 @@ export function Sidebar({ role, isOpen, onClose }) {
         >
           <X className="w-5 h-5" />
         </button>
-        <div className="flex items-center gap-3 font-extrabold text-lg tracking-tight text-slate-900 dark:text-white group cursor-pointer">
+        <div
+          onClick={handleHeaderClick}
+          className={cn(
+            "flex items-center gap-3 font-extrabold text-lg tracking-tight text-slate-900 dark:text-white group",
+            currentProject ? "cursor-pointer hover:opacity-80 transition-opacity" : "cursor-default"
+          )}
+        >
           <div className="w-8 h-8 bg-linear-to-tr from-indigo-600 to-blue-500 rounded-lg flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 group-active:scale-95 transition-all duration-300">
             <Layers className="text-white w-5 h-5" />
           </div>
-          {title}
+          <span className="truncate" title={title}>{title}</span>
         </div>
         {subtitle && (
           <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-11">
@@ -163,7 +177,7 @@ export function Sidebar({ role, isOpen, onClose }) {
               label="Dashboard"
             />
             <SidebarLink to="/bde/projects" icon={Folder} label="Projects" />
-            <SidebarLink to="/bde/reports" icon={FileText} label="Reporting" />
+            {/* <SidebarLink to="/bde/reports" icon={FileText} label="Reporting" /> */}
             <SidebarLink to="/bde/teams" icon={Users} label="Teams" />
             <SidebarLink
               to="/bde/analytics"
