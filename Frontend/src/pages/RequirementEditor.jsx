@@ -21,7 +21,8 @@ import {
     Check,
     Search,
     Filter,
-    Clock
+    Clock,
+    ChevronLeft
 } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import useProjectStore from "../stores/useProjectStore";
@@ -58,8 +59,11 @@ export default function RequirementEditor({ role = "bde" }) {
         addRequirement,
         updateRequirement,
         deleteRequirement,
+        pagination,
         loading
     } = useProjectStore();
+
+    const [currentPage, setCurrentPage] = useState(1);
 
     const [selectedReq, setSelectedReq] = useState(null);
     const [isAdding, setIsAdding] = useState(false);
@@ -74,9 +78,9 @@ export default function RequirementEditor({ role = "bde" }) {
 
     useEffect(() => {
         if (projectId) {
-            fetchRequirements(projectId);
+            fetchRequirements(projectId, currentPage);
         }
-    }, [projectId, fetchRequirements]);
+    }, [projectId, fetchRequirements, currentPage]);
 
     const filteredRequirements = requirements.filter(req =>
         req.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -276,6 +280,29 @@ export default function RequirementEditor({ role = "bde" }) {
                                     <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">No results found</p>
                                 </div>
                             )}
+                        </div>
+
+                        {/* Pagination Footer */}
+                        <div className="p-4 border-t border-slate-100 dark:border-slate-800/50 bg-slate-50/30 dark:bg-slate-900/10 flex items-center justify-between">
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                disabled={currentPage === 1}
+                                className="p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
+                            >
+                                <ChevronLeft className="w-4 h-4" />
+                            </button>
+
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                Page {pagination.page} of {pagination.pages}
+                            </div>
+
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.min(pagination.pages, prev + 1))}
+                                disabled={!pagination.hasNext}
+                                className="p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
+                            >
+                                <ChevronRight className="w-4 h-4" />
+                            </button>
                         </div>
                     </div>
                 </div>

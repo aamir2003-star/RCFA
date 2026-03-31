@@ -26,6 +26,6 @@ router.post("/upload-csv", authorize("BDE", "PM"), upload.single("file"), requir
 router.get("/", requirementController.getRequirements);
 router.get("/:id", requirementController.getRequirementById);
 router.patch("/:id", authorize("BDE", "PM", "DEV"), requirementController.updateRequirement);
-router.delete("/:id", authorize("PM"), requirementController.deleteRequirement);
+router.delete("/:id", authorize("BDE", "PM"), requirementController.deleteRequirement);
 
 export default router;

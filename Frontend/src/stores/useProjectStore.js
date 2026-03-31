@@ -10,13 +10,24 @@ const useProjectStore = create((set, get) => ({
     loading: false,
     error: null,
 
-    fetchRequirements: async (projectId) => {
+    pagination: {
+        page: 1,
+        pages: 1,
+        total: 0,
+        hasNext: false
+    },
+
+    fetchRequirements: async (projectId, page = 1, limit = 10) => {
         set({ loading: true });
         try {
-            const response = await api.get(`/requirements?projectId=${projectId}`);
-            // Format for pagination if backend returns it
-            const requirements = response.data.requirements || response.data;
-            set({ requirements: Array.isArray(requirements) ? requirements : [], loading: false });
+            const response = await api.get(`/requirements?projectId=${projectId}&page=${page}&limit=${limit}`);
+            // The backend returns { requirements: [], pagination: {} }
+            const { requirements, pagination } = response.data;
+            set({
+                requirements: Array.isArray(requirements) ? requirements : (response.data.requirements || []),
+                pagination: pagination || get().pagination,
+                loading: false
+            });
         } catch (error) {
             set({ error: error.message, loading: false });
         }
@@ -28,7 +39,7 @@ const useProjectStore = create((set, get) => ({
             const response = await api.post("/requirements", requirementData);
             const newReq = response.data;
             set((state) => ({
-                requirements: [...state.requirements, newReq],
+                requirements: [newReq, ...state.requirements],
                 loading: false
             }));
             return { success: true, requirement: newReq };
