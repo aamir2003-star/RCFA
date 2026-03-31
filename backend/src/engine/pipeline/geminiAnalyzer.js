@@ -1,198 +1,100 @@
 // src/engine/pipeline/geminiAnalyzer.js
-// Step 5 — Analyze unflagged pairs via Gemini AI with batching, retry, and queue
+// Step 5 — Bulk-Analyze requirements to identify conflicts in a single pass
 
 import { getGeminiModel } from '../../config/gemini.js';
 
-const BATCH_SIZE = 20;       // Max pairs per API call
-const MAX_RETRIES = 3;       // Retry attempts per batch
-const MAX_CONCURRENT = 10;   // Max concurrent Gemini requests
-
 /**
- * Sleep for ms milliseconds.
+ * Bulk-Analyze all requirements in one or two prompts to identify conflicts.
+ * This is an O(1) or O(N/K) API strategy that avoids the O(N^2) request explosion.
+ * 
+ * @param {Array} requirements - Flat list of all requirements
+ * @returns {Promise<Array>} List of detected conflict objects
  */
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-/**
- * Build the Gemini prompt for a single pair.
- * @param {Object} reqA
- * @param {Object} reqB
- * @returns {string}
- */
-const buildPrompt = (reqA, reqB) => `
-You are a software requirements conflict analyzer.
-Analyze these two requirements for logical, semantic, or technical conflicts.
-
-Requirement A: ${reqA.description} (Priority: ${reqA.priority}, Stakeholder: ${reqA.stakeholder})
-Requirement B: ${reqB.description} (Priority: ${reqB.priority}, Stakeholder: ${reqB.stakeholder})
-
-Respond ONLY in JSON format:
-{
-  "conflicted": true | false,
-  "conflictType": "string (e.g. Security vs Performance)",
-  "confidence": 0.0 to 1.0,
-  "explanation": "one sentence summary",
-  "feasibility": {
-    "timelineImpact": "+X%",
-    "costImpact": "+Y%",
-    "riskLevel": "Low|Medium|High|Critical"
-  },
-  "resolutions": [
-    { "title": "Option 1", "description": "short desc", "strategyType": "Compromise|Strict|Alternative|Hybrid" },
-    { "title": "Option 2", "description": "short desc", "strategyType": "Compromise|Strict|Alternative|Hybrid" },
-    { "title": "Option 3", "description": "short desc", "strategyType": "Compromise|Strict|Alternative|Hybrid" }
-  ]
-}
-`.trim();
-
-/**
- * Parse Gemini's text response into a structured object.
- * Handles malformed JSON gracefully.
- * @param {string} text
- * @returns {Object|null}
- */
-const parseGeminiResponse = (text) => {
-    try {
-        const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) ||
-            text.match(/(\{[\s\S]*\})/);
-
-        const raw = jsonMatch ? jsonMatch[1] : text;
-        const parsed = JSON.parse(raw.trim());
-
-        if (!parsed.conflicted) return { conflicted: false };
-
-        return {
-            conflicted: true,
-            conflictType: parsed.conflictType || 'Unknown',
-            confidence: typeof parsed.confidence === 'number'
-                ? Math.min(1, Math.max(0, parsed.confidence))
-                : 0.5,
-            explanation: parsed.explanation || '',
-            feasibility: parsed.feasibility || null,
-            resolutions: parsed.resolutions || []
-        };
-    } catch {
-        console.warn('⚠️  Failed to parse Gemini response:', text.substring(0, 200));
-        return null;
-    }
-};
-
-/**
- * Call Gemini (via OpenAI-compatible endpoint) for a single pair with exponential backoff retry.
- * @param {Object} client - OpenAI client instance
- * @param {Object} reqA
- * @param {Object} reqB
- * @returns {Promise<Object>}
- */
-const analyzeOnePair = async (client, reqA, reqB) => {
-    const prompt = buildPrompt(reqA, reqB);
-    let lastError = null;
-
-    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-        try {
-            const response = await client.chat.completions.create({
-                model: 'gemini-flash-latest',
-                messages: [
-                    { role: 'system', content: 'You are a software requirements conflict analyzer.' },
-                    { role: 'user', content: prompt }
-                ],
-                response_format: { type: 'json_object' }
-            });
-
-            const text = response.choices[0].message.content;
-
-            // Log token usage for cost tracking
-            const usage = response.usage;
-            if (usage) {
-                console.debug(
-                    `🔢 Gemini tokens — prompt: ${usage.prompt_tokens}, response: ${usage.completion_tokens}`
-                );
-            }
-
-            const parsed = parseGeminiResponse(text);
-            if (parsed) return parsed;
-
-            // Malformed response — treat as no conflict
-            return { conflicted: false, conflictType: 'Unknown', confidence: 0, explanation: 'Parse error' };
-
-        } catch (err) {
-            lastError = err;
-            const backoff = Math.pow(2, attempt - 1) * 1000; // 1s, 2s, 4s
-            console.warn(`⚠️  Gemini attempt ${attempt} failed: ${err.message}. Retrying in ${backoff}ms...`);
-            await sleep(backoff);
-        }
-    }
-
-    console.error(`❌ Gemini failed after ${MAX_RETRIES} attempts:`, lastError?.message);
-    return { conflicted: false, conflictType: 'Unknown', confidence: 0, explanation: 'Gemini API error' };
-};
-
-/**
- * Process an array of pairs concurrently with a max concurrency limit.
- * @param {Array} pairs
- * @param {Function} fn - async function to call for each pair
- * @param {number} concurrency
- * @returns {Promise<Array>}
- */
-const withConcurrencyLimit = async (pairs, fn, concurrency) => {
-    const results = [];
-    let index = 0;
-
-    const worker = async () => {
-        while (index < pairs.length) {
-            const current = index++;
-            results[current] = await fn(pairs[current]);
-        }
-    };
-
-    const workers = Array.from({ length: Math.min(concurrency, pairs.length) }, worker);
-    await Promise.all(workers);
-    return results;
-};
-
-/**
- * Analyze all unflagged pairs using Gemini AI.
- * Groups into batches of BATCH_SIZE, runs with MAX_CONCURRENT limit.
- * Returns only conflicted pairs.
- *
- * @param {Array<[req, req]>} unflaggedPairs
- * @returns {Promise<Array>} AI-detected conflicts with source: 'ai'
- */
-export const analyzeWithGemini = async (unflaggedPairs) => {
+export const analyzeWithGemini = async (requirements) => {
     const client = getGeminiModel();
 
-    if (!client) {
-        console.warn('⚠️  Gemini client unavailable — skipping AI analysis');
+    if (!client || requirements.length < 2) {
         return [];
     }
 
-    if (unflaggedPairs.length === 0) {
-        console.log('✅ Step 5 — No pairs to send to Gemini');
+    console.log(`🤖 Step 5 — Bulk-scanning ${requirements.length} requirements for conflicts with Gemini AI...`);
+
+    // Prepare the list for the prompt
+    const requirementsText = requirements.map((r) =>
+        `[ID: ${r._id}] ${r.title}: ${r.description}`
+    ).join('\n');
+
+    const prompt = `
+You are an expert software requirement analyst. 
+Given the following list of requirements, identify all pairs that conflict, contradict, or have significant technical dependencies with each other.
+
+List of Requirements:
+${requirementsText}
+
+Analyze all possible combinations for logical, semantic, or technical conflicts.
+Focus on identifying:
+1. Contradictions (e.g., "manual" vs "autonomous", "online only" vs "offline only").
+2. Resource conflicts (e.g., "maximize performance" while "minimizing hardware costs").
+3. Security vs Usability or Compliance conflicts.
+
+Respond ONLY as a JSON array of objects. Do not include markdown formatting or extra text.
+JSON Structure:
+[
+  {
+    "reqA_id": "string id from the list",
+    "reqB_id": "string id from the list",
+    "conflictType": "string (Contradiction/Resource/Security/etc)",
+    "confidence": 0.0 to 1.0,
+    "explanation": "concise summary of why they conflict",
+    "feasibility": { "timelineImpact": "+X%", "costImpact": "+Y%", "riskLevel": "Low|Medium|High|Critical" },
+    "resolutions": [ { "title": "Option name", "description": "desc", "strategyType": "Avoidance|Mitigation|Acceptance" } ]
+  }
+]
+`.trim();
+
+    try {
+        const response = await client.chat.completions.create({
+            model: 'gemini-1.5-flash',
+            messages: [
+                { role: 'system', content: 'You are a requirements conflict analyzer. Respond only with JSON.' },
+                { role: 'user', content: prompt }
+            ],
+            response_format: { type: 'json_object' }
+        });
+
+        const text = response.choices[0].message.content;
+
+        // Clean the response: Gemini sometimes wraps in markdown or objects
+        const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) || text.match(/(\{[\s\S]*\})/) || text.match(/(\[[\s\S]*\])/);
+        const raw = jsonMatch ? jsonMatch[1] : text;
+        const parsedResults = JSON.parse(raw.trim());
+
+        // Normalize if wrapped in an object like { "conflicts": [...] }
+        const finalResults = Array.isArray(parsedResults) ? parsedResults : (parsedResults.conflicts || parsedResults.results || []);
+
+        const aiConflicts = finalResults.map((item) => {
+            const reqA = requirements.find(r => r._id === item.reqA_id);
+            const reqB = requirements.find(r => r._id === item.reqB_id);
+
+            if (!reqA || !reqB) return null;
+
+            return {
+                reqA,
+                reqB,
+                conflictType: item.conflictType || 'AI Detected',
+                ruleConfidence: typeof item.confidence === 'number' ? item.confidence : 0.8,
+                source: 'ai',
+                explanation: item.explanation || 'No explanation provided.',
+                feasibility: item.feasibility || { timelineImpact: '+10%', costImpact: '+5%', riskLevel: 'Medium' },
+                resolutions: item.resolutions || []
+            };
+        }).filter(Boolean);
+
+        console.log(`✅ Step 5 — Gemini detected ${aiConflicts.length} conflicts via bulk scan`);
+        return aiConflicts;
+
+    } catch (err) {
+        console.error(`❌ Gemini bulk scan failed: ${err.message}`);
         return [];
     }
-
-    console.log(`🤖 Step 5 — Sending ${unflaggedPairs.length} pairs to Gemini (batch size: ${BATCH_SIZE})`);
-
-    const aiResults = await withConcurrencyLimit(
-        unflaggedPairs,
-        async ([reqA, reqB]) => {
-            const result = await analyzeOnePair(client, reqA, reqB);
-            return { reqA, reqB, ...result };
-        },
-        MAX_CONCURRENT
-    );
-
-    // Filter to only conflicted pairs
-    const aiConflicts = aiResults.filter((r) => r.conflicted).map((r) => ({
-        reqA: r.reqA,
-        reqB: r.reqB,
-        conflictType: r.conflictType,
-        ruleConfidence: r.confidence,
-        source: 'ai',
-        explanation: r.explanation,
-        feasibility: r.feasibility,
-        resolutions: r.resolutions
-    }));
-
-    console.log(`✅ Step 5 — Gemini detected ${aiConflicts.length} conflicts from ${unflaggedPairs.length} pairs`);
-    return aiConflicts;
 };

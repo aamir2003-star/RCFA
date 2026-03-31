@@ -1,6 +1,7 @@
 // src/engine/rules/index.js
 // Rule Registry — dynamically exports all rules as an ordered array
 
+import { dictionaryRule } from './dictionaryRule.js';
 import { securityVsPerformance } from './securityVsPerformance.js';
 import { costVsScalability } from './costVsScalability.js';
 import { encryptionVsLatency } from './encryptionVsLatency.js';
@@ -12,6 +13,7 @@ import { eeaVsGlobalReplication } from './eeaVsGlobalReplication.js';
  * Rules are checked in order — first match wins.
  */
 export const rules = [
+    dictionaryRule,         // High-speed dictionary matching (instantly catches common conflicts)
     securityVsPerformance,
     costVsScalability,
     encryptionVsLatency,

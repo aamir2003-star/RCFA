@@ -62,12 +62,14 @@ export const runConflictDetection = async (projectId, jobId, onProgress = null) 
     const { ruleFlagged, unflagged } = runRules(pairs);
 
     // ─── Step 5: Gemini AI Analysis ─────────────────────────────────────────────
-    progress(projectId, jobId, onProgress, 45, `Analyzing ${unflagged.length} pairs with Gemini AI...`);
-    const aiDetected = await analyzeWithGemini(unflagged);
+    progress(projectId, jobId, onProgress, 45, `Bulk-scanning ${classified.length} requirements with Gemini AI...`);
+    // Passing the full list to Gemini for a single-pass scan
+    const aiDetected = await analyzeWithGemini(classified);
 
     // ─── Combine all detected conflicts ────────────────────────────────────────
+    // We combine rule-flagged (from specific pairs) with AI-detected (from bulk scan)
     const allConflicts = [...ruleFlagged, ...aiDetected];
-    progress(projectId, jobId, onProgress, 65, `Total conflicts detected: ${allConflicts.length}. Scoring severity...`);
+    progress(projectId, jobId, onProgress, 65, `${allConflicts.length} total potential conflicts found. Scoring severity...`);
 
     // ─── Step 6: Score Severity ─────────────────────────────────────────────────
     const scoredConflicts = allConflicts.map((conflict) => {

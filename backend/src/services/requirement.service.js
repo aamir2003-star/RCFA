@@ -12,6 +12,13 @@ export const createRequirement = async (data) => {
         performedBy: data.createdBy
     });
 
+    // Trigger Conflict Detection in background
+    if (requirement.projectId) {
+        runConflictDetection(requirement.projectId, `req-create-${Date.now()}`).catch(err => {
+            console.error(`[RCFA] Background Conflict Detection Failed (Create): ${err.message}`);
+        });
+    }
+
     return requirement;
 };
 
@@ -54,6 +61,12 @@ export const updateRequirement = async (id, data) => {
         });
     }
 
+    if (requirement) {
+        runConflictDetection(requirement.projectId, `req-update-${Date.now()}`).catch(err => {
+            console.error(`[RCFA] Background Conflict Detection Failed (Update): ${err.message}`);
+        });
+    }
+
     return requirement;
 };
 
@@ -65,6 +78,12 @@ export const deleteRequirement = async (id) => {
             projectId: requirement.projectId,
             action: `Deleted requirement: ${requirement.title}`,
             performedBy: requirement.createdBy // Simplified for now
+        });
+    }
+
+    if (requirement) {
+        runConflictDetection(requirement.projectId, `req-delete-${Date.now()}`).catch(err => {
+            console.error(`[RCFA] Background Conflict Detection Failed (Delete): ${err.message}`);
         });
     }
 

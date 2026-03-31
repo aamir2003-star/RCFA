@@ -174,6 +174,16 @@ export default function BdeDashboard() {
                       {proj.status}
                     </span>
                     <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/bde/editor?projectId=${proj._id}`);
+                      }}
+                      className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 rounded-lg transition-colors"
+                      title="Manage Requirements"
+                    >
+                      <FileText className="w-4 h-4" />
+                    </button>
+                    <button
                       onClick={(e) => handleDeleteProject(e, proj._id)}
                       className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors"
                       title="Delete Project"

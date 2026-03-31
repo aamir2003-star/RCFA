@@ -276,6 +276,16 @@ export default function AppRoutes() {
                 }
             />
             <Route
+                path="/bde/editor"
+                element={
+                    <ProtectedRoute allowedRoles={["bde"]}>
+                        <MainLayout role="bde">
+                            <RequirementEditor role="bde" />
+                        </MainLayout>
+                    </ProtectedRoute>
+                }
+            />
+            <Route
                 path="/bde/projects"
                 element={
                     <ProtectedRoute allowedRoles={["bde"]}>

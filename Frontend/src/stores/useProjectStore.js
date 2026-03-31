@@ -3,11 +3,71 @@ import api from "../lib/api";
 
 const useProjectStore = create((set, get) => ({
     projects: [],
+    requirements: [],
     currentProject: null,
     projectStats: null,
     bdeStats: null,
     loading: false,
     error: null,
+
+    fetchRequirements: async (projectId) => {
+        set({ loading: true });
+        try {
+            const response = await api.get(`/requirements?projectId=${projectId}`);
+            // Format for pagination if backend returns it
+            const requirements = response.data.requirements || response.data;
+            set({ requirements: Array.isArray(requirements) ? requirements : [], loading: false });
+        } catch (error) {
+            set({ error: error.message, loading: false });
+        }
+    },
+
+    addRequirement: async (requirementData) => {
+        set({ loading: true });
+        try {
+            const response = await api.post("/requirements", requirementData);
+            const newReq = response.data;
+            set((state) => ({
+                requirements: [...state.requirements, newReq],
+                loading: false
+            }));
+            return { success: true, requirement: newReq };
+        } catch (error) {
+            set({ error: error.message, loading: false });
+            return { success: false, message: error.response?.data?.message || error.message };
+        }
+    },
+
+    updateRequirement: async (requirementId, requirementData) => {
+        set({ loading: true });
+        try {
+            const response = await api.patch(`/requirements/${requirementId}`, requirementData);
+            const updatedReq = response.data;
+            set((state) => ({
+                requirements: state.requirements.map((r) => r._id === requirementId ? updatedReq : r),
+                loading: false
+            }));
+            return { success: true, requirement: updatedReq };
+        } catch (error) {
+            set({ error: error.message, loading: false });
+            return { success: false, message: error.response?.data?.message || error.message };
+        }
+    },
+
+    deleteRequirement: async (requirementId) => {
+        set({ loading: true });
+        try {
+            await api.delete(`/requirements/${requirementId}`);
+            set((state) => ({
+                requirements: state.requirements.filter((r) => r._id !== requirementId),
+                loading: false
+            }));
+            return { success: true };
+        } catch (error) {
+            set({ error: error.message, loading: false });
+            return { success: false, message: error.response?.data?.message || error.message };
+        }
+    },
 
     fetchProjects: async () => {
         set({ loading: true });

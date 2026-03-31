@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import { ProjectModel } from "../models/project/project.model.js";
+import { RequirementModel } from "../models/requirements/requirement.model.js";
+import { ConflictModel } from "../models/conflict/conflict.model.js";
 
 // CREATE
 export const createProject = async (data) => {
@@ -12,50 +14,6 @@ export const getAllProjects = async (options = {}) => {
   const skip = (page - 1) * limit;
 
   const query = createdBy ? { createdBy: new mongoose.Types.ObjectId(createdBy) } : {};
-
-  // For counts, we'll use a more complex aggregation or just a fast way.
-  // Let's use aggregate to get projects with their counts.
-  const pipeline = [
-    { $match: query },
-    { $sort: sort },
-    { $skip: skip },
-    { $limit: Number(limit) },
-    // Join with requirements
-    {
-      $lookup: {
-        from: "requirements",
-        localField: "_id",
-        foreignField: projectId,
-        as: "requirements"
-      }
-    },
-    // Join with conflicts
-    {
-      $lookup: {
-        from: "conflicts",
-        localField: "_id",
-        foreignField: "projectId",
-        as: "conflicts"
-      }
-    },
-    {
-      $addFields: {
-        requirementCount: { $size: "$requirements" },
-        conflictCount: { $size: "$conflicts" }
-      }
-    },
-    {
-      $project: {
-        requirements: 0,
-        conflicts: 0
-      }
-    }
-  ];
-
-  // We still need to populate createdBy and projectManager, 
-  // so we'll do ProjectModel.find instead and add counts manually or use a better pipeline.
-  // Manual populate after aggregation is harder, so let's stick to find and just loop for now for simplicity/speed
-  // (or use a better lookup with let/pipeline for population).
 
   const [projectsResult, total] = await Promise.all([
     ProjectModel.find(query)
@@ -93,9 +51,6 @@ export const getAllProjects = async (options = {}) => {
  * Get project statistics using a single aggregation pipeline.
  * Counts requirements by status and conflicts by severity.
  */
-import { RequirementModel } from "../models/requirements/requirement.model.js";
-import { ConflictModel } from "../models/conflict/conflict.model.js";
-
 export const getProjectStats = async (projectId) => {
   const stats = await Promise.all([
     RequirementModel.aggregate([

@@ -62,7 +62,7 @@ const useConflictStore = create((set, get) => ({
         const socket = getSocket();
         if (!socket) return;
 
-        socket.emit("join_project", projectId);
+        socket.emit("join:project", projectId);
 
         socket.on("analysis:progress", (data) => {
             if (data.projectId === projectId) {

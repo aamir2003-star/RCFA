@@ -48,7 +48,11 @@ export default function CreateProject() {
   useEffect(() => {
     if (showProgress && analysisProgress.percent === 100) {
       setTimeout(() => {
-        navigate('/pm/conflicts');
+        if (user?.role?.toLowerCase() === 'bde') {
+          navigate('/bde/dashboard');
+        } else {
+          navigate('/pm/conflicts');
+        }
       }, 1500);
     }
   }, [analysisProgress.percent, showProgress, navigate]);

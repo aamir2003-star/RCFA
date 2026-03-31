@@ -53,6 +53,7 @@ export const parseRequirements = async (projectId) => {
             description,
             title: req.title || description,
             priority: normalizedPriority,
+            module: req.module || 'General',
             category: req.category || null, // null = needs classification
             stakeholder: req.stakeholder || 'Developer',
             projectId: req.projectId?.toString(),
