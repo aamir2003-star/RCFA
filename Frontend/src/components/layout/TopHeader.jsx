@@ -1,12 +1,16 @@
 import React from "react";
 import { useTheme } from "../../contexts/ThemeContext";
-import { Bell, Search, Sun, Moon, HelpCircle, Settings, Menu } from "lucide-react";
+import { Bell, Search, Sun, Moon, HelpCircle, Settings, Menu, LogOut, User } from "lucide-react";
 import { Avatar, AvatarFallback } from "../ui/Avatar";
 import ThemeToggle from "../ThemeToggle";
-
+import useAuthStore from "../../stores/useAuthStore";
+import { Dropdown } from "../ui/Dropdown";
+import { useNavigate } from "react-router-dom";
 
 export function TopHeader({ role, onMenuClick }) {
   const { theme, setTheme } = useTheme();
+  const { user, logout } = useAuthStore();
+  const navigate = useNavigate();
 
   let searchPlaceholder = "Search...";
   if (role === "bde") searchPlaceholder = "Search projects...";
@@ -14,19 +18,17 @@ export function TopHeader({ role, onMenuClick }) {
     searchPlaceholder = "Search projects, requirements or conflicts...";
   if (role === "dev") searchPlaceholder = "Search modules or conflicts...";
 
-  let profileName = "Jane Doe";
-  let profileRole = "BDE";
-  let profileInitials = "JD";
+  const profileName = user?.name || "User";
+  const profileRole = user?.role?.toUpperCase() || role?.toUpperCase() || "USER";
+  const profileInitials = user?.name?.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || "U";
 
-  if (role === "pm") {
-    profileName = "Alex Rivera";
-    profileRole = "Project Manager";
-    profileInitials = "AR";
-  } else if (role === "dev") {
-    profileName = "Alex Rivera";
-    profileRole = "Senior Dev";
-    profileInitials = "AR";
-  }
+  const handleProfileClick = () => {
+    navigate(`/${role}/profile`);
+  };
+
+  const handleSettingsClick = () => {
+    navigate(`/${role}/settings`);
+  };
 
   return (
     <header className="h-16 bg-white/70 dark:bg-[#0f1115]/70 backdrop-blur-md flex items-center justify-between px-4 md:px-6 shrink-0 z-50 shadow-sm border-b border-slate-200/50 dark:border-slate-800/50 sticky top-0 transition-colors duration-300">
@@ -80,20 +82,49 @@ export function TopHeader({ role, onMenuClick }) {
 
         <ThemeToggle />
 
-
-        <div className="flex items-center gap-3 select-none cursor-pointer group">
-          {role === "pm" || role === "dev" ? (
-            <div className="text-right hidden sm:block">
-              <div className="text-sm font-medium">{profileName}</div>
-              <div className="text-xs text-muted-foreground">{profileRole}</div>
+        <Dropdown
+          trigger={
+            <div className="flex items-center gap-3 select-none cursor-pointer group">
+              <div className="text-right hidden sm:block">
+                <div className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{profileName}</div>
+                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{profileRole}</div>
+              </div>
+              <Avatar className="w-9 h-9 border-2 border-transparent group-hover:border-indigo-500 transition-all shadow-sm">
+                <AvatarFallback className="bg-linear-to-tr from-indigo-500 to-blue-500 text-white font-black text-xs uppercase">
+                  {profileInitials}
+                </AvatarFallback>
+              </Avatar>
             </div>
-          ) : null}
-          <Avatar className="w-8 h-8 border-2 border-transparent group-hover:border-indigo-500/30 transition-all shadow-sm">
-            <AvatarFallback className="bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100 font-bold">
-              {profileInitials}
-            </AvatarFallback>
-          </Avatar>
-        </div>
+          }
+          className="w-48 mt-4 p-2 rounded-2xl border border-slate-200 dark:border-slate-800"
+        >
+          <div className="px-3 py-2 mb-2 border-b border-slate-100 dark:border-slate-800/50 sm:hidden">
+            <p className="text-sm font-bold text-slate-900 dark:text-white">{profileName}</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{profileRole}</p>
+          </div>
+          <button
+            onClick={handleProfileClick}
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-xl transition-all"
+          >
+            <User className="w-4 h-4" />
+            My Profile
+          </button>
+          <button
+            onClick={handleSettingsClick}
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-xl transition-all"
+          >
+            <Settings className="w-4 h-4" />
+            Account Settings
+          </button>
+          <div className="my-2 border-t border-slate-100 dark:border-slate-800/50"></div>
+          <button
+            onClick={logout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout Session
+          </button>
+        </Dropdown>
       </div>
     </header>
   );

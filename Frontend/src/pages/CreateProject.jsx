@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import { Zap, Lightbulb, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Zap, Lightbulb, ChevronDown, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useProjectStore from '../stores/useProjectStore';
+import useConflictStore from '../stores/useConflictStore';
 
 export default function CreateProject() {
   const navigate = useNavigate();
   const { createProject, uploadRequirementsCSV, loading } = useProjectStore();
+  const { analysisProgress, subscribeToConflicts, unsubscribeFromConflicts, resetAnalysisProgress } = useConflictStore();
   const [formData, setFormData] = useState({
     name: '',
     clientName: '',
@@ -14,6 +16,26 @@ export default function CreateProject() {
     budget: ''
   });
   const [requirementFile, setRequirementFile] = useState(null);
+  const [showProgress, setShowProgress] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      // Cleanup on unmount - but we might want to keep listening if we navigate away
+      // For now, let's reset if we leave this page normally
+      resetAnalysisProgress();
+    };
+  }, [resetAnalysisProgress]);
+
+  // Effect to navigate when analysis is complete
+  useEffect(() => {
+    if (analysisProgress.percent === 100) {
+      setTimeout(() => {
+        // Find the project ID (could be from currentProject store once updated)
+        // For now, navigate to triage after a short delay to show 100%
+        navigate('/pm/conflicts');
+      }, 1500);
+    }
+  }, [analysisProgress.percent, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,9 +53,20 @@ export default function CreateProject() {
     const result = await createProject(formData);
     if (result.success) {
       if (requirementFile) {
-        await uploadRequirementsCSV(result.project._id, requirementFile);
+        setShowProgress(true);
+        // Join the project room to start receiving progress events
+        subscribeToConflicts(result.project._id);
+
+        const uploadResult = await uploadRequirementsCSV(result.project._id, requirementFile);
+        if (!uploadResult.success) {
+          alert("Error uploading CSV: " + uploadResult.message);
+          setShowProgress(false);
+          unsubscribeFromConflicts(result.project._id);
+        }
+        // Background AI scan starts automatically on the backend
+      } else {
+        navigate('/bde/dashboard');
       }
-      navigate('/bde/dashboard');
     } else {
       alert("Error creating project: " + result.message);
     }
@@ -245,6 +278,56 @@ export default function CreateProject() {
         </div>
 
       </div>
+
+      {/* ── Progress Overlay ── */}
+      {showProgress && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-[#1a2035] rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-200 dark:border-slate-700/50 flex flex-col items-center text-center">
+            <div className="relative mb-6">
+              <div className="absolute inset-0 bg-indigo-500/20 rounded-full blur-xl animate-pulse"></div>
+              <div className="relative bg-indigo-600 rounded-full p-4 text-white">
+                <BrainCircuit className="w-8 h-8" />
+              </div>
+            </div>
+
+            <h2 className="text-xl font-bold text-[#1e2532] dark:text-white mb-2">
+              Conflict Resolver AI is Scanning...
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-8 leading-relaxed">
+              Analyzing requirements across modules to detect logical contradictions and potential synchronization risks.
+            </p>
+
+            {/* Progress Bar Container */}
+            <div className="w-full space-y-4">
+              <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-slate-400">
+                <span>{analysisProgress.message || "Initializing 7-step pipeline..."}</span>
+                <span className="text-indigo-600 dark:text-indigo-400">{analysisProgress.percent}%</span>
+              </div>
+
+              <div className="w-full h-2.5 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700/50">
+                <div
+                  className="h-full bg-indigo-600 transition-all duration-500 ease-out"
+                  style={{ width: `${analysisProgress.percent}%` }}
+                ></div>
+              </div>
+
+              <div className="flex items-center justify-center gap-2 pt-2">
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-500" />
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  Step {Math.min(7, Math.ceil((analysisProgress.percent / 100) * 7))} of 7: {analysisProgress.percent < 100 ? "Processing" : "Complete"}
+                </span>
+              </div>
+            </div>
+
+            {analysisProgress.percent === 100 && (
+              <div className="mt-8 flex items-center gap-2 text-emerald-500 text-sm font-bold animate-bounce">
+                <Zap className="w-4 h-4 fill-current" />
+                <span>Detection Complete. Redirecting to Triage...</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

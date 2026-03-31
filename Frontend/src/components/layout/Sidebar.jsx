@@ -72,7 +72,7 @@ export function Sidebar({ role, isOpen, onClose }) {
       "fixed lg:static top-16 lg:top-0 bottom-0 left-0 w-64 bg-white/90 dark:bg-[#080b11]/90 backdrop-blur-xl flex flex-col h-[calc(100vh-64px)] lg:h-full shrink-0 shadow-2xl shadow-indigo-500/5 dark:shadow-none border-r border-slate-200/50 dark:border-slate-800/50 z-50 transition-all duration-300 transform",
       isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
     )}>
-      <div className="p-6 flex flex-col gap-1 relative">
+      <div className="p-6 flex flex-col gap-1 relative border-b border-slate-100 dark:border-slate-800/50 mb-4">
         <button
           onClick={onClose}
           className="lg:hidden absolute top-6 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
@@ -86,13 +86,13 @@ export function Sidebar({ role, isOpen, onClose }) {
           {title}
         </div>
         {subtitle && (
-          <div className="text-xs text-muted-foreground font-semibold uppercase pl-11">
+          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-11">
             {subtitle}
           </div>
         )}
       </div>
 
-      <nav className="flex-1 px-4 py-2 flex flex-col gap-2">
+      <nav className="flex-1 px-4 py-2 flex flex-col gap-2 overflow-y-auto custom-scrollbar">
         {role === "dev" && (
           <>
             <SidebarLink
@@ -114,7 +114,7 @@ export function Sidebar({ role, isOpen, onClose }) {
               icon={MessageSquare}
               label="Discussions"
             />
-            <div className="text-xs font-semibold text-muted-foreground uppercase mt-4 mb-2 px-3">
+            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-6 mb-2 px-3">
               SYSTEMS
             </div>
             <SidebarLink to="/dev/settings" icon={Settings} label="Settings" />
@@ -175,46 +175,38 @@ export function Sidebar({ role, isOpen, onClose }) {
         )}
       </nav>
 
-      {/* Storage usage for BDE */}
-      {role === "bde" && (
-        <div className="p-4 mx-4 mb-6 bg-secondary/50 rounded-lg">
-          <div className="text-sm font-medium mb-2">Storage Usage</div>
-          <div className="h-2 bg-secondary rounded-full overflow-hidden">
-            <div className="h-full bg-slate-700 w-[64%]"></div>
-          </div>
-          <div className="text-xs text-muted-foreground mt-2">
-            64% of 100GB used
-          </div>
-        </div>
-      )}
-
-      {/* AI Credits for PM */}
-      {role === "pm" && (
-        <div className="p-4 mx-4 mb-6 bg-secondary/50 rounded-lg">
-          <div className="text-sm font-medium mb-2">AI Credits</div>
-          <div className="h-2 bg-secondary rounded-full overflow-hidden">
-            <div className="h-full bg-slate-700 w-[65%]"></div>
-          </div>
-          <div className="text-xs text-muted-foreground mt-2">
-            650 / 1000 requests used
-          </div>
-        </div>
-      )}
-
-      {/* User profile brief for all roles */}
-      <div className="p-4 border-t border-slate-200/50 dark:border-slate-800/50 flex items-center justify-between bg-white/50 dark:bg-[#080b11]/50 backdrop-blur-md">
-        <div className="flex items-center gap-3 cursor-pointer group">
-          <div className="w-9 h-9 rounded-full bg-linear-to-tr from-indigo-400 to-blue-400 shadow-sm border-2 border-white dark:border-[#080b11] group-hover:scale-105 transition-transform duration-300 flex items-center justify-center text-white font-bold text-xs">
-            {user?.name?.[0] || "U"}
-          </div>
-          <div>
-            <div className="text-[13px] font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-              {user?.name || "Guest User"}
+      {/* Status indicators bottom */}
+      <div className="p-4 mt-auto space-y-4">
+        {role === "bde" && (
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/50">
+            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex justify-between">
+              <span>Storage Usage</span>
+              <span className="text-slate-600 dark:text-slate-300">64%</span>
             </div>
-            <div className="text-xs text-muted-foreground uppercase tracking-tighter">
-              {user?.role || role || "User"}
+            <div className="h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+              <div className="h-full bg-linear-to-r from-indigo-500 to-blue-500 w-[64%]"></div>
             </div>
           </div>
+        )}
+
+        {role === "pm" && (
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/50">
+            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex justify-between">
+              <span>AI Engine Credits</span>
+              <span className="text-indigo-500">650 / 1K</span>
+            </div>
+            <div className="h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+              <div className="h-full bg-linear-to-r from-indigo-500 to-violet-500 w-[65%]"></div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between px-2">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">System Online</span>
+          </div>
+          <Activity className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600" />
         </div>
       </div>
     </div>

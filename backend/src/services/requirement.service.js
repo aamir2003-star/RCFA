@@ -1,5 +1,6 @@
 import { RequirementModel } from "../models/requirements/requirement.model.js";
 import { ActivityModel } from "../models/activity/activity.model.js";
+import { runConflictDetection } from "../engine/conflictDetector.js";
 
 export const createRequirement = async (data) => {
     const requirement = await RequirementModel.create(data);
@@ -83,6 +84,12 @@ export const bulkCreateRequirements = async (requirements, projectId, createdBy)
         projectId,
         action: `Imported ${docs.length} requirements via CSV`,
         performedBy: createdBy
+    });
+
+    // Trigger Conflict Detection in background (do not await to avoid blocking)
+    console.log(`[RCFA] Triggering AI Conflict Detection for Project: ${projectId}`);
+    runConflictDetection(projectId, `job-${Date.now()}`).catch(err => {
+        console.error(`[RCFA] Background Conflict Detection Failed: ${err.message}`);
     });
 
     return docs;

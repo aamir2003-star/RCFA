@@ -9,19 +9,24 @@ import { analyzeWithGemini } from './pipeline/geminiAnalyzer.js';
 import { computeSeverity } from './pipeline/severityScorer.js';
 import { estimateAllFeasibilities } from './pipeline/feasibilityEstimator.js';
 import { ConflictModel } from '../models/conflict/conflict.model.js';
-import { emitConflictNew } from '../sockets/events/conflictEvents.js';
+import { emitConflictNew, emitAnalysisProgress } from '../sockets/events/conflictEvents.js';
 
 /**
- * Report progress via callback (used by job layer to track %).
+ * Report progress via callback and Socket.io.
+ * @param {string} projectId
+ * @param {string} jobId
  * @param {Function} onProgress
  * @param {number} percent
  * @param {string} message
  */
-const progress = (onProgress, percent, message) => {
+const progress = (projectId, jobId, onProgress, percent, message) => {
     console.log(`[${percent}%] ${message}`);
     if (typeof onProgress === 'function') {
         onProgress(percent, message);
     }
+
+    // Emit via Socket.io
+    emitAnalysisProgress(projectId, jobId, percent, message);
 };
 
 /**
@@ -37,7 +42,7 @@ export const runConflictDetection = async (projectId, jobId, onProgress = null) 
     console.log(`\n🔍 Starting conflict detection for project: ${projectId} (job: ${jobId})\n`);
 
     // ─── Step 1: Parse Requirements ───────────────────────────────────────────
-    progress(onProgress, 5, 'Fetching and parsing requirements...');
+    progress(projectId, jobId, onProgress, 5, 'Fetching and parsing requirements...');
     const parsed = await parseRequirements(projectId);
 
     if (parsed.length < 2) {
@@ -45,24 +50,24 @@ export const runConflictDetection = async (projectId, jobId, onProgress = null) 
     }
 
     // ─── Step 2: Classify Requirements ─────────────────────────────────────────
-    progress(onProgress, 15, 'Classifying requirements...');
+    progress(projectId, jobId, onProgress, 15, 'Classifying requirements...');
     const classified = classifyRequirements(parsed);
 
     // ─── Step 3: Generate Pairs ─────────────────────────────────────────────────
-    progress(onProgress, 25, 'Generating requirement pairs...');
+    progress(projectId, jobId, onProgress, 25, 'Generating requirement pairs...');
     const pairs = generatePairs(classified);
 
     // ─── Step 4: Run Rule Engine ────────────────────────────────────────────────
-    progress(onProgress, 35, 'Running rule engine...');
+    progress(projectId, jobId, onProgress, 35, 'Running rule engine...');
     const { ruleFlagged, unflagged } = runRules(pairs);
 
     // ─── Step 5: Gemini AI Analysis ─────────────────────────────────────────────
-    progress(onProgress, 45, `Analyzing ${unflagged.length} pairs with Gemini AI...`);
+    progress(projectId, jobId, onProgress, 45, `Analyzing ${unflagged.length} pairs with Gemini AI...`);
     const aiDetected = await analyzeWithGemini(unflagged);
 
     // ─── Combine all detected conflicts ────────────────────────────────────────
     const allConflicts = [...ruleFlagged, ...aiDetected];
-    progress(onProgress, 65, `Total conflicts detected: ${allConflicts.length}. Scoring severity...`);
+    progress(projectId, jobId, onProgress, 65, `Total conflicts detected: ${allConflicts.length}. Scoring severity...`);
 
     // ─── Step 6: Score Severity ─────────────────────────────────────────────────
     const scoredConflicts = allConflicts.map((conflict) => {
@@ -71,11 +76,11 @@ export const runConflictDetection = async (projectId, jobId, onProgress = null) 
     });
 
     // ─── Step 7: Estimate Feasibility ───────────────────────────────────────────
-    progress(onProgress, 75, 'Estimating feasibility impacts...');
+    progress(projectId, jobId, onProgress, 75, 'Estimating feasibility impacts...');
     const finalConflicts = estimateAllFeasibilities(scoredConflicts);
 
     // ─── Save to MongoDB ────────────────────────────────────────────────────────
-    progress(onProgress, 85, 'Saving conflicts to database...');
+    progress(projectId, jobId, onProgress, 85, 'Saving conflicts to database...');
     const savedConflicts = [];
 
     for (const conflict of finalConflicts) {
@@ -106,7 +111,7 @@ export const runConflictDetection = async (projectId, jobId, onProgress = null) 
         }
     }
 
-    progress(onProgress, 100, `Detection complete. ${savedConflicts.length} conflicts saved.`);
+    progress(projectId, jobId, onProgress, 100, `Detection complete. ${savedConflicts.length} conflicts saved.`);
 
     console.log(`\n✅ Conflict detection finished for project: ${projectId}`);
     console.log(`   Rule-detected: ${ruleFlagged.length}`);
