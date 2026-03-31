@@ -28,7 +28,7 @@ export default function CreateProject() {
     // Fetch PMs
     const fetchPMs = async () => {
       try {
-        const response = await api.get('/users?role=PM');
+        const response = await api.get('/users?role=pm');
         setProjectManagers(response.data);
       } catch (error) {
         console.error("Failed to fetch PMs:", error);
@@ -188,13 +188,22 @@ export default function CreateProject() {
                     onChange={handleChange}
                     className="w-full appearance-none bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all cursor-pointer font-medium"
                   >
-                    <option value="">Select a team lead</option>
-                    {projectManagers.map(pm => (
-                      <option key={pm._id} value={pm._id}>{pm.name}</option>
-                    ))}
+                    <option value="">Select a Project Manager</option>
+                    {projectManagers.length > 0 ? (
+                      projectManagers.map(pm => (
+                        <option key={pm._id} value={pm._id}>
+                          {pm.name} ({pm.email})
+                        </option>
+                      ))
+                    ) : (
+                      <option disabled>No PMs available</option>
+                    )}
                   </select>
                   <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 </div>
+                {projectManagers.length === 0 && (
+                  <p className="text-[10px] text-amber-500 mt-1 font-bold">Note: No users found with 'pm' role in system.</p>
+                )}
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Requirement CSV (Optional)</label>
