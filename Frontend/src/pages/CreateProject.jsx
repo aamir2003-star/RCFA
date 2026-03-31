@@ -64,8 +64,21 @@ export default function CreateProject() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name) return alert("Project Name is required");
-    if (!formData.projectManager) return alert("Please assign a Project Manager");
+
+    // Comprehensive Validation
+    const missingFields = [];
+    if (!formData.name) missingFields.push("Project Name");
+    if (!formData.clientName) missingFields.push("Client Name");
+    if (!formData.description) missingFields.push("Project Overview");
+    if (!formData.timeline) missingFields.push("Expected Timeline");
+    if (!formData.budget) missingFields.push("Budget");
+    if (!formData.projectManager) missingFields.push("Project Manager Assignment");
+    if (!requirementFile) missingFields.push("Requirement CSV File");
+
+    if (missingFields.length > 0) {
+      alert(`The following fields are required:\n- ${missingFields.join("\n- ")}`);
+      return;
+    }
 
     const submissionData = {
       ...formData,
@@ -74,18 +87,14 @@ export default function CreateProject() {
 
     const result = await createProject(submissionData);
     if (result.success) {
-      if (requirementFile) {
-        setShowProgress(true);
-        subscribeToConflicts(result.project._id);
+      setShowProgress(true);
+      subscribeToConflicts(result.project._id);
 
-        const uploadResult = await uploadRequirementsCSV(result.project._id, requirementFile);
-        if (!uploadResult.success) {
-          alert("Error uploading CSV: " + uploadResult.message);
-          setShowProgress(false);
-          unsubscribeFromConflicts(result.project._id);
-        }
-      } else {
-        navigate('/bde/dashboard');
+      const uploadResult = await uploadRequirementsCSV(result.project._id, requirementFile);
+      if (!uploadResult.success) {
+        alert("Error uploading CSV: " + uploadResult.message);
+        setShowProgress(false);
+        unsubscribeFromConflicts(result.project._id);
       }
     } else {
       alert("Error creating project: " + result.message);
@@ -97,11 +106,11 @@ export default function CreateProject() {
       {/* Page Title */}
       <h1 className="text-2xl font-bold text-[#1e2532] dark:text-white">Create New Project</h1>
 
-      {/* Two-column layout */}
-      <div className="flex flex-col lg:flex-row gap-6 items-start">
+      {/* Full-width layout */}
+      <div className="flex flex-col gap-6 items-start">
 
-        {/* ── LEFT: Project Details Form ── */}
-        <div className="flex-1 bg-white dark:bg-[#0f1115]/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-sm">
+        {/* ── Project Details Form ── */}
+        <div className="w-full bg-white dark:bg-[#0f1115]/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-sm">
           <div className="flex items-center gap-2 mb-6">
             <svg className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h8" />
@@ -113,7 +122,9 @@ export default function CreateProject() {
             {/* Row 1: Project Name + Client Name */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Project Name</label>
+                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                  Project Name <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   name="name"
@@ -124,7 +135,9 @@ export default function CreateProject() {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Client Name</label>
+                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                  Client Name <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   name="clientName"
@@ -138,7 +151,9 @@ export default function CreateProject() {
 
             {/* Project Overview */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Project Overview</label>
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                Project Overview <span className="text-red-500">*</span>
+              </label>
               <textarea
                 name="description"
                 rows={4}
@@ -152,7 +167,9 @@ export default function CreateProject() {
             {/* Row 2: Timeline + Budget */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Expected Timeline</label>
+                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                  Expected Timeline (Duration) <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="date"
                   name="timeline"
@@ -162,7 +179,9 @@ export default function CreateProject() {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Budget ($)</label>
+                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                  Budget ($) <span className="text-red-500">*</span>
+                </label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-400 font-bold">$</span>
                   <input
@@ -180,7 +199,9 @@ export default function CreateProject() {
             {/* Assign Project Manager */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Assign Project Manager</label>
+                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                  Assign Project Manager <span className="text-red-500">*</span>
+                </label>
                 <div className="relative">
                   <select
                     name="projectManager"
@@ -206,7 +227,9 @@ export default function CreateProject() {
                 )}
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Requirement CSV (Optional)</label>
+                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                  Requirement CSV <span className="text-red-500">*</span>
+                </label>
                 <div className="relative group">
                   <input
                     type="file"
@@ -240,79 +263,6 @@ export default function CreateProject() {
             </div>
           </form>
         </div>
-
-        {/* ── RIGHT: AI Preview Panel ── */}
-        <div className="w-full lg:w-80 flex flex-col gap-4">
-          {/* AI Preview Card */}
-          <div className="bg-[#1a2035] rounded-2xl p-5 shadow-lg">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <Zap className="w-5 h-5 text-indigo-400" />
-                <span className="font-semibold text-white text-sm">AI Preview Panel</span>
-              </div>
-              <span className="text-[10px] font-bold uppercase tracking-widest bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/30">
-                Live Analysis
-              </span>
-            </div>
-            <p className="text-xs text-slate-400 mb-5 leading-relaxed">
-              As you type, our AI analyzes your overview to suggest potential project requirements and risk mitigations.
-            </p>
-
-            {/* Requirement #1 */}
-            <div className="bg-[#232b3e] rounded-xl p-4 mb-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Requirement #1</span>
-                <span className="text-[10px] font-bold uppercase tracking-widest bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full border border-red-500/30">
-                  High Priority
-                </span>
-              </div>
-              <p className="text-sm font-semibold text-white mb-1">Conflict Mitigation Strategy</p>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Based on 'infrastructure audit', we suggest defining a clear escalation path for stakeholder disputes.
-              </p>
-            </div>
-
-            {/* Requirement #2 */}
-            <div className="bg-[#232b3e] rounded-xl p-4 mb-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Requirement #2</span>
-                <span className="text-[10px] font-bold uppercase tracking-widest bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full border border-yellow-500/30">
-                  Medium Priority
-                </span>
-              </div>
-              <p className="text-sm font-semibold text-white mb-1">Bi-Weekly Compliance Sync</p>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Automated checks for regulatory alignment with current municipal guidelines.
-              </p>
-            </div>
-
-            {/* Requirement #3 */}
-            <div className="bg-[#232b3e] rounded-xl p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Requirement #3</span>
-                <span className="text-[10px] font-bold uppercase tracking-widest bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                  Low Priority
-                </span>
-              </div>
-              <p className="text-sm font-semibold text-white mb-1">Document Versioning</p>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Ensure all historical project iterations are stored in the AI-Vault for legal auditing.
-              </p>
-            </div>
-          </div>
-
-          {/* AI Tip Card */}
-          <div className="bg-white dark:bg-white/5 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 shadow-sm">
-            <div className="flex items-center gap-2 mb-2">
-              <Lightbulb className="w-4 h-4 text-indigo-500" />
-              <span className="text-sm font-semibold text-[#1e2532] dark:text-white">AI Tip</span>
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Adding a detailed budget helps the Conflict Resolver AI better predict resource-related bottlenecks and financial dispute risks.
-            </p>
-          </div>
-        </div>
-
       </div>
 
       {/* ── Progress Overlay ── */}

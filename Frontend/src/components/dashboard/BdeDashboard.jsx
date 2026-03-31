@@ -1,12 +1,12 @@
 import React, { useEffect } from "react";
 import { Button } from "../ui/Button.jsx";
-import { Plus, ChevronRight, MoreHorizontal, ArrowUpRight, Folder, Layout, Users, FileText, AlertCircle, Inbox } from "lucide-react";
+import { Plus, ChevronRight, MoreHorizontal, ArrowUpRight, Folder, Layout, Users, FileText, AlertCircle, Inbox, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import useProjectStore from "../../stores/useProjectStore";
 
 export default function BdeDashboard() {
   const navigate = useNavigate();
-  const { projects, fetchProjects, bdeStats, fetchBdeStats, setCurrentProject, loading } = useProjectStore();
+  const { projects, fetchProjects, bdeStats, fetchBdeStats, setCurrentProject, deleteProject, loading } = useProjectStore();
 
   useEffect(() => {
     fetchProjects();
@@ -16,6 +16,18 @@ export default function BdeDashboard() {
   const handleProjectClick = (project) => {
     setCurrentProject(project);
     navigate("/pm/workspace");
+  };
+
+  const handleDeleteProject = async (e, projectId) => {
+    e.stopPropagation();
+    if (window.confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
+      const result = await deleteProject(projectId);
+      if (result.success) {
+        fetchBdeStats(); // Refresh stats after deletion
+      } else {
+        alert("Failed to delete project: " + result.message);
+      }
+    }
   };
 
   const statsConfig = [
@@ -154,12 +166,21 @@ export default function BdeDashboard() {
                   <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">
                     <Folder className="w-5 h-5" />
                   </div>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${proj.status === 'active' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
-                    proj.status === 'planning' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' :
-                      'bg-slate-50 text-slate-600 border border-slate-100'
-                    }`}>
-                    {proj.status}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${proj.status === 'active' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                      proj.status === 'planning' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' :
+                        'bg-slate-50 text-slate-600 border border-slate-100'
+                      }`}>
+                      {proj.status}
+                    </span>
+                    <button
+                      onClick={(e) => handleDeleteProject(e, proj._id)}
+                      className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors"
+                      title="Delete Project"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
                 <h3 className="font-bold text-slate-900 dark:text-white text-[17px] mb-2 leading-snug">
@@ -185,8 +206,8 @@ export default function BdeDashboard() {
                 <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-6">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${(proj.conflictCount || 0) === 0 ? 'bg-emerald-500 w-full' :
-                        (proj.conflictCount || 0) < 3 ? 'bg-amber-400 w-[75%]' :
-                          'bg-rose-500 w-[45%]'
+                      (proj.conflictCount || 0) < 3 ? 'bg-amber-400 w-[75%]' :
+                        'bg-rose-500 w-[45%]'
                       }`}
                   />
                 </div>

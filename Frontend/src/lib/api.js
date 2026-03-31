@@ -10,7 +10,7 @@ const api = axios.create({
 // Request interceptor for adding JWT token
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem("rcfa-token");
+        const token = localStorage.getItem("spectra-ai-token");
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -25,7 +25,8 @@ api.interceptors.response.use(
     async (error) => {
         if (error.response?.status === 401) {
             // Handle logout or token refresh here
-            localStorage.removeItem("rcfa-token");
+            localStorage.removeItem("spectra-ai-token");
+            localStorage.removeItem("spectra-ai-user");
             window.location.href = "/login";
         }
         return Promise.reject(error);

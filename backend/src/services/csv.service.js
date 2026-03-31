@@ -11,20 +11,33 @@ export const parseRequirementsCSV = (filePath) => {
     return new Promise((resolve, reject) => {
         const results = [];
         fs.createReadStream(filePath)
-            .pipe(csv())
+            .pipe(csv({
+                mapHeaders: ({ header }) => header.trim().toLowerCase()
+            }))
             .on('data', (data) => {
-                // Map CSV headers to internal requirement fields
-                results.push({
-                    title: data.Title || data.title,
-                    description: data.Description || data.description,
-                    priority: (data.Priority || data.priority || 'medium').toLowerCase(),
-                    module: data.Module || data.module,
-                    status: 'draft',
-                    type: 'functional'
-                });
+                // Map common CSV headers to internal requirement fields
+                // Supporting: title, requirement, name, feature, description, overview, priority, module, section
+                const title = data.title || data.requirement || data.name || data.feature || data.summary;
+                const description = data.description || data.overview || data.details || "";
+
+                // Skip rows that don't have a title (likely empty or corrupted rows)
+                if (title && title.trim()) {
+                    results.push({
+                        title: title.trim(),
+                        description: description.trim(),
+                        priority: (data.priority || 'medium').toLowerCase(),
+                        module: data.module || data.section || 'General',
+                        status: 'draft',
+                        type: 'functional'
+                    });
+                }
             })
             .on('end', () => {
-                resolve(results);
+                if (results.length === 0) {
+                    reject(new Error("No valid requirements found in CSV. Please ensure your CSV has a 'Title' or 'Requirement' header."));
+                } else {
+                    resolve(results);
+                }
             })
             .on('error', (err) => {
                 reject(err);

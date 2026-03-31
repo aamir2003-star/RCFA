@@ -81,6 +81,21 @@ const useProjectStore = create((set, get) => ({
         }
     },
 
+    deleteProject: async (projectId) => {
+        set({ loading: true });
+        try {
+            await api.delete(`/projects/${projectId}`);
+            set((state) => ({
+                projects: state.projects.filter((p) => p._id !== projectId),
+                loading: false
+            }));
+            return { success: true };
+        } catch (error) {
+            set({ error: error.message, loading: false });
+            return { success: false, message: error?.response?.data?.message || error.message };
+        }
+    },
+
     clearCurrentProject: () => {
         set({ currentProject: null, projectStats: null });
     }

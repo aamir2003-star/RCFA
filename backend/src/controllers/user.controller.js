@@ -4,7 +4,7 @@ import { AppError } from '../utils/AppError.js';
 export const getUsers = async (req, res, next) => {
     try {
         const { role } = req.query;
-        const query = role ? { role: role.toLowerCase() } : {};
+        const query = role ? { role: { $regex: new RegExp(`^${role}$`, 'i') } } : {};
 
         const users = await User.find(query)
             .select('name email role')
