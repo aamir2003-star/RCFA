@@ -102,7 +102,7 @@ export default function AuthPage() {
               <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-lg flex items-center justify-center border border-white/20">
                 <BrainCircuit className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold tracking-tight">Conflict Resolver AI</span>
+              <span className="text-xl font-bold tracking-tight">Spectra AI</span>
             </div>
 
             <h1 className="text-4xl lg:text-5xl font-bold leading-tight mb-6 transition-all">
@@ -147,7 +147,7 @@ export default function AuthPage() {
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <BrainCircuit className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Conflict Resolver AI</span>
+              <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Spectra AI</span>
             </div>
             <Button variant="outline" size="sm" className="hidden sm:flex">Need Help?</Button>
           </div>

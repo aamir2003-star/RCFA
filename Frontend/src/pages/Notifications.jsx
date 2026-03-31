@@ -42,7 +42,7 @@ const mockNotifications = [
         color: 'text-amber-500',
         bg: 'bg-amber-500/10',
         title: 'AI Resolution Suggested',
-        desc: 'The RCFA engine has generated 3 optimized solutions for the remaining conflicts in E-Commerce Core.',
+        desc: 'The Spectra AI engine has generated 3 optimized solutions for the remaining conflicts in E-Commerce Core.',
         time: '1 hour ago',
         unread: false
     },

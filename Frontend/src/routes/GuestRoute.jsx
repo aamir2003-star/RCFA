@@ -10,16 +10,19 @@ export default function GuestRoute({ children }) {
     const { isAuthenticated, user } = useAuthStore();
     const location = useLocation();
 
-    if (isAuthenticated) {
+    if (isAuthenticated && user?.role) {
+        const role = user.role.toLowerCase();
         const defaultDashboards = {
             bde: "/bde/dashboard",
             pm: "/pm/dashboard",
             dev: "/dev/dashboard"
         };
 
-        // Redirect to the intended page or their default dashboard
-        const from = location.state?.from?.pathname || defaultDashboards[user?.role] || "/";
-        return <Navigate to={from} replace />;
+        const dashboard = defaultDashboards[role];
+        if (dashboard) {
+            const from = location.state?.from?.pathname || dashboard;
+            return <Navigate to={from} replace />;
+        }
     }
 
     return children;

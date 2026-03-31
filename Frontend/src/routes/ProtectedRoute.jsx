@@ -15,14 +15,19 @@ export default function ProtectedRoute({ children, allowedRoles }) {
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
-    if (allowedRoles && !allowedRoles.includes(user?.role)) {
+    if (allowedRoles && !allowedRoles.includes(user?.role?.toLowerCase())) {
         // If user is authenticated but doesn't have the required role, redirect to their default dashboard
         const defaultDashboards = {
             bde: "/bde/dashboard",
             pm: "/pm/dashboard",
             dev: "/dev/dashboard"
         };
-        return <Navigate to={defaultDashboards[user?.role] || "/"} replace />;
+
+        const role = user?.role?.toLowerCase();
+        const dashboard = defaultDashboards[role];
+
+        // Final fallback to Landing if no dashboard matches
+        return <Navigate to={dashboard || "/"} replace />;
     }
 
     return children;

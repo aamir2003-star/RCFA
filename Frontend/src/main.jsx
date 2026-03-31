@@ -10,7 +10,7 @@ const queryClient = new QueryClient();
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="light" storageKey="rcfa-theme">
+      <ThemeProvider defaultTheme="light" storageKey="spectra-ai-theme">
         <App />
       </ThemeProvider>
     </QueryClientProvider>

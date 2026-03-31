@@ -25,7 +25,7 @@ const LandingPage = () => {
       {/* Navbar */}
       <nav className="flex items-center justify-between px-8 py-6 max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
-          <span className="text-2xl font-bold tracking-tighter">SpectraAI</span>
+          <span className="text-2xl font-bold tracking-tighter">Spectra AI</span>
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
           <a href="#features" className="hover:text-foreground transition-colors">Features</a>
@@ -377,7 +377,7 @@ const LandingPage = () => {
       <section id="how-it-works" className="py-24 bg-background border-y border-border transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 tracking-tight">SpectraAI Workflow</h2>
+            <h2 className="text-4xl font-bold mb-4 tracking-tight">Spectra AI Workflow</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto text-base font-medium">
               From raw documents to resolved conflicts in four high-efficiency steps.
             </p>
@@ -454,7 +454,7 @@ const LandingPage = () => {
       <footer className="bg-background pt-24 pb-12 px-8 border-t border-border transition-colors duration-300">
         <div className="max-w-7xl mx-auto grid md:grid-cols-5 gap-16 mb-24">
           <div className="md:col-span-2">
-            <div className="text-2xl font-black mb-6 tracking-tighter">SpectraAI</div>
+            <div className="text-2xl font-black mb-6 tracking-tighter">Spectra AI</div>
             <p className="text-muted-foreground text-xs leading-relaxed max-w-xs uppercase font-black tracking-[0.1em] opacity-60">
               Precision engineering conflict resolution for modern enterprises. Built for scale.
             </p>
@@ -485,7 +485,7 @@ const LandingPage = () => {
           </div>
         </div>
         <div className="max-w-7xl mx-auto border-t border-border pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">
-          <div>© 2026 REQUIREMENT CONFLICT & FEASIBILITY ANALYZER. ENGINEERED FOR PRECISION.</div>
+          <div>© 2026 SPECTRA AI. ENGINEERED FOR PRECISION.</div>
           <div className="flex gap-6">
             <Globe className="w-4 h-4 hover:text-foreground transition-colors cursor-pointer" />
             <LayoutGrid className="w-4 h-4 hover:text-foreground transition-colors cursor-pointer" />

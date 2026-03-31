@@ -638,7 +638,7 @@ export const timelineActivities = [
     iconColor: "text-emerald-600 dark:text-emerald-400",
     bgIcon: "bg-emerald-100 dark:bg-emerald-900/30",
     user: {
-      name: "Conflict Resolver AI",
+      name: "Spectra AI",
       avatar: "https://i.pravatar.cc/100?u=ai-resolve",
       action: "resolved"
     },

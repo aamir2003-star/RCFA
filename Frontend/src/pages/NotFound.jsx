@@ -39,7 +39,7 @@ export default function NotFound() {
 
                 <div className="pt-8 border-t border-slate-200/60 dark:border-slate-800/60">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                        SpectraAI Error Code: ERR_MODULE_NOT_MAPPED
+                        Spectra AI Error Code: ERR_MODULE_NOT_MAPPED
                     </p>
                 </div>
             </div>

@@ -27,7 +27,7 @@ export function Sidebar({ role, isOpen, onClose }) {
   const { user } = useAuthStore();
   const { currentProject } = useProjectStore();
 
-  let title = currentProject?.name || "Resolver AI";
+  let title = currentProject?.name || "Spectra AI";
   let subtitle = currentProject ? "ACTIVE PROJECT" : "";
 
   if (role === "bde") {
