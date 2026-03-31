@@ -5,6 +5,7 @@ const useProjectStore = create((set, get) => ({
     projects: [],
     currentProject: null,
     projectStats: null,
+    bdeStats: null,
     loading: false,
     error: null,
 
@@ -33,6 +34,15 @@ const useProjectStore = create((set, get) => ({
             set({ projectStats: response.data });
         } catch (error) {
             console.error("Failed to fetch project stats:", error);
+        }
+    },
+
+    fetchBdeStats: async () => {
+        try {
+            const response = await api.get("/projects/bde/stats");
+            set({ bdeStats: response.data });
+        } catch (error) {
+            console.error("Failed to fetch BDE stats:", error);
         }
     },
 

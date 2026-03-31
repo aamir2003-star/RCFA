@@ -22,8 +22,16 @@ export const createProject = async (req, res) => {
 // GET ALL with Pagination
 export const getAllProjects = async (req, res) => {
   try {
-    const { page, limit, sort } = req.query;
-    const projects = await projectService.getAllProjects({ page, limit, sort });
+    const { page, limit, sort, createdBy } = req.query;
+    // Auto-filter by user if BDE, or allow override if admin
+    const filterBy = req.user?.role === 'BDE' ? req.user._id : createdBy;
+
+    const projects = await projectService.getAllProjects({
+      page,
+      limit,
+      sort,
+      createdBy: filterBy
+    });
     res.json(projects);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -34,6 +42,20 @@ export const getAllProjects = async (req, res) => {
 export const getProjectStats = async (req, res) => {
   try {
     const stats = await projectService.getProjectStats(req.params.id);
+    res.json(stats);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// GET BDE DASHBOARD STATS
+export const getBdeStats = async (req, res) => {
+  try {
+    const userId = req.user?._id || req.query.userId; // Prefer req.user from auth middleware
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+    const stats = await projectService.getBdeStats(userId);
     res.json(stats);
   } catch (error) {
     res.status(500).json({ message: error.message });
