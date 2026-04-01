@@ -99,9 +99,9 @@ const useProjectStore = create((set, get) => ({
         }
     },
 
-    fetchProjectStats: async (projectId) => {
+    fetchProjectStats: async (projectId, timeframe = 'WEEKLY') => {
         try {
-            const response = await api.get(`/projects/${projectId}/stats`);
+            const response = await api.get(`/projects/${projectId}/stats?timeframe=${timeframe}`);
             set({ projectStats: response.data });
         } catch (error) {
             console.error("Failed to fetch project stats:", error);

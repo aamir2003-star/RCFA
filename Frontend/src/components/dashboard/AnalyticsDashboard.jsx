@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Download, FileText, Rocket, AlertTriangle, CheckCircle2, AlertCircle, Clock, BarChart } from 'lucide-react';
 import useProjectStore from '../../stores/useProjectStore';
+import {
+  ANALYTICS_TIMEFRAMES,
+  TIMEFRAME_SUBHEADERS,
+  DEFAULT_SUBHEADER,
+  ANALYTICS_STATS_TEMPLATE,
+  SEVERITY_BREAKDOWN_TEMPLATE
+} from '../../constants/analytics';
 
 const IconMap = {
   FileText, Rocket, AlertTriangle, CheckCircle2, AlertCircle, Clock
@@ -38,15 +45,17 @@ const StatCard = ({ title, value, change, isPositive, iconName, colorClass, prog
   );
 };
 
-const ConflictTrendsChart = ({ timeline }) => {
+const ConflictTrendsChart = ({ timeline, timeframe }) => {
   const max = Math.max(...(timeline?.map(t => t.count) || [0]), 10);
+
+  const subheader = TIMEFRAME_SUBHEADERS[timeframe] || DEFAULT_SUBHEADER;
 
   return (
     <div className="bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/5 dark:shadow-none col-span-1 lg:col-span-2 relative min-h-[300px] flex flex-col">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Detection Timeline</h3>
-          <p className="text-xs text-slate-500 font-medium">Daily conflict detection volume over the last 7 days.</p>
+          <p className="text-xs text-slate-500 font-medium">{subheader}</p>
         </div>
         <div className="flex items-center space-x-4">
           <div className="flex items-center">
@@ -71,7 +80,14 @@ const ConflictTrendsChart = ({ timeline }) => {
                 </div>
               </div>
               <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter truncate w-full text-center">
-                {new Date(item._id).toLocaleDateString(undefined, { weekday: 'short' })}
+                {item._id.includes(':')
+                  ? (() => {
+                    const hour = parseInt(item._id.split(' ')[1].split(':')[0]);
+                    const ampm = hour >= 12 ? 'PM' : 'AM';
+                    return `${hour % 12 || 12} ${ampm}`;
+                  })()
+                  : new Date(item._id).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' })
+                }
               </span>
             </div>
           ))
@@ -136,8 +152,8 @@ const ActivityLog = ({ activity }) => (
         activity.map((item, index) => (
           <div key={index} className="flex items-center p-4 rounded-2xl bg-slate-50/50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/[0.05] group hover:border-indigo-500/30 transition-all">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-4 shrink-0 shadow-sm ${item.severity === 'Red' ? 'bg-rose-500/10 text-rose-500' :
-                item.severity === 'Orange' ? 'bg-amber-500/10 text-amber-500' :
-                  'bg-emerald-500/10 text-emerald-500'
+              item.severity === 'Orange' ? 'bg-amber-500/10 text-amber-500' :
+                'bg-emerald-500/10 text-emerald-500'
               }`}>
               <AlertCircle className="w-5 h-5" />
             </div>
@@ -169,58 +185,38 @@ const ActivityLog = ({ activity }) => (
 const AnalyticsDashboard = () => {
   const { currentProject, projectStats, fetchProjectStats } = useProjectStore();
   const [isLoading, setIsLoading] = useState(false);
+  const [timeframe, setTimeframe] = useState(ANALYTICS_TIMEFRAMES.WEEKLY);
 
   useEffect(() => {
     if (currentProject?._id) {
       setIsLoading(true);
-      fetchProjectStats(currentProject._id).finally(() => setIsLoading(false));
+      fetchProjectStats(currentProject._id, timeframe).finally(() => setIsLoading(false));
     }
-  }, [currentProject?._id, fetchProjectStats]);
+  }, [currentProject?._id, timeframe, fetchProjectStats]);
 
   const stats = projectStats || {};
   const conflictTotal = stats.conflicts?.total || 0;
 
-  const dynamicCards = [
-    {
-      title: "Requirement Clarity",
-      tooltip: "% of specifications peer-reviewed or AI-approved.",
-      value: `${stats.requirements?.clarity || 0}%`,
-      change: "+2% drift",
-      isPositive: true,
-      iconName: "FileText",
-      colorClass: "bg-emerald-500/10 text-emerald-500",
-      progressClass: "bg-emerald-500",
-      progressValue: `${stats.requirements?.clarity || 0}%`
-    },
-    {
-      title: "AI Readiness Score",
-      tooltip: "Combined metric of specification health vs. open conflicts.",
-      value: `${stats.readiness || 0}%`,
-      change: stats.readiness > 70 ? "Stable" : "Critical",
-      isPositive: stats.readiness > 70,
-      iconName: "Rocket",
-      colorClass: "bg-indigo-500/10 text-indigo-500",
-      progressClass: "bg-indigo-500",
-      progressValue: `${stats.readiness || 0}%`
-    },
-    {
-      title: "Detection Volume",
-      tooltip: "Total number of live conflicts identified by the system.",
-      value: conflictTotal.toString(),
-      change: `${stats.conflicts?.high || 0} Critical`,
-      isPositive: (stats.conflicts?.high || 0) === 0,
-      iconName: "AlertTriangle",
-      colorClass: "bg-rose-500/10 text-rose-500",
-      progressClass: "bg-rose-500",
-      progressValue: conflictTotal > 0 ? "100%" : "0%"
-    }
-  ];
+  const dynamicCards = ANALYTICS_STATS_TEMPLATE.map(template => {
+    // Helper to get nested values
+    const getValue = (obj, path) => path.split('.').reduce((acc, part) => acc && acc[part], obj);
+    const value = getValue(stats, template.keyPath) || 0;
 
-  const severityBreakdown = [
-    { type: "Critical Blockers", percentage: conflictTotal > 0 ? Math.round((stats.conflicts?.high / conflictTotal) * 100) : 0, colorClass: "bg-rose-500" },
-    { type: "Moderate Friction", percentage: conflictTotal > 0 ? Math.round((stats.conflicts?.medium / conflictTotal) * 100) : 0, colorClass: "bg-amber-500" },
-    { type: "Minor Inconsistencies", percentage: conflictTotal > 0 ? Math.round((stats.conflicts?.low / conflictTotal) * 100) : 0, colorClass: "bg-indigo-500" }
-  ];
+    return {
+      ...template,
+      value: template.keyPath === 'conflicts.total' ? value.toString() : `${value}%`,
+      change: template.keyPath === 'readiness' ? (value > 70 ? "Stable" : "Critical") :
+        template.keyPath === 'conflicts.total' ? `${stats.conflicts?.high || 0} Critical` : "+2% drift",
+      isPositive: template.keyPath === 'conflicts.total' ? (stats.conflicts?.high || 0) === 0 : value > 70,
+      progressValue: template.keyPath === 'conflicts.total' ? (value > 0 ? "100%" : "0%") : `${value}%`
+    };
+  });
+
+  const severityBreakdown = SEVERITY_BREAKDOWN_TEMPLATE.map(template => ({
+    type: template.label,
+    percentage: conflictTotal > 0 ? Math.round((stats.conflicts?.[template.key] / conflictTotal) * 100) : 0,
+    colorClass: template.colorClass
+  }));
 
   if (!currentProject) {
     return (
@@ -254,9 +250,18 @@ const AnalyticsDashboard = () => {
           <p className="text-sm text-slate-500 font-medium">Diagnostic health metrics and behavior analysis for <span className="text-indigo-600 font-bold underline decoration-indigo-500/30 underline-offset-4">{currentProject?.name}</span></p>
         </div>
         <div className="flex items-center bg-white/50 dark:bg-white/[0.02] p-1.5 rounded-2xl border border-slate-200 dark:border-white/[0.05] shadow-sm">
-          <button className="px-4 py-2 text-xs font-black text-slate-400 uppercase tracking-widest hover:text-slate-900 dark:hover:text-white transition-colors">Daily</button>
-          <button className="px-6 py-2 bg-white dark:bg-slate-800 text-xs font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest rounded-xl shadow-sm border border-slate-100 dark:border-white/[0.05]">Weekly</button>
-          <button className="px-4 py-2 text-xs font-black text-slate-400 uppercase tracking-widest hover:text-slate-900 dark:hover:text-white transition-colors">Monthly</button>
+          {Object.values(ANALYTICS_TIMEFRAMES).map((tf) => (
+            <button
+              key={tf}
+              onClick={() => setTimeframe(tf)}
+              className={`px-4 py-2 text-xs font-black uppercase tracking-widest transition-all duration-300 rounded-xl ${timeframe === tf
+                ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-100 dark:border-white/[0.05]'
+                : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+            >
+              {tf.charAt(0) + tf.slice(1).toLowerCase()}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -269,7 +274,7 @@ const AnalyticsDashboard = () => {
 
       {/* Main Charts Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <ConflictTrendsChart timeline={stats.timeline} />
+        <ConflictTrendsChart timeline={stats.timeline} timeframe={timeframe} />
         <ConflictsByType data={severityBreakdown} stats={stats} />
       </div>
 

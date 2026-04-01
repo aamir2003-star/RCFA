@@ -3,6 +3,7 @@ import { Button } from "../ui/Button.jsx";
 import { Plus, ChevronRight, MoreHorizontal, ArrowUpRight, Folder, Layout, Users, FileText, AlertCircle, Inbox, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import useProjectStore from "../../stores/useProjectStore";
+import { BDE_STATS_TEMPLATE, PROJECT_STATUS_COLORS } from "../../constants/dashboard";
 
 export default function BdeDashboard() {
   const navigate = useNavigate();
@@ -30,41 +31,10 @@ export default function BdeDashboard() {
     }
   };
 
-  const statsConfig = [
-    {
-      title: "Total Projects",
-      value: bdeStats?.totalProjects || 0,
-      icon: Layout,
-      color: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
-      subtext: "Across all clients",
-      subtextColor: "text-slate-500"
-    },
-    {
-      title: "Active Clients",
-      value: bdeStats?.activeClients || 0,
-      icon: Users,
-      color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-      subtext: "Engaged current",
-      subtextColor: "text-slate-500"
-    },
-    {
-      title: "Conflicts Found",
-      value: bdeStats?.totalConflicts || 0,
-      icon: AlertCircle,
-      color: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-      subtext: "Detected by AI",
-      subtextColor: "text-amber-600"
-    },
-    {
-      title: "Total Requirements",
-      value: bdeStats?.totalRequirements || 0,
-      icon: FileText,
-      color: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
-      subtext: "Defined to date",
-      subtextColor: "text-slate-500",
-      isProgress: false
-    }
-  ];
+  const statsConfig = BDE_STATS_TEMPLATE.map(stat => ({
+    ...stat,
+    value: bdeStats?.[stat.key] || 0
+  }));
 
   const hasProjects = projects && projects.length > 0;
 
@@ -167,10 +137,7 @@ export default function BdeDashboard() {
                     <Folder className="w-5 h-5" />
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${proj.status === 'active' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
-                      proj.status === 'planning' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' :
-                        'bg-slate-50 text-slate-600 border border-slate-100'
-                      }`}>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${PROJECT_STATUS_COLORS[proj.status] || PROJECT_STATUS_COLORS.default}`}>
                       {proj.status}
                     </span>
                     <button

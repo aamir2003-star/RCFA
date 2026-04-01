@@ -62,7 +62,42 @@ const useAuthStore = create((set) => ({
     updateUser: (user) => {
         localStorage.setItem("spectra-ai-user", JSON.stringify(user));
         set({ user });
+    },
+
+    updateProfile: async (profileData) => {
+        try {
+            const response = await api.put("/auth/profile", profileData);
+            const { user } = response.data;
+            localStorage.setItem("spectra-ai-user", JSON.stringify(user));
+            set({ user });
+            return { success: true };
+        } catch (error) {
+            return {
+                success: false,
+                message: error.response?.data?.message || "Profile update failed"
+            };
+        }
+    },
+
+    updateAvatar: async (formData) => {
+        try {
+            const response = await api.post("/auth/avatar", formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            const { user } = response.data;
+            localStorage.setItem("spectra-ai-user", JSON.stringify(user));
+            set({ user });
+            return { success: true };
+        } catch (error) {
+            return {
+                success: false,
+                message: error.response?.data?.message || "Avatar update failed"
+            };
+        }
     }
 }));
+
 
 export default useAuthStore;

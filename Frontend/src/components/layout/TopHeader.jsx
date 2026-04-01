@@ -89,11 +89,20 @@ export function TopHeader({ role, onMenuClick }) {
                 <div className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{profileName}</div>
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{profileRole}</div>
               </div>
-              <Avatar className="w-9 h-9 border-2 border-transparent group-hover:border-indigo-500 transition-all shadow-sm">
-                <AvatarFallback className="bg-linear-to-tr from-indigo-500 to-blue-500 text-white font-black text-xs uppercase">
-                  {profileInitials}
-                </AvatarFallback>
+              <Avatar className="w-9 h-9 border-2 border-transparent group-hover:border-indigo-500 transition-all shadow-sm overflow-hidden">
+                {user?.avatar ? (
+                  <img
+                    src={`http://localhost:3000${user.avatar}`}
+                    alt={profileName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <AvatarFallback className="bg-linear-to-tr from-indigo-500 to-blue-500 text-white font-black text-xs uppercase">
+                    {profileInitials}
+                  </AvatarFallback>
+                )}
               </Avatar>
+
             </div>
           }
           className="w-48 mt-4 p-2 rounded-2xl border border-slate-200 dark:border-slate-800"

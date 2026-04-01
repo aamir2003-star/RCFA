@@ -5,6 +5,7 @@ import useProjectStore from '../stores/useProjectStore';
 import useConflictStore from '../stores/useConflictStore';
 import useAuthStore from '../stores/useAuthStore';
 import api from '../lib/api';
+import { PROJECT_FORM_INITIAL_STATE, PROJECT_FORM_FIELDS } from '../constants/projects';
 
 export default function CreateProject() {
   const navigate = useNavigate();
@@ -13,14 +14,7 @@ export default function CreateProject() {
   const { analysisProgress, resetAnalysisProgress, subscribeToConflicts, unsubscribeFromConflicts } = useConflictStore();
 
   const [projectManagers, setProjectManagers] = useState([]);
-  const [formData, setFormData] = useState({
-    name: '',
-    clientName: '',
-    description: '',
-    timeline: '',
-    budget: '',
-    projectManager: ''
-  });
+  const [formData, setFormData] = useState(PROJECT_FORM_INITIAL_STATE);
   const [requirementFile, setRequirementFile] = useState(null);
   const [showProgress, setShowProgress] = useState(false);
 
@@ -69,14 +63,11 @@ export default function CreateProject() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Comprehensive Validation
-    const missingFields = [];
-    if (!formData.name) missingFields.push("Project Name");
-    if (!formData.clientName) missingFields.push("Client Name");
-    if (!formData.description) missingFields.push("Project Overview");
-    if (!formData.timeline) missingFields.push("Expected Timeline");
-    if (!formData.budget) missingFields.push("Budget");
-    if (!formData.projectManager) missingFields.push("Project Manager Assignment");
+    // Comprehensive Validation using constants
+    const missingFields = PROJECT_FORM_FIELDS
+      .filter(f => f.required && !formData[f.name] && (f.name !== 'requirementFile')) // requirementFile is handled separately
+      .map(f => f.label);
+
     if (!requirementFile) missingFields.push("Requirement CSV File");
 
     if (missingFields.length > 0) {

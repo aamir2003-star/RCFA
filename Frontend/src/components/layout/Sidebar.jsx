@@ -2,23 +2,9 @@
 /* eslint-disable react-hooks/static-components */
 import React from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Layers, X as CloseIcon, Activity } from "lucide-react";
 import { cn } from "../../lib/utils.js";
-import {
-  Layers,
-  Folder,
-  Users,
-  BarChart,
-  Settings,
-  LayoutDashboard,
-  FileText,
-  AlertTriangle,
-  MessageSquare,
-  Box,
-  History,
-  Activity,
-  X,
-  Briefcase
-} from "lucide-react";
+import { NAV_ITEMS } from "../../constants/navigation";
 import useAuthStore from "../../stores/useAuthStore";
 import useProjectStore from "../../stores/useProjectStore";
 
@@ -85,7 +71,7 @@ export function Sidebar({ role, isOpen, onClose }) {
           onClick={onClose}
           className="lg:hidden absolute top-6 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
         >
-          <X className="w-5 h-5" />
+          <CloseIcon className="w-5 h-5" />
         </button>
         <div
           onClick={handleHeaderClick}
@@ -107,86 +93,21 @@ export function Sidebar({ role, isOpen, onClose }) {
       </div>
 
       <nav className="flex-1 px-4 py-2 flex flex-col gap-2 overflow-y-auto custom-scrollbar">
-        {role === "dev" && (
-          <>
-            <SidebarLink
-              to="/dev/dashboard"
-              icon={LayoutDashboard}
-              label="Dashboard"
-            />
-            <SidebarLink to="/dev/modules" icon={Box} label="My Modules" />
-            <SidebarLink to="/dev/editor" icon={FileText} label="Specifications" />
-            <SidebarLink to="/dev/vault" icon={Layers} label="Technical Vault" />
-            <SidebarLink
-              to="/dev/conflicts"
-              icon={AlertTriangle}
-              label="Conflicts"
-              badge={4}
-            />
-            <SidebarLink
-              to="/dev/discussions"
-              icon={MessageSquare}
-              label="Discussions"
-            />
-            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-6 mb-2 px-3">
-              SYSTEMS
+        {NAV_ITEMS[role]?.map((item, index) => (
+          item.type === 'separator' ? (
+            <div key={index} className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-6 mb-2 px-3">
+              {item.label}
             </div>
-            <SidebarLink to="/dev/settings" icon={Settings} label="Settings" />
-          </>
-        )}
-
-        {role === "pm" && (
-          <>
+          ) : (
             <SidebarLink
-              to="/pm/dashboard"
-              icon={LayoutDashboard}
-              label="Dashboard"
+              key={item.to}
+              to={item.to}
+              icon={item.icon}
+              label={item.label}
+              badge={item.badge}
             />
-            <SidebarLink
-              to="/pm/workspace"
-              icon={Box}
-              label="Workspace"
-            />
-            <SidebarLink
-              to="/pm/editor"
-              icon={FileText}
-              label="Requirements"
-            />
-            <SidebarLink
-              to="/pm/conflicts"
-              icon={AlertTriangle}
-              label="Conflicts"
-              badge={12}
-            />
-            <SidebarLink
-              to="/pm/timeline"
-              icon={History}
-              label="Timeline"
-            />
-            <SidebarLink to="/pm/analytics" icon={BarChart} label="Analytics" />
-            <SidebarLink to="/pm/team" icon={Users} label="Team" />
-            <SidebarLink to="/pm/settings" icon={Settings} label="Settings" />
-          </>
-        )}
-
-        {role === "bde" && (
-          <>
-            <SidebarLink
-              to="/bde/dashboard"
-              icon={LayoutDashboard}
-              label="Dashboard"
-            />
-            <SidebarLink to="/bde/projects" icon={Folder} label="Projects" />
-            {/* <SidebarLink to="/bde/reports" icon={FileText} label="Reporting" /> */}
-            <SidebarLink to="/bde/teams" icon={Users} label="Teams" />
-            <SidebarLink
-              to="/bde/analytics"
-              icon={BarChart}
-              label="Analytics"
-            />
-            <SidebarLink to="/bde/settings" icon={Settings} label="Settings" />
-          </>
-        )}
+          )
+        ))}
       </nav>
 
       {/* Status indicators bottom */}

@@ -1,24 +1,56 @@
-import React from "react";
-import {
-    User,
-    Settings,
-    Shield,
-    Globe,
-    Terminal,
-    Key,
-    Cpu,
-    Save,
-    ChevronRight,
-    Github
-} from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import useAuthStore from "../stores/useAuthStore";
+import { toast } from "react-hot-toast";
+import { Settings, Cpu, Save, ChevronRight, Github } from "lucide-react";
 import { cn } from "../lib/utils";
+import { SETTINGS_NAV_ITEMS, DEV_ENVIRONMENT_PREFERENCES } from "../constants/settings";
 
 export default function DevSettings() {
-    const profile = {
-        name: "Alex Rivera",
-        role: "Senior Full Stack Developer",
-        email: "alex.dev@spectra.ai",
-        avatar: "https://i.pravatar.cc/100?u=liam"
+    const { user, updateProfile, updateAvatar } = useAuthStore();
+    const [name, setName] = useState(user?.name || "");
+    const [email, setEmail] = useState(user?.email || "");
+    const [loading, setLoading] = useState(false);
+    const fileInputRef = useRef(null);
+
+    useEffect(() => {
+        if (user) {
+            setName(user.name || "");
+            setEmail(user.email || "");
+        }
+    }, [user]);
+
+    const handleAvatarClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleAvatarChange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("avatar", file);
+
+        setLoading(true);
+        const result = await updateAvatar(formData);
+        setLoading(false);
+
+        if (result.success) {
+            toast.success("Avatar updated successfully");
+        } else {
+            toast.error(result.message);
+        }
+    };
+
+    const handleSave = async () => {
+        setLoading(true);
+        const result = await updateProfile({ name, email });
+        setLoading(false);
+
+        if (result.success) {
+            toast.success("Profile updated successfully");
+        } else {
+            toast.error(result.message);
+        }
     };
 
     return (
@@ -34,11 +66,9 @@ export default function DevSettings() {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 {/* Nav */}
                 <div className="space-y-2">
-                    <SettingsTab icon={User} label="General Profile" active />
-                    <SettingsTab icon={Terminal} label="IDE Sync" />
-                    <SettingsTab icon={Key} label="API Access" />
-                    <SettingsTab icon={Shield} label="Security" />
-                    <SettingsTab icon={Globe} label="Localization" />
+                    {SETTINGS_NAV_ITEMS.dev.map((item, idx) => (
+                        <SettingsTab key={item.id} icon={item.icon} label={item.label} active={idx === 0} />
+                    ))}
                 </div>
 
                 {/* Content */}
@@ -46,15 +76,32 @@ export default function DevSettings() {
                     {/* Profile Card */}
                     <div className="bg-white/50 dark:bg-[#0f1115]/50 backdrop-blur-md rounded-3xl border border-slate-200 dark:border-slate-800 p-8 shadow-2xl shadow-slate-200/5 dark:shadow-none space-y-8">
                         <div className="flex items-center gap-8">
-                            <div className="relative group cursor-pointer">
-                                <img src={profile.avatar} className="w-24 h-24 rounded-3xl object-cover border-4 border-white dark:border-slate-800 shadow-xl group-hover:scale-105 transition-transform" alt="avatar" />
-                                <div className="absolute inset-0 bg-black/40 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
+                                {user?.avatar ? (
+                                    <img
+                                        src={`http://localhost:3000${user.avatar}`}
+                                        className="w-24 h-24 rounded-3xl object-cover border-4 border-white dark:border-slate-800 shadow-xl group-hover:opacity-75 transition-opacity"
+                                        alt="avatar"
+                                    />
+                                ) : (
+                                    <div className="w-24 h-24 rounded-3xl bg-linear-to-tr from-indigo-500 to-blue-500 flex items-center justify-center text-white text-2xl font-black border-4 border-white dark:border-slate-800 shadow-xl group-hover:opacity-75 transition-opacity">
+                                        {user?.name?.charAt(0).toUpperCase() || "U"}
+                                    </div>
+                                )}
+                                <div className="absolute inset-0 bg-black/40 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                                     <Save className="w-6 h-6 text-white" />
                                 </div>
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    onChange={handleAvatarChange}
+                                    className="hidden"
+                                    accept="image/*"
+                                />
                             </div>
                             <div className="flex-1">
-                                <h3 className="text-xl font-bold text-slate-900 dark:text-white">{profile.name}</h3>
-                                <p className="text-slate-500 dark:text-slate-400 font-medium">{profile.role}</p>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white">{user?.name}</h3>
+                                <p className="text-slate-500 dark:text-slate-400 font-medium tracking-tight uppercase text-xs font-black">{user?.role}</p>
                                 <div className="flex items-center gap-2 mt-3">
                                     <span className="px-2 py-0.5 rounded-lg bg-indigo-500/10 text-indigo-500 text-[10px] font-black uppercase tracking-widest border border-indigo-500/20">Maintainer</span>
                                     <span className="px-2 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20">Verified</span>
@@ -63,8 +110,24 @@ export default function DevSettings() {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <InputGroup label="User Identifier" value="arivera_dev" />
-                            <InputGroup label="Primary Email" value={profile.email} />
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Full Name</label>
+                                <input
+                                    type="text"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/40 transition-all shadow-sm"
+                                />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Work Email</label>
+                                <input
+                                    type="text"
+                                    value={email}
+                                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/40 transition-all shadow-sm opacity-75 cursor-not-allowed"
+                                    disabled
+                                />
+                            </div>
                             <InputGroup label="Technical Stack" value="Node.js, React, Postgres" />
                             <div className="space-y-1.5 flex flex-col">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">GitHub Account</label>
@@ -83,16 +146,20 @@ export default function DevSettings() {
                                 Environment Preferences
                             </h4>
                             <div className="space-y-4">
-                                <ToggleItem label="Enable AI-Vault Sync" desc="Automatically back up conflict resolution patterns to the private cloud." enabled />
-                                <ToggleItem label="Real-time Pipeline Webhooks" desc="Receive atomic updates on module contradiction spikes." enabled />
-                                <ToggleItem label="Developer Analytics" desc="Share anonymous performance metrics to improve the Conflict AI model." />
+                                {DEV_ENVIRONMENT_PREFERENCES.map((pref) => (
+                                    <ToggleItem key={pref.id} label={pref.label} desc={pref.desc} enabled={pref.enabled} />
+                                ))}
                             </div>
                         </div>
 
                         <div className="pt-6 flex justify-end">
-                            <button className="flex items-center gap-2 bg-[#1e2532] dark:bg-white text-white dark:text-[#1e2532] font-black px-10 py-3.5 rounded-2xl shadow-xl active:scale-95 transition-all text-xs uppercase tracking-widest">
+                            <button
+                                onClick={handleSave}
+                                disabled={loading}
+                                className="flex items-center gap-2 bg-[#1e2532] dark:bg-white text-white dark:text-[#1e2532] font-black px-10 py-3.5 rounded-2xl shadow-xl active:scale-95 disabled:opacity-50 disabled:active:scale-100 transition-all text-xs uppercase tracking-widest"
+                            >
                                 <Save className="w-4 h-4" />
-                                Update Configuration
+                                {loading ? "Updating..." : "Update Configuration"}
                             </button>
                         </div>
                     </div>
@@ -101,6 +168,7 @@ export default function DevSettings() {
         </div>
     );
 }
+
 
 function SettingsTab({ icon: Icon, label, active }) {
     return (

@@ -15,6 +15,7 @@ import {
 import api from "../lib/api";
 import useProjectStore from "../stores/useProjectStore";
 import { cn } from "../lib/utils";
+import { PM_DIRECTORY_STATS_TEMPLATE } from "../constants/dashboard";
 
 export default function BdeTeams() {
     const [pms, setPms] = useState([]);
@@ -52,34 +53,18 @@ export default function BdeTeams() {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard
-                    icon={Users}
-                    label="Total PMs"
-                    value={pms.length}
-                    color="text-blue-500"
-                    sub="Active Directors"
-                />
-                <StatCard
-                    icon={Briefcase}
-                    label="Assigned Projects"
-                    value={bdeStats?.totalProjects || 0}
-                    color="text-emerald-500"
-                    sub="Across Portfolio"
-                />
-                <StatCard
-                    icon={AlertCircle}
-                    label="Ongoing Conflicts"
-                    value={bdeStats?.totalConflicts || 0}
-                    color="text-rose-500"
-                    sub="Requiring Triage"
-                />
-                <StatCard
-                    icon={TrendingUp}
-                    label="Avg. Project Load"
-                    value={`${(bdeStats?.totalProjects / (pms.length || 1)).toFixed(1)}`}
-                    color="text-amber-500"
-                    sub="Projects / PM"
-                />
+                {PM_DIRECTORY_STATS_TEMPLATE.map((stat, i) => (
+                    <StatCard
+                        key={i}
+                        icon={stat.icon}
+                        label={stat.label}
+                        value={stat.key === 'pmsCount' ? pms.length :
+                            stat.key === 'avgLoad' ? (bdeStats?.totalProjects / (pms.length || 1)).toFixed(1) :
+                                bdeStats?.[stat.key] || 0}
+                        color={stat.color}
+                        sub={stat.sub}
+                    />
+                ))}
             </div>
 
             {/* Project Managers List */}

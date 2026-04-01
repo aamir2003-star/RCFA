@@ -27,26 +27,17 @@ import {
 import { Button } from "../components/ui/Button";
 import useProjectStore from "../stores/useProjectStore";
 import { cn } from "../lib/utils";
+import {
+    REQUIREMENT_CATEGORIES,
+    REQUIREMENT_PRIORITIES,
+    STAKEHOLDERS,
+    AI_ASSISTANT_CARDS_TEMPLATE
+} from "../constants/requirements";
+
+const IconMap = { AlertTriangle, Zap };
 
 // Mock AI assistant data for premium feel
-const aiAssistantCards = [
-    {
-        id: 1,
-        title: "Conflict Detected",
-        desc: "This requirement conflicts with REQ-042 regarding data encryption standards.",
-        icon: AlertTriangle,
-        color: "bg-red-50 dark:bg-red-900/10 border-red-100 dark:border-red-900/20 text-red-600 dark:text-red-400",
-        action: "Resolve Now"
-    },
-    {
-        id: 2,
-        title: "Optimization Tip",
-        desc: "Consider merging this with REQ-105 to reduce database overhead.",
-        icon: Zap,
-        color: "bg-indigo-50 dark:bg-indigo-900/10 border-indigo-100 dark:border-indigo-900/20 text-indigo-600 dark:text-indigo-400",
-        action: "Apply Suggestion"
-    }
-];
+
 
 export default function RequirementEditor({ role = "bde" }) {
     const [searchParams] = useSearchParams();
@@ -71,9 +62,9 @@ export default function RequirementEditor({ role = "bde" }) {
     const [formData, setFormData] = useState({
         title: "",
         description: "",
-        priority: "medium",
-        category: "Functional",
-        stakeholder: "Developer"
+        priority: REQUIREMENT_PRIORITIES[1].value, // medium
+        category: REQUIREMENT_CATEGORIES[0], // Functional
+        stakeholder: STAKEHOLDERS[0].value // Developer
     });
 
     useEffect(() => {
@@ -105,9 +96,9 @@ export default function RequirementEditor({ role = "bde" }) {
         setFormData({
             title: "",
             description: "",
-            priority: "medium",
-            category: "Functional",
-            stakeholder: "Developer"
+            priority: REQUIREMENT_PRIORITIES[1].value,
+            category: REQUIREMENT_CATEGORIES[0],
+            stakeholder: STAKEHOLDERS[0].value
         });
     };
 
@@ -340,10 +331,9 @@ export default function RequirementEditor({ role = "bde" }) {
                                                 onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
                                                 className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-4 pr-10 py-3 text-[13px] font-bold outline-none focus:border-indigo-500 transition-all appearance-none cursor-pointer shadow-sm"
                                             >
-                                                <option value="low">Low Priority</option>
-                                                <option value="medium">Medium Priority</option>
-                                                <option value="high">High Priority</option>
-                                                <option value="critical">Critical Path</option>
+                                                {REQUIREMENT_PRIORITIES.map(p => (
+                                                    <option key={p.value} value={p.value}>{p.label}</option>
+                                                ))}
                                             </select>
                                             <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 rotate-90 text-slate-400 pointer-events-none" />
                                         </div>
@@ -355,11 +345,9 @@ export default function RequirementEditor({ role = "bde" }) {
                                                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                                 className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-4 pr-10 py-3 text-[13px] font-bold outline-none focus:border-indigo-500 transition-all appearance-none cursor-pointer shadow-sm"
                                             >
-                                                <option value="Functional">Functional Req</option>
-                                                <option value="Performance">Performance</option>
-                                                <option value="Security">Security Protocol</option>
-                                                <option value="Cost">Cost Optimization</option>
-                                                <option value="Scalability">Scalability</option>
+                                                {REQUIREMENT_CATEGORIES.map(cat => (
+                                                    <option key={cat} value={cat}>{cat}</option>
+                                                ))}
                                             </select>
                                             <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 rotate-90 text-slate-400 pointer-events-none" />
                                         </div>
@@ -371,11 +359,9 @@ export default function RequirementEditor({ role = "bde" }) {
                                                 onChange={(e) => setFormData({ ...formData, stakeholder: e.target.value })}
                                                 className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-4 pr-10 py-3 text-[13px] font-bold outline-none focus:border-indigo-500 transition-all appearance-none cursor-pointer shadow-sm"
                                             >
-                                                <option value="Developer">Lead Developer</option>
-                                                <option value="Architect">System Architect</option>
-                                                <option value="PM">Project Manager</option>
-                                                <option value="Security">Security Auditor</option>
-                                                <option value="Legal">Compliance Officer</option>
+                                                {STAKEHOLDERS.map(s => (
+                                                    <option key={s.value} value={s.value}>{s.label}</option>
+                                                ))}
                                             </select>
                                             <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 rotate-90 text-slate-400 pointer-events-none" />
                                         </div>
@@ -413,19 +399,22 @@ export default function RequirementEditor({ role = "bde" }) {
                                 </div>
 
                                 <div className="space-y-4">
-                                    {aiAssistantCards.map((card) => (
-                                        <div key={card.id} className={cn("p-4 rounded-2xl border transition-all duration-300 group hover:-translate-y-1", card.color)}>
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <card.icon className="w-4 h-4" />
-                                                <span className="text-[10px] font-black uppercase tracking-widest">{card.title}</span>
+                                    {AI_ASSISTANT_CARDS_TEMPLATE.map((card) => {
+                                        const Icon = IconMap[card.iconName] || Sparkles;
+                                        return (
+                                            <div key={card.id} className={cn("p-4 rounded-2xl border transition-all duration-300 group hover:-translate-y-1", card.color)}>
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Icon className="w-4 h-4" />
+                                                    <span className="text-[10px] font-black uppercase tracking-widest">{card.title}</span>
+                                                </div>
+                                                <p className="text-[12px] font-medium leading-relaxed opacity-90 mb-3">{card.desc}</p>
+                                                <button className="text-[11px] font-black flex items-center gap-1 hover:gap-2 transition-all">
+                                                    {card.action}
+                                                    <ChevronRight className="w-3 h-3" />
+                                                </button>
                                             </div>
-                                            <p className="text-[12px] font-medium leading-relaxed opacity-90 mb-3">{card.desc}</p>
-                                            <button className="text-[11px] font-black flex items-center gap-1 hover:gap-2 transition-all">
-                                                {card.action}
-                                                <ChevronRight className="w-3 h-3" />
-                                            </button>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
 
                                 <div className="pt-6 border-t border-slate-100 dark:border-slate-800 space-y-3">

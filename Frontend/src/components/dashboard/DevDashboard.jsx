@@ -2,11 +2,11 @@ import React from "react";
 import { Button } from "../ui/Button.jsx";
 import { Bug, FileText, Bot, ArrowRight } from "lucide-react";
 import {
-  devActiveConflicts,
-  devModules,
-  devStats,
-  devTimeline,
-} from "../../lib/features_utils.js";
+  DEV_STATS_TEMPLATE,
+  DEV_MODULES_TEMPLATE,
+  DEV_ACTIVE_CONFLICTS_TEMPLATE,
+  DEV_TIMELINE_TEMPLATE,
+} from "../../constants/developer";
 
 export default function DevDashboard() {
   return (
@@ -23,21 +23,20 @@ export default function DevDashboard() {
           You have{" "}
           <span className="text-slate-900 dark:text-white font-bold">
             4 unresolved conflicts
-          </span>{" "}  
+          </span>{" "}
           requiring immediate pipeline attention today.
         </p>
       </div>
 
       {/* Stats row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
-        {devStats.map((stat, i) => (
+        {DEV_STATS_TEMPLATE.map((stat, i) => (
           <div
             key={i}
-            className={`bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md rounded-2xl p-5 shadow-lg shadow-slate-200/20 dark:shadow-none border border-slate-200 dark:border-slate-800 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-500/30 transition-all duration-300 ${
-              stat.title === "PENDING CONFLICTS"
-                ? "border-l-4 border-l-red-500/80 shadow-red-500/10"
-                : ""
-            }`}
+            className={`bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md rounded-2xl p-5 shadow-lg shadow-slate-200/20 dark:shadow-none border border-slate-200 dark:border-slate-800 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-500/30 transition-all duration-300 ${stat.title === "PENDING CONFLICTS"
+              ? "border-l-4 border-l-red-500/80 shadow-red-500/10"
+              : ""
+              }`}
           >
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-[11px] font-black tracking-wider text-slate-500 dark:text-slate-400 uppercase">
@@ -55,20 +54,19 @@ export default function DevDashboard() {
               </div>
               {!stat.isProgress ? (
                 <p
-                  className={`text-xs mt-2 font-bold ${
-                    stat.title === "PENDING CONFLICTS"
-                      ? "text-red-500"
-                      : "text-emerald-500"
-                  }`}
+                  className={`text-xs mt-2 font-bold ${stat.title === "PENDING CONFLICTS"
+                    ? "text-red-500"
+                    : "text-emerald-500"
+                    }`}
                 >
                   {stat.subtext}
                 </p>
               ) : (
-                  <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-3 shadow-inner">
-                    <div
-                      className="h-full bg-linear-to-r from-blue-500 to-indigo-500 rounded-full relative"
-                      style={{ width: "85%" }}
-                    ></div>
+                <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-3 shadow-inner">
+                  <div
+                    className="h-full bg-linear-to-r from-blue-500 to-indigo-500 rounded-full relative"
+                    style={{ width: "85%" }}
+                  ></div>
                 </div>
               )}
             </div>
@@ -93,7 +91,7 @@ export default function DevDashboard() {
               </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {devModules.map((mod, i) => (
+              {DEV_MODULES_TEMPLATE.map((mod, i) => (
                 <div
                   key={i}
                   className="group bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md shadow-lg shadow-slate-200/20 dark:shadow-none border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex flex-col justify-between hover:border-indigo-500/40 dark:hover:border-indigo-500/40 hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden"
@@ -183,7 +181,7 @@ export default function DevDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                    {devActiveConflicts.map((conf, i) => (
+                    {DEV_ACTIVE_CONFLICTS_TEMPLATE.map((conf, i) => (
                       <tr
                         key={i}
                         className="hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors"
@@ -257,7 +255,7 @@ export default function DevDashboard() {
               <div className="absolute left-[39px] top-8 bottom-8 w-0.5 bg-linear-to-b from-slate-200 via-slate-200 to-transparent dark:from-slate-800 dark:via-slate-800 dark:to-transparent z-0"></div>
 
               <div className="space-y-6 relative z-10">
-                {devTimeline.map((item, i) => (
+                {DEV_TIMELINE_TEMPLATE.map((item, i) => (
                   <div key={i} className="flex gap-4 group">
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border-[3px] border-card shadow-sm z-10 ${item.color}`}

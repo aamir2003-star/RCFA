@@ -51,10 +51,29 @@ export const getAllProjects = async (options = {}) => {
  * Get project statistics using a single aggregation pipeline.
  * Counts requirements by status and conflicts by severity.
  */
-export const getProjectStats = async (projectId) => {
+export const getProjectStats = async (projectId, timeframe = 'WEEKLY') => {
   const pId = new mongoose.Types.ObjectId(projectId);
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  // Set time window and aggregation format based on timeframe
+  const now = new Date();
+  let startDate = new Date();
+  let dateFormat = "%Y-%m-%d"; // Default for WEEKLY and MONTHLY
+
+  switch (timeframe.toUpperCase()) {
+    case 'DAILY':
+      startDate.setHours(now.getHours() - 24);
+      dateFormat = "%Y-%m-%d %H:00"; // Hourly granularity
+      break;
+    case 'MONTHLY':
+      startDate.setDate(now.getDate() - 30);
+      dateFormat = "%Y-%m-%d";
+      break;
+    case 'WEEKLY':
+    default:
+      startDate.setDate(now.getDate() - 7);
+      dateFormat = "%Y-%m-%d";
+      break;
+  }
 
   const [reqStatsRaw, conflictStatsRaw, timelineData, recentActivity] = await Promise.all([
     // Requirement breakdown
@@ -67,17 +86,17 @@ export const getProjectStats = async (projectId) => {
       { $match: { projectId: pId } },
       { $group: { _id: "$severityColor", count: { $sum: 1 } } }
     ]),
-    // Timeline: conflicts in last 7 days
+    // Timeline: conflicts in the selected timeframe
     ConflictModel.aggregate([
       {
         $match: {
           projectId: pId,
-          createdAt: { $gt: sevenDaysAgo }
+          createdAt: { $gt: startDate }
         }
       },
       {
         $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          _id: { $dateToString: { format: dateFormat, date: "$createdAt" } },
           count: { $sum: 1 }
         }
       },

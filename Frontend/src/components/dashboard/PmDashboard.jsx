@@ -9,7 +9,7 @@ import {
   TrendingDown,
   Sparkles,
 } from "lucide-react";
-import { pmStats, pmProjects, quickActions } from "../../lib/features_utils.js";
+import { PM_STATS_TEMPLATE, PM_PROJECTS_TEMPLATE, PM_QUICK_ACTIONS_TEMPLATE } from "../../constants/dashboard";
 import { useNavigate } from "react-router-dom";
 
 export default function PmDashboard() {
@@ -192,8 +192,8 @@ export default function PmDashboard() {
                 <div className="text-left flex-1 min-w-0">
                   <div
                     className={`font-bold text-sm ${action.isDark
-                        ? "text-white"
-                        : "text-[#1e2532] dark:text-white"
+                      ? "text-white"
+                      : "text-[#1e2532] dark:text-white"
                       } truncate`}
                   >
                     {action.title}

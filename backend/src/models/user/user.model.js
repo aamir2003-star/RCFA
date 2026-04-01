@@ -14,6 +14,9 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
+    avatar: String,
+
+
     refreshToken: String,
     resetToken: String,
     resetTokenExpiry: Date,

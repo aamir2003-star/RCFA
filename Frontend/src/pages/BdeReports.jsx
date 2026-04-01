@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import useProjectStore from "../stores/useProjectStore";
 import { Button } from "../components/ui/Button";
 import { cn } from "../lib/utils";
+import { REPORTS_STATS_TEMPLATE, TIMELINE_VELOCITY_TEMPLATE } from "../constants/dashboard";
 
 export default function BdeReports() {
     const navigate = useNavigate();
@@ -33,36 +34,10 @@ export default function BdeReports() {
         fetchBdeStats();
     }, [fetchProjects, fetchBdeStats]);
 
-    const stats = [
-        {
-            label: "Total Projects",
-            value: bdeStats?.totalProjects || 0,
-            icon: FileText,
-            color: "bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400",
-            trend: "+12% this month"
-        },
-        {
-            label: "Active Conflicts",
-            value: bdeStats?.totalConflicts || 0,
-            icon: AlertCircle,
-            color: "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400",
-            trend: "Needs attention"
-        },
-        {
-            label: "Market Reach",
-            value: bdeStats?.activeClients || 0,
-            icon: TrendingUp,
-            color: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400",
-            trend: "Growing"
-        },
-        {
-            label: "Delivery Rate",
-            value: `${bdeStats?.completedProjects || 0}%`,
-            icon: CheckCircle2,
-            color: "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400",
-            trend: "Stable"
-        }
-    ];
+    const stats = REPORTS_STATS_TEMPLATE.map(stat => ({
+        ...stat,
+        value: stat.isPercentage ? `${bdeStats?.[stat.key] || 0}%` : (bdeStats?.[stat.key] || 0)
+    }));
 
     return (
         <div className="space-y-8 p-1">
@@ -240,12 +215,7 @@ export default function BdeReports() {
                             <Clock className="w-5 h-5 text-slate-400" />
                         </div>
                         <div className="space-y-6">
-                            {[
-                                { stage: "Concept Validation", color: "bg-emerald-500", progress: 100 },
-                                { stage: "Requirement Bulk", color: "bg-indigo-500", progress: 65 },
-                                { stage: "AI Triage", color: "bg-amber-500", progress: 40 },
-                                { stage: "Final Review", color: "bg-slate-200 dark:bg-slate-800", progress: 0 }
-                            ].map((item) => (
+                            {TIMELINE_VELOCITY_TEMPLATE.map((item) => (
                                 <div key={item.stage} className="space-y-2">
                                     <div className="flex justify-between items-center px-1">
                                         <span className="text-xs font-bold text-slate-600 dark:text-slate-400">{item.stage}</span>

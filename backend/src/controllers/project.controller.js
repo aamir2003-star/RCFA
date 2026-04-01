@@ -41,7 +41,8 @@ export const getAllProjects = async (req, res) => {
 // GET PROJECT STATS
 export const getProjectStats = async (req, res) => {
   try {
-    const stats = await projectService.getProjectStats(req.params.id);
+    const { timeframe } = req.query;
+    const stats = await projectService.getProjectStats(req.params.id, timeframe);
     res.json(stats);
   } catch (error) {
     res.status(500).json({ message: error.message });
