@@ -7,6 +7,8 @@ const useProjectStore = create((set, get) => ({
     currentProject: null,
     projectStats: null,
     bdeStats: null,
+    pmStats: null,
+    pmActivity: [],
     loading: false,
     error: null,
 
@@ -114,6 +116,24 @@ const useProjectStore = create((set, get) => ({
             set({ bdeStats: response.data });
         } catch (error) {
             console.error("Failed to fetch BDE stats:", error);
+        }
+    },
+
+    fetchPmStats: async () => {
+        try {
+            const response = await api.get("/projects/pm/stats");
+            set({ pmStats: response.data });
+        } catch (error) {
+            console.error("Failed to fetch PM stats:", error);
+        }
+    },
+
+    fetchPmActivity: async () => {
+        try {
+            const response = await api.get("/projects/pm/activity");
+            set({ pmActivity: response.data.activities || [] });
+        } catch (error) {
+            console.error("Failed to fetch PM activity:", error);
         }
     },
 

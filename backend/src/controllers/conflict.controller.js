@@ -3,6 +3,7 @@
 
 import { startJob, getJobStatus } from '../jobs/conflictScanJob.js';
 import { ConflictModel } from '../models/conflict/conflict.model.js';
+import { ProjectModel } from '../models/project/project.model.js';
 import { emitConflictResolved } from '../sockets/events/conflictEvents.js';
 /**
  * POST /api/v1/conflicts/analyze/:projectId
@@ -121,6 +122,44 @@ export const getConflicts = async (req, res) => {
             success: false,
             message: err.message || 'Internal server error',
         });
+    }
+};
+
+/**
+ * GET /api/v1/conflicts/pm/all
+ * Returns all conflicts across all of the authenticated PM's projects.
+ */
+export const getAllPmConflicts = async (req, res) => {
+    try {
+        const pmId = req.user._id;
+        const pmProjectIds = await ProjectModel.find({ projectManager: pmId }).distinct('_id');
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 50;
+        const skip = (page - 1) * limit;
+
+        const [conflicts, total] = await Promise.all([
+            ConflictModel.find({ projectId: { $in: pmProjectIds } })
+                .populate('requirementA', 'title description')
+                .populate('requirementB', 'title description')
+                .populate('projectId', 'name')
+                .sort({ severityScore: -1, createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+            ConflictModel.countDocuments({ projectId: { $in: pmProjectIds } })
+        ]);
+
+        return res.json({
+            success: true,
+            total,
+            page,
+            pages: Math.ceil(total / limit),
+            conflicts
+        });
+    } catch (err) {
+        console.error('getAllPmConflicts error:', err);
+        return res.status(500).json({ success: false, message: err.message });
     }
 };
 

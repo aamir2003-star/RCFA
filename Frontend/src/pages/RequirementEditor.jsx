@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
     Save,
@@ -103,7 +104,10 @@ export default function RequirementEditor({ role = "bde" }) {
     };
 
     const handleSave = async () => {
-        if (!formData.title.trim()) return;
+        if (!formData.title.trim()) {
+            toast.error("Requirement title is required");
+            return;
+        }
 
         let success = false;
         if (isAdding) {
@@ -119,17 +123,24 @@ export default function RequirementEditor({ role = "bde" }) {
         }
 
         if (success) {
-            // Optional: Show success toast
+            toast.success(isAdding ? "Requirement created" : "Requirement updated");
+        } else {
+            toast.error("Failed to save requirement");
         }
     };
 
     const handleDelete = async (e, id) => {
         e.stopPropagation();
         if (window.confirm("Are you sure you want to delete this requirement? This will also remove any associated conflicts.")) {
-            await deleteRequirement(id);
-            if (selectedReq?._id === id) {
-                setSelectedReq(null);
-                setIsAdding(false);
+            const result = await deleteRequirement(id);
+            if (result.success) {
+                toast.success("Requirement deleted");
+                if (selectedReq?._id === id) {
+                    setSelectedReq(null);
+                    setIsAdding(false);
+                }
+            } else {
+                toast.error("Failed to delete: " + (result.message || "Unknown error"));
             }
         }
     };

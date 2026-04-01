@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { toast } from "react-hot-toast";
 import { Button } from "../ui/Button.jsx";
 import { Plus, ChevronRight, MoreHorizontal, ArrowUpRight, Folder, Layout, Users, FileText, AlertCircle, Inbox, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -24,9 +25,10 @@ export default function BdeDashboard() {
     if (window.confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
       const result = await deleteProject(projectId);
       if (result.success) {
+        toast.success("Project deleted successfully");
         fetchBdeStats(); // Refresh stats after deletion
       } else {
-        alert("Failed to delete project: " + result.message);
+        toast.error("Failed to delete project: " + result.message);
       }
     }
   };

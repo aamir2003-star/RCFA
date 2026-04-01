@@ -111,31 +111,7 @@ export function Sidebar({ role, isOpen, onClose }) {
       </nav>
 
       {/* Status indicators bottom */}
-      <div className="p-4 mt-auto space-y-4">
-        {role === "bde" && (
-          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/50">
-            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex justify-between">
-              <span>Storage Usage</span>
-              <span className="text-slate-600 dark:text-slate-300">64%</span>
-            </div>
-            <div className="h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-              <div className="h-full bg-linear-to-r from-indigo-500 to-blue-500 w-[64%]"></div>
-            </div>
-          </div>
-        )}
-
-        {role === "pm" && (
-          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/50">
-            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex justify-between">
-              <span>AI Engine Credits</span>
-              <span className="text-indigo-500">650 / 1K</span>
-            </div>
-            <div className="h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-              <div className="h-full bg-linear-to-r from-indigo-500 to-violet-500 w-[65%]"></div>
-            </div>
-          </div>
-        )}
-
+      <div className="p-4 mt-auto space-y-4 border-t border-slate-100 dark:border-slate-800/50">
         <div className="flex items-center justify-between px-2">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>

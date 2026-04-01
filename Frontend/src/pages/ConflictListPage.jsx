@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
     AlertTriangle,
     Search,
@@ -7,7 +7,6 @@ import {
     ChevronRight,
     AlertOctagon,
     Clock,
-    User,
     ArrowRight,
     BrainCircuit,
     Loader2
@@ -15,18 +14,11 @@ import {
 import useConflictStore from "../stores/useConflictStore";
 
 export default function ConflictListPage() {
-    const { projectId } = useParams();
-    const { conflicts, loading, fetchConflicts, subscribeToConflicts, unsubscribeFromConflicts } = useConflictStore();
+    const { conflicts, loading, fetchAllPmConflicts } = useConflictStore();
 
     useEffect(() => {
-        if (projectId) {
-            fetchConflicts(projectId);
-            subscribeToConflicts(projectId);
-        }
-        return () => {
-            if (projectId) unsubscribeFromConflicts(projectId);
-        };
-    }, [projectId, fetchConflicts, subscribeToConflicts, unsubscribeFromConflicts]);
+        fetchAllPmConflicts();
+    }, [fetchAllPmConflicts]);
 
     if (loading && conflicts.length === 0) {
         return (
@@ -46,14 +38,14 @@ export default function ConflictListPage() {
                         <AlertTriangle className="w-8 h-8 text-red-500" />
                         Conflict Triage
                     </h1>
-                    <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">Review and resolve logical contradictions across project requirements.</p>
+                    <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">Review and resolve logical contradictions across all your project requirements.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <input
                             type="text"
-                            placeholder="Search identification..."
+                            placeholder="Search conflicts..."
                             className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm w-64 focus:ring-2 focus:ring-indigo-500/20 transition-all outline-none"
                         />
                     </div>
@@ -68,13 +60,13 @@ export default function ConflictListPage() {
                 {[
                     { label: "Active Conflicts", val: conflicts.filter(c => c.status === 'open').length, color: "text-red-500", bg: "bg-red-50 dark:bg-red-500/10" },
                     { label: "High Impact", val: conflicts.filter(c => c.severityScore >= 7).length, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-500/10" },
-                    { label: "Resolved Today", val: conflicts.filter(c => c.status === 'resolved').length, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
+                    { label: "Resolved", val: conflicts.filter(c => c.status === 'resolved').length, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
                 ].map((stat, i) => (
                     <div key={i} className="bg-white/50 dark:bg-[#0f1115]/50 backdrop-blur-md rounded-3xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col gap-1 items-center md:items-start">
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{stat.label}</span>
                         <div className="flex items-baseline gap-2">
                             <span className={`text-3xl font-black ${stat.color}`}>{stat.val}</span>
-                            <span className="text-xs font-bold text-slate-400">/ Total</span>
+                            <span className="text-xs font-bold text-slate-400">/ {conflicts.length} Total</span>
                         </div>
                     </div>
                 ))}
@@ -91,7 +83,7 @@ export default function ConflictListPage() {
                         <p className="text-slate-500 max-w-sm">All requirements are logically synchronized. Your project's semantic health is optimal.</p>
                     </div>
                 ) : (
-                    conflicts.map((conflict, i) => (
+                    conflicts.map((conflict) => (
                         <Link
                             key={conflict._id}
                             to={`/pm/conflicts/${conflict._id}`}
@@ -110,6 +102,12 @@ export default function ConflictListPage() {
                                             <span className="text-indigo-500">{conflict._id.substring(0, 8)}</span>
                                             <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
                                             <span>{conflict.conflictType || 'Logic Conflict'}</span>
+                                            {conflict.projectId?.name && (
+                                                <>
+                                                    <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                                                    <span className="text-emerald-500">{conflict.projectId.name}</span>
+                                                </>
+                                            )}
                                         </div>
                                         <h3 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-indigo-500 transition-colors">
                                             {conflict.explanation || "Requirement Contradiction"}

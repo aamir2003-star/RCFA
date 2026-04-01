@@ -10,6 +10,8 @@ router.use(authenticate);
 router.post("/", projectController.createProject);
 router.get("/", projectController.getAllProjects);
 router.get("/bde/stats", projectController.getBdeStats);
+router.get("/pm/stats", projectController.getPmStats);
+router.get("/pm/activity", projectController.getPmActivity);
 router.get("/:id", projectController.getProjectById);
 router.get("/:id/stats", projectController.getProjectStats);
 router.put("/:id", projectController.updateProject);

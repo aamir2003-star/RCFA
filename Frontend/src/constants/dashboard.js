@@ -1,4 +1,4 @@
-import { Layout, Users, AlertCircle, FileText, Briefcase, TrendingUp, CheckCircle2, TrendingDown, CreditCard, ShoppingCart, Shield, Zap, Layers, UserPlus } from "lucide-react";
+import { Layout, Users, AlertCircle, FileText, Briefcase, TrendingUp, CheckCircle2, TrendingDown, Zap, Layers, Activity } from "lucide-react";
 
 export const PROJECT_STATUS_COLORS = {
     active: "bg-emerald-50 text-emerald-600 border border-emerald-100",
@@ -121,105 +121,75 @@ export const TIMELINE_VELOCITY_TEMPLATE = [
 
 export const PM_STATS_TEMPLATE = [
     {
+        key: "totalRequirements",
         title: "REQUIREMENTS CREATED",
-        value: "128",
-        trend: "+12%",
-        trendUp: true,
         icon: FileText,
         iconColor: "text-blue-500",
         bg: "bg-blue-50 dark:bg-blue-900/30",
+        trend: "+0%",
+        trendUp: true
     },
     {
+        key: "totalConflicts",
         title: "CONFLICTS DETECTED",
-        value: "12",
-        trend: "-5%",
-        trendUp: false,
         icon: AlertCircle,
         iconColor: "text-red-500",
         bg: "bg-red-50 dark:bg-red-900/30",
-        borderLeft: "border-l-4 border-l-red-500",
+        trend: "Real-time",
+        trendUp: false,
+        borderLeft: "border-l-4 border-l-red-500"
     },
     {
-        title: "MODULES CREATED",
-        value: "45",
-        trend: "+8%",
-        trendUp: true,
+        key: "totalProjects",
+        title: "TOTAL PROJECTS",
         icon: Layout,
         iconColor: "text-purple-500",
         bg: "bg-purple-50 dark:bg-purple-900/30",
+        trend: "Portfolio",
+        trendUp: true
     },
     {
-        title: "DEVELOPERS ASSIGNED",
-        value: "18",
-        trend: "+2%",
-        trendUp: true,
+        key: "teamCount",
+        title: "TEAM MEMBERS",
         icon: Users,
         iconColor: "text-emerald-500",
         bg: "bg-emerald-50 dark:bg-emerald-900/30",
-    },
-];
-
-export const PM_PROJECTS_TEMPLATE = [
-    {
-        title: "FinTech Core Revamp",
-        statusBadge: "ON TRACK",
-        statusColor: "text-emerald-700 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400",
-        updatedInfo: "Updated 2h ago • 3 conflicts pending",
-        progress: 75,
-        progressColor: "bg-emerald-500",
-        icon: { bg: "bg-blue-500", element: CreditCard },
-        avatars: 3,
-        extraAvatars: 4,
-    },
-    {
-        title: "E-Commerce AI Chatbot",
-        statusBadge: "AT RISK",
-        statusColor: "text-orange-700 bg-orange-100 dark:bg-orange-900/30 dark:text-orange-400",
-        updatedInfo: "Updated 5h ago • 9 conflicts pending",
-        progress: 32,
-        progressColor: "bg-orange-500",
-        icon: { bg: "bg-orange-500", element: ShoppingCart },
-        avatars: 1,
-        extraAvatars: 2,
-    },
-    {
-        title: "HealthTech Data Pipeline",
-        statusBadge: "ON TRACK",
-        statusColor: "text-emerald-700 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400",
-        updatedInfo: "Updated 12h ago • 0 conflicts",
-        progress: 90,
-        progressColor: "bg-emerald-500",
-        icon: { bg: "bg-emerald-500", element: Shield },
-        avatars: 2,
-        extraAvatars: 0,
-    },
+        trend: "Active",
+        trendUp: true
+    }
 ];
 
 export const PM_QUICK_ACTIONS_TEMPLATE = [
     {
+        id: "generate",
         icon: Zap,
         title: "Generate Requirements",
         desc: "Powered by AI Analysis",
         bg: "bg-[#252f3e] text-white hover:bg-[#1e2632]",
         iconBg: "bg-white/10",
         isDark: true,
+        route: "/pm/editor"
     },
     {
+        id: "conflicts",
         icon: Layers,
-        title: "Create Modules",
-        desc: "Define architectural blocks",
+        title: "Manage Conflicts",
+        desc: "Review AI-detected issues",
         bg: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50",
         iconBg: "bg-slate-100 dark:bg-slate-800",
         isDark: false,
+        route: "/pm/conflicts"
     },
     {
-        icon: UserPlus,
-        title: "Invite Team Members",
-        desc: "Add developers or stakeholders",
+        id: "activity",
+        icon: Activity,
+        title: "View Activity",
+        desc: "Real-time project timeline",
         bg: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50",
         iconBg: "bg-slate-100 dark:bg-slate-800",
         isDark: false,
-    },
+        route: "/pm/timeline"
+    }
 ];
 
 

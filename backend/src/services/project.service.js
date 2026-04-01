@@ -10,10 +10,12 @@ export const createProject = async (data) => {
 
 // GET ALL with Pagination & Counts
 export const getAllProjects = async (options = {}) => {
-  const { page = 1, limit = 10, sort = { createdAt: -1 }, createdBy } = options;
+  const { page = 1, limit = 10, sort = { createdAt: -1 }, createdBy, projectManager } = options;
   const skip = (page - 1) * limit;
 
-  const query = createdBy ? { createdBy: new mongoose.Types.ObjectId(createdBy) } : {};
+  let query = {};
+  if (createdBy) query.createdBy = new mongoose.Types.ObjectId(createdBy);
+  if (projectManager) query.projectManager = new mongoose.Types.ObjectId(projectManager);
 
   const [projectsResult, total] = await Promise.all([
     ProjectModel.find(query)
@@ -150,6 +152,69 @@ export const getProjectStats = async (projectId, timeframe = 'WEEKLY') => {
       time: c.updatedAt
     }))
   };
+};
+
+/**
+ * Get aggregated statistics for a PM user.
+ */
+export const getPmStats = async (userId) => {
+  try {
+    const pmId = new mongoose.Types.ObjectId(userId);
+
+    // Get all project IDs once to reuse
+    const pmProjectIds = await ProjectModel.find({ projectManager: pmId }).distinct("_id");
+
+    const stats = await Promise.all([
+      // Total Projects
+      ProjectModel.countDocuments({ projectManager: pmId }),
+
+      // Total Conflicts across PM's projects
+      ConflictModel.countDocuments({
+        projectId: { $in: pmProjectIds }
+      }),
+
+      // Total Requirements
+      RequirementModel.countDocuments({
+        projectId: { $in: pmProjectIds }
+      }),
+
+      // Status breakdown
+      ProjectModel.aggregate([
+        { $match: { projectManager: pmId } },
+        { $group: { _id: "$status", count: { $sum: 1 } } }
+      ]),
+
+      // Unique team members across all PM projects
+      ProjectModel.aggregate([
+        { $match: { projectManager: pmId } },
+        { $unwind: { path: "$team", preserveNullAndEmptyArrays: false } },
+        { $group: { _id: null, uniqueMembers: { $addToSet: "$team" } } },
+        { $project: { count: { $size: "$uniqueMembers" } } }
+      ])
+    ]);
+
+    const [totalProjects, totalConflicts, totalRequirements, statusBreakdown, teamAgg] = stats;
+
+    const statusMap = statusBreakdown.reduce((acc, curr) => ({ ...acc, [curr._id]: curr.count }), {
+      planning: 0,
+      active: 0,
+      completed: 0
+    });
+
+    const teamCount = teamAgg.length > 0 ? teamAgg[0].count : 0;
+
+    return {
+      totalProjects,
+      activeProjects: statusMap.active,
+      totalConflicts,
+      totalRequirements,
+      completedProjects: statusMap.completed,
+      teamCount
+    };
+  } catch (error) {
+    console.error("Error in getPmStats service:", error);
+    throw error;
+  }
 };
 
 /**

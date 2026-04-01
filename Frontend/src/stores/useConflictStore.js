@@ -26,6 +26,19 @@ const useConflictStore = create((set, get) => ({
         }
     },
 
+    fetchAllPmConflicts: async () => {
+        set({ loading: true });
+        try {
+            const response = await api.get('/conflicts/pm/all');
+            set({
+                conflicts: response.data.conflicts || [],
+                loading: false
+            });
+        } catch (error) {
+            set({ error: error.message, loading: false });
+        }
+    },
+
     setAnalysisProgress: (progress) => {
         set((state) => ({
             analysisProgress: { ...state.analysisProgress, ...progress }

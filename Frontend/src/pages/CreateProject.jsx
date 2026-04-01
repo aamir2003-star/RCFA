@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import { Zap, Lightbulb, ChevronDown, Loader2, BrainCircuit } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useProjectStore from '../stores/useProjectStore';
@@ -71,7 +72,7 @@ export default function CreateProject() {
     if (!requirementFile) missingFields.push("Requirement CSV File");
 
     if (missingFields.length > 0) {
-      alert(`The following fields are required:\n- ${missingFields.join("\n- ")}`);
+      toast.error(`Missing fields: ${missingFields.join(", ")}`);
       return;
     }
 
@@ -87,12 +88,12 @@ export default function CreateProject() {
 
       const uploadResult = await uploadRequirementsCSV(result.project._id, requirementFile);
       if (!uploadResult.success) {
-        alert("Error uploading CSV: " + uploadResult.message);
+        toast.error("Error uploading CSV: " + uploadResult.message);
         setShowProgress(false);
         unsubscribeFromConflicts(result.project._id);
       }
     } else {
-      alert("Error creating project: " + result.message);
+      toast.error("Error creating project: " + result.message);
     }
   };
 
