@@ -126,6 +126,7 @@ const useProjectStore = create((set, get) => ({
                 projects: [newProject, ...state.projects],
                 loading: false
             }));
+            get().fetchBdeStats(); // Refresh stats after creation
             return { success: true, project: newProject };
         } catch (error) {
             set({ error: error.message, loading: false });
@@ -160,6 +161,7 @@ const useProjectStore = create((set, get) => ({
                 projects: state.projects.filter((p) => p._id !== projectId),
                 loading: false
             }));
+            get().fetchBdeStats(); // Refresh stats after deletion
             return { success: true };
         } catch (error) {
             set({ error: error.message, loading: false });

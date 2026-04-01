@@ -56,13 +56,13 @@ export default function BdeDashboard() {
       subtextColor: "text-amber-600"
     },
     {
-      title: "Engagement Rate",
-      value: "84%",
+      title: "Total Requirements",
+      value: bdeStats?.totalRequirements || 0,
       icon: FileText,
       color: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
-      subtext: "+12.5% from last month",
-      subtextColor: "text-emerald-600",
-      isProgress: true
+      subtext: "Defined to date",
+      subtextColor: "text-slate-500",
+      isProgress: false
     }
   ];
 

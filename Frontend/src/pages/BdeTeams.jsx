@@ -8,28 +8,33 @@ import {
     MoreVertical,
     Plus,
     Mail,
-    Shield
+    Shield,
+    Briefcase,
+    AlertCircle
 } from "lucide-react";
 import api from "../lib/api";
+import useProjectStore from "../stores/useProjectStore";
 import { cn } from "../lib/utils";
 
 export default function BdeTeams() {
     const [pms, setPms] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { bdeStats, fetchBdeStats } = useProjectStore();
 
     useEffect(() => {
-        const fetchPMs = async () => {
+        const fetchData = async () => {
             try {
                 const response = await api.get('/users?role=pm');
                 setPms(response.data);
+                await fetchBdeStats();
             } catch (error) {
-                console.error("Error fetching PMs:", error);
+                console.error("Error fetching data:", error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchPMs();
-    }, []);
+        fetchData();
+    }, [fetchBdeStats]);
 
     return (
         <div className="flex flex-col gap-8">
@@ -47,10 +52,34 @@ export default function BdeTeams() {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard icon={Users} label="Total PMs" value={pms.length} color="text-blue-500" />
-                <StatCard icon={Shield} label="Verified" value={pms.length} color="text-emerald-500" />
-                <StatCard icon={Mail} label="Avg Response" value="1.2h" color="text-indigo-500" />
-                <StatCard icon={Award} label="Capacity" value="92%" color="text-amber-500" />
+                <StatCard
+                    icon={Users}
+                    label="Total PMs"
+                    value={pms.length}
+                    color="text-blue-500"
+                    sub="Active Directors"
+                />
+                <StatCard
+                    icon={Briefcase}
+                    label="Assigned Projects"
+                    value={bdeStats?.totalProjects || 0}
+                    color="text-emerald-500"
+                    sub="Across Portfolio"
+                />
+                <StatCard
+                    icon={AlertCircle}
+                    label="Ongoing Conflicts"
+                    value={bdeStats?.totalConflicts || 0}
+                    color="text-rose-500"
+                    sub="Requiring Triage"
+                />
+                <StatCard
+                    icon={TrendingUp}
+                    label="Avg. Project Load"
+                    value={`${(bdeStats?.totalProjects / (pms.length || 1)).toFixed(1)}`}
+                    color="text-amber-500"
+                    sub="Projects / PM"
+                />
             </div>
 
             {/* Project Managers List */}
