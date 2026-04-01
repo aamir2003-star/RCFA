@@ -173,6 +173,43 @@ const useProjectStore = create((set, get) => ({
         }
     },
 
+    generateAiRequirements: async (projectId, teams) => {
+        set({ loading: true });
+        try {
+            const response = await api.post("/requirements/generate", { projectId, teams });
+            const { requirements } = response.data;
+
+            // Add new requirements to the state
+            set((state) => ({
+                requirements: [...requirements, ...state.requirements],
+                loading: false
+            }));
+
+            return { success: true, count: requirements.length };
+        } catch (error) {
+            set({ error: error.message, loading: false });
+            return { success: false, message: error?.response?.data?.message || error.message };
+        }
+    },
+
+    approveRequirement: async (requirementId) => {
+        set({ loading: true });
+        try {
+            const response = await api.patch(`/requirements/${requirementId}`, { status: 'approved' });
+            const updatedReq = response.data;
+
+            set((state) => ({
+                requirements: state.requirements.map(r => r._id === requirementId ? updatedReq : r),
+                loading: false
+            }));
+
+            return { success: true };
+        } catch (error) {
+            set({ error: error.message, loading: false });
+            return { success: false, message: error?.response?.data?.message || error.message };
+        }
+    },
+
     deleteProject: async (projectId) => {
         set({ loading: true });
         try {

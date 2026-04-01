@@ -1,6 +1,8 @@
 import { RequirementModel } from "../models/requirements/requirement.model.js";
 import { ActivityModel } from "../models/activity/activity.model.js";
 import { runConflictDetection } from "../engine/conflictDetector.js";
+import { generateRequirements as aiGenerator } from "../engine/pipeline/requirementGenerator.js";
+import { ProjectModel } from "../models/project/project.model.js";
 
 export const createRequirement = async (data) => {
     const requirement = await RequirementModel.create(data);
@@ -110,6 +112,47 @@ export const bulkCreateRequirements = async (requirements, projectId, createdBy)
     runConflictDetection(projectId, `job-${Date.now()}`).catch(err => {
         console.error(`[RCFA] Background Conflict Detection Failed: ${err.message}`);
     });
+
+    return docs;
+};
+
+/**
+ * Generate requirements using AI and save them for review.
+ */
+export const generateAiRequirements = async (projectId, teams, userId) => {
+    const project = await ProjectModel.findById(projectId);
+    if (!project) throw new Error("Project not found");
+
+    const existingRequirements = await RequirementModel.find({ projectId }).lean();
+
+    // Call AI engine
+    const aiResults = await aiGenerator(project, existingRequirements, teams);
+
+    // Format for DB
+    const formatted = aiResults.map(req => ({
+        ...req,
+        projectId,
+        createdBy: userId,
+        status: 'review' // Force review status for AI-generated items
+    }));
+
+    // Save as draft/review
+    const docs = await RequirementModel.insertMany(formatted);
+
+    // Log activity
+    await ActivityModel.create({
+        projectId,
+        action: `AI generated ${docs.length} requirements for review`,
+        performedBy: userId
+    });
+
+    // Trigger Conflict Detection with a slight delay to avoid rate limiting
+    console.log(`[RCFA] Queueing AI Conflict Detection (3s delay) after AI generation: ${projectId}`);
+    setTimeout(() => {
+        runConflictDetection(projectId, `ai-gen-${Date.now()}`).catch(err => {
+            console.error(`[RCFA] Background Conflict Detection Failed (AI-Gen): ${err.message}`);
+        });
+    }, 3000);
 
     return docs;
 };

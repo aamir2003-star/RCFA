@@ -23,6 +23,7 @@ router.use(authenticate);
 
 router.post("/", authorize("BDE", "PM"), requirementController.createRequirement);
 router.post("/upload-csv", authorize("BDE", "PM"), upload.single("file"), requirementController.uploadRequirements);
+router.post("/generate", authorize("PM"), requirementController.generateRequirements);
 router.get("/", requirementController.getRequirements);
 router.get("/:id", requirementController.getRequirementById);
 router.patch("/:id", authorize("BDE", "PM", "DEV"), requirementController.updateRequirement);

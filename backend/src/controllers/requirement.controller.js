@@ -92,3 +92,27 @@ export const uploadRequirements = async (req, res, next) => {
         next(error);
     }
 };
+
+export const generateRequirements = async (req, res, next) => {
+    try {
+        const { projectId, teams } = req.body;
+        if (!projectId) {
+            return res.status(400).json({ message: "Project ID is required" });
+        }
+
+        const requirements = await requirementService.generateAiRequirements(
+            projectId,
+            teams || ['Developer', 'Legal'],
+            req.user?._id
+        );
+
+        res.status(201).json({
+            message: `Successfully generated ${requirements.length} AI requirements for review`,
+            count: requirements.length,
+            requirements
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+

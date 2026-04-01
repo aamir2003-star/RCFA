@@ -15,18 +15,45 @@ export const parseRequirementsCSV = (filePath) => {
                 mapHeaders: ({ header }) => header.trim().toLowerCase()
             }))
             .on('data', (data) => {
-                // Map common CSV headers to internal requirement fields
-                // Supporting: title, requirement, name, feature, description, overview, priority, module, section
-                const title = data.title || data.requirement || data.name || data.feature || data.summary;
-                const description = data.description || data.overview || data.details || "";
+                // Map common CSV headers to internal requirement fields (case-insensitive due to mapHeaders)
+                // Supporting common variations found in business requirements docs
+                const titleKey = Object.keys(data).find(key =>
+                    ['title', 'requirement', 'requirements', 'name', 'feature', 'summary', 'task', 'titles', 'subject'].includes(key) ||
+                    key.includes('title') || key.includes('requirement')
+                );
+
+                const descKey = Object.keys(data).find(key =>
+                    ['description', 'overview', 'details', 'desc', 'explanation', 'summary'].includes(key) ||
+                    key.includes('description') || key.includes('overview')
+                );
+
+                const priorityKey = Object.keys(data).find(key =>
+                    ['priority', 'importance', 'urgency', 'level'].includes(key)
+                );
+
+                const moduleKey = Object.keys(data).find(key =>
+                    ['module', 'section', 'category', 'group', 'component', 'area'].includes(key)
+                );
+
+                let title = titleKey ? data[titleKey] : null;
+                let description = descKey ? data[descKey] : "";
+
+                // Fallback: If no header matched, use first column as title and second as description
+                if (!title) {
+                    const values = Object.values(data);
+                    if (values[0] && values[0].toString().trim()) {
+                        title = values[0];
+                        description = values[1] || "";
+                    }
+                }
 
                 // Skip rows that don't have a title (likely empty or corrupted rows)
-                if (title && title.trim()) {
+                if (title && title.toString().trim()) {
                     results.push({
-                        title: title.trim(),
-                        description: description.trim(),
-                        priority: (data.priority || 'medium').toLowerCase(),
-                        module: data.module || data.section || 'General',
+                        title: title.toString().trim(),
+                        description: description ? description.toString().trim() : "",
+                        priority: (priorityKey && data[priorityKey] ? data[priorityKey].toString().toLowerCase() : 'medium'),
+                        module: (moduleKey && data[moduleKey] ? data[moduleKey].toString() : 'General'),
                         status: 'draft',
                         type: 'functional'
                     });
@@ -34,7 +61,7 @@ export const parseRequirementsCSV = (filePath) => {
             })
             .on('end', () => {
                 if (results.length === 0) {
-                    reject(new Error("No valid requirements found in CSV. Please ensure your CSV has a 'Title' or 'Requirement' header."));
+                    reject(new Error("No valid requirements found. Please ensure your CSV has a 'Title' header or at least one column with text."));
                 } else {
                     resolve(results);
                 }

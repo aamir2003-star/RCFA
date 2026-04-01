@@ -54,7 +54,7 @@ JSON Structure:
 
     try {
         const response = await client.chat.completions.create({
-            model: 'gemini-1.5-flash',
+            model: 'gemini-2.0-flash',
             messages: [
                 { role: 'system', content: 'You are a requirements conflict analyzer. Respond only with JSON.' },
                 { role: 'user', content: prompt }

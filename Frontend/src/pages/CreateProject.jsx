@@ -7,6 +7,7 @@ import useConflictStore from '../stores/useConflictStore';
 import useAuthStore from '../stores/useAuthStore';
 import api from '../lib/api';
 import { PROJECT_FORM_INITIAL_STATE, PROJECT_FORM_FIELDS } from '../constants/projects';
+import { cn } from '../lib/utils';
 
 export default function CreateProject() {
   const navigate = useNavigate();
@@ -15,21 +16,27 @@ export default function CreateProject() {
   const { analysisProgress, resetAnalysisProgress, subscribeToConflicts, unsubscribeFromConflicts } = useConflictStore();
 
   const [projectManagers, setProjectManagers] = useState([]);
+  const [developers, setDevelopers] = useState([]);
   const [formData, setFormData] = useState(PROJECT_FORM_INITIAL_STATE);
   const [requirementFile, setRequirementFile] = useState(null);
   const [showProgress, setShowProgress] = useState(false);
 
   useEffect(() => {
     // Fetch PMs
-    const fetchPMs = async () => {
+    const fetchData = async () => {
       try {
-        const response = await api.get('/users?role=pm');
-        setProjectManagers(response.data);
+        const [pmsRes, devsRes] = await Promise.all([
+          api.get('/users?role=pm'),
+          api.get('/users?role=dev')
+        ]);
+        setProjectManagers(pmsRes.data);
+        setDevelopers(devsRes.data);
       } catch (error) {
-        console.error("Failed to fetch PMs:", error);
+        console.error("Failed to fetch users:", error);
+        toast.error("Failed to fetch team members");
       }
     };
-    fetchPMs();
+    fetchData();
 
     // Reset progress on mount to prevent premature redirection
     resetAnalysisProgress();
@@ -86,9 +93,16 @@ export default function CreateProject() {
       setShowProgress(true);
       subscribeToConflicts(result.project._id);
 
-      const uploadResult = await uploadRequirementsCSV(result.project._id, requirementFile);
-      if (!uploadResult.success) {
-        toast.error("Error uploading CSV: " + uploadResult.message);
+      try {
+        const uploadResult = await uploadRequirementsCSV(result.project._id, requirementFile);
+        if (!uploadResult.success) {
+          toast.error("CSV Error: " + uploadResult.message, { duration: 6000 });
+          setShowProgress(false); // Only hide if we want to allow re-upload or fixing
+          unsubscribeFromConflicts(result.project._id);
+        }
+        // If success, the analysisProgress useEffect will handle navigation
+      } catch (err) {
+        toast.error("Upload failed: " + err.message);
         setShowProgress(false);
         unsubscribeFromConflicts(result.project._id);
       }
@@ -192,8 +206,9 @@ export default function CreateProject() {
               </div>
             </div>
 
-            {/* Assign Project Manager */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Assign Project Manager & Developer Team */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {/* PM Selection */}
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-1">
                   Assign Project Manager <span className="text-red-500">*</span>
@@ -206,22 +221,17 @@ export default function CreateProject() {
                     className="w-full appearance-none bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all cursor-pointer font-medium"
                   >
                     <option value="">Select a Project Manager</option>
-                    {projectManagers.length > 0 ? (
-                      projectManagers.map(pm => (
-                        <option key={pm._id} value={pm._id}>
-                          {pm.name} ({pm.email})
-                        </option>
-                      ))
-                    ) : (
-                      <option disabled>No PMs available</option>
-                    )}
+                    {projectManagers.map(pm => (
+                      <option key={pm._id} value={pm._id}>
+                        {pm.name} ({pm.email})
+                      </option>
+                    ))}
                   </select>
                   <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 </div>
-                {projectManagers.length === 0 && (
-                  <p className="text-[10px] text-amber-500 mt-1 font-bold">Note: No users found with 'pm' role in system.</p>
-                )}
               </div>
+
+              {/* Requirement Upload */}
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-1">
                   Requirement CSV <span className="text-red-500">*</span>
@@ -235,6 +245,64 @@ export default function CreateProject() {
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Developer Team Selection */}
+            <div className="space-y-3">
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                Assign Developer Team <span className="text-slate-400 font-medium">(Optional)</span>
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {developers.map(dev => {
+                  const isSelected = formData.team.includes(dev._id);
+                  return (
+                    <button
+                      key={dev._id}
+                      type="button"
+                      onClick={() => {
+                        const newTeam = isSelected
+                          ? formData.team.filter(id => id !== dev._id)
+                          : [...formData.team, dev._id];
+                        setFormData(prev => ({ ...prev, team: newTeam }));
+                      }}
+                      className={cn(
+                        "flex items-center gap-3 p-3 rounded-xl border transition-all text-left group",
+                        isSelected
+                          ? "bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/40 ring-1 ring-indigo-500/20"
+                          : "bg-slate-50/50 dark:bg-white/5 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
+                      )}
+                    >
+                      <div className={cn(
+                        "size-8 rounded-lg flex items-center justify-center text-xs font-black shrink-0 transition-colors",
+                        isSelected
+                          ? "bg-indigo-600 text-white"
+                          : "bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                      )}>
+                        {dev.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={cn(
+                          "text-xs font-bold truncate",
+                          isSelected ? "text-indigo-900 dark:text-indigo-200" : "text-slate-700 dark:text-slate-300"
+                        )}>{dev.name}</p>
+                        <p className="text-[10px] text-slate-400 truncate tracking-tight">{dev.email}</p>
+                      </div>
+                      {isSelected && (
+                        <div className="size-4 rounded-full bg-indigo-600 flex items-center justify-center text-white shrink-0">
+                          <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              {developers.length === 0 && (
+                <div className="p-4 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 text-center">
+                  <p className="text-xs text-slate-400 font-medium">No developers available in the system.</p>
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}

@@ -115,7 +115,8 @@ export const getProjectStats = async (projectId, timeframe = 'WEEKLY') => {
   // Process Requirement Stats
   const reqStats = reqStatsRaw.reduce((acc, curr) => ({ ...acc, [curr._id]: curr.count }), {
     approved: 0,
-    draft: 0
+    draft: 0,
+    review: 0
   });
   const totalReqs = Object.values(reqStats).reduce((a, b) => a + b, 0);
 
