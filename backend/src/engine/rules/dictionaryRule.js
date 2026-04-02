@@ -58,8 +58,13 @@ export const dictionaryRule = (reqA, reqB) => {
                 return {
                     flagged: true,
                     conflictType: description || `${term1} vs ${term2}`,
-                    ruleConfidence: 0.9, // High confidence for explicit keyword matches
-                    severity: severity || 'High'
+                    ruleConfidence: 0.9,
+                    severity: severity || 'High',
+                    explanation: `System-level conflict detected between keyword "${t1}" and "${t2}". ${description || 'This represents a known technical contradiction requiring resolution.'}`,
+                    resolutions: [
+                        { title: 'Goal Prioritization', description: `Determine if ${t1} or ${t2} takes precedence for the current MVP.`, strategyType: 'Compromise' },
+                        { title: 'Module Isolation', description: 'Encapsulate these requirements in separate micro-services to minimize friction.', strategyType: 'Alternative' }
+                    ]
                 };
             }
         }

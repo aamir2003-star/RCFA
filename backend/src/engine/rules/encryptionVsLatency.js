@@ -36,17 +36,23 @@ export const encryptionVsLatency = (reqA, reqB) => {
     const reqBHasEncryption = hasKeyword(textB, ENCRYPTION_KEYWORDS);
     const reqAHasLatency = hasKeyword(textA, LATENCY_KEYWORDS);
     const reqBHasLatency = hasKeyword(textB, LATENCY_KEYWORDS);
+    const categories = new Set([...(reqA.categories || []), ...(reqB.categories || [])]);
 
     // True conflict: one side talks about security, the other about speed
     const crossConflict =
-        (reqAHasEncryption && reqBHasLatency) ||
-        (reqBHasEncryption && reqAHasLatency);
+        (hasKeyword(textA, ENCRYPTION_KEYWORDS) && hasKeyword(textB, LATENCY_KEYWORDS)) ||
+        (hasKeyword(textB, ENCRYPTION_KEYWORDS) && hasKeyword(textA, LATENCY_KEYWORDS));
 
-    if (hasEncryption && hasLatency && (crossConflict || true)) {
+    if (categories.has('Security') && categories.has('Performance')) {
         return {
             flagged: true,
             conflictType: 'Encryption vs Latency',
-            ruleConfidence: crossConflict ? 0.92 : 0.75,
+            ruleConfidence: 0.9,
+            explanation: `Resource contention between Security (${reqA.title}) and Latency (${reqB.title}). High-bitrate encryption suites (AES-256) introduce 15-20ms of overhead per packet, conflicting with "Ultra-low latency" goals.`,
+            resolutions: [
+                { title: 'Hardware Acceleration', description: 'Utilize specialized chips (TPM/HSM) for cryptographic offloading.', strategyType: 'Hybrid' },
+                { title: 'Selective Encryption', description: 'Encrypt only sensitive fields instead of the whole payload.', strategyType: 'Compromise' }
+            ]
         };
     }
 

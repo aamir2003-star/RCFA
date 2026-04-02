@@ -39,6 +39,24 @@ const useConflictStore = create((set, get) => ({
         }
     },
 
+    startAnalysis: async (projectId) => {
+        set({ analysisProgress: { status: 'running', percent: 0, message: 'Initializing engine...' } });
+        try {
+            const response = await api.post(`/conflicts/analyze/${projectId}`);
+            set((state) => ({
+                analysisProgress: {
+                    ...state.analysisProgress,
+                    jobId: response.data.jobId,
+                    status: 'running'
+                }
+            }));
+            return { success: true, jobId: response.data.jobId };
+        } catch (error) {
+            set({ analysisProgress: { status: 'error', message: error.message } });
+            return { success: false, message: error.message };
+        }
+    },
+
     setAnalysisProgress: (progress) => {
         set((state) => ({
             analysisProgress: { ...state.analysisProgress, ...progress }

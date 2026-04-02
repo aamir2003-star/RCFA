@@ -27,6 +27,8 @@ export const runRules = (pairs) => {
                     conflictType: result.conflictType,
                     ruleConfidence: result.ruleConfidence,
                     source: 'rule',
+                    explanation: result.explanation,
+                    resolutions: result.resolutions || [],
                 });
                 matched = true;
                 break; // First matching rule wins

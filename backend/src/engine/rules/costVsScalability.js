@@ -15,7 +15,12 @@ export const costVsScalability = (reqA, reqB) => {
         return {
             flagged: true,
             conflictType: 'Cost vs Scalability',
-            ruleConfidence: 0.9,
+            ruleConfidence: 0.8,
+            explanation: `Contradiction between ${reqA.category === 'Cost' ? reqA.title : reqB.title} (Budget Restraint) and ${reqA.category === 'Scalability' ? reqA.title : reqB.title} (Unlimited Growth). Scalability typically requires horizontal redundancy which increases direct cloud costs.`,
+            resolutions: [
+                { title: 'Serverless Auto-scaling', description: 'Use consumption-based billing (Lambda/CloudRun) to scale only when needed.', strategyType: 'Alternative' },
+                { title: 'Hard Budget Caps', description: 'Implement circuit breakers to stop scaling once cost limit is reached.', strategyType: 'Strict' }
+            ]
         };
     }
 

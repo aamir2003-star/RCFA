@@ -16,7 +16,18 @@ import useConflictStore from "../stores/useConflictStore";
 export default function ConflictListPage() {
     const [searchParams] = useSearchParams();
     const projectId = searchParams.get("projectId");
-    const { conflicts, loading, fetchAllPmConflicts } = useConflictStore();
+    const { conflicts, loading, fetchAllPmConflicts, startAnalysis, analysisProgress, subscribeToConflicts, unsubscribeFromConflicts } = useConflictStore();
+
+    useEffect(() => {
+        if (projectId) {
+            subscribeToConflicts(projectId);
+        }
+        return () => {
+            if (projectId) {
+                unsubscribeFromConflicts(projectId);
+            }
+        };
+    }, [projectId, subscribeToConflicts, unsubscribeFromConflicts]);
 
     useEffect(() => {
         fetchAllPmConflicts();
@@ -48,19 +59,40 @@ export default function ConflictListPage() {
                         <AlertTriangle className="w-8 h-8 text-red-500" />
                         {projectId ? "Project Triage" : "Conflict Triage"}
                     </h1>
-                    <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">
-                        {projectId ? (
-                            <span className="flex items-center gap-2">
-                                <span className="text-indigo-600 font-bold underline decoration-indigo-500/30 underline-offset-4">{currentProjectName}</span>
-                                <button
-                                    onClick={() => setSearchParams({})}
-                                    className="ml-2 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-[9px] font-black uppercase tracking-widest rounded-md hover:bg-slate-200 transition-all"
-                                >
-                                    Clear Filter
-                                </button>
-                            </span>
-                        ) : "Review and resolve logical contradictions across all your project requirements."}
-                    </p>
+                    <div className="flex flex-col md:flex-row md:items-center gap-4 mt-1">
+                        <p className="text-slate-500 dark:text-slate-400 font-medium">
+                            {projectId ? (
+                                <span className="flex items-center gap-2">
+                                    <span className="text-indigo-600 font-bold underline decoration-indigo-500/30 underline-offset-4">{currentProjectName}</span>
+                                    <button
+                                        onClick={() => setSearchParams({})}
+                                        className="ml-2 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-[9px] font-black uppercase tracking-widest rounded-md hover:bg-slate-200 transition-all"
+                                    >
+                                        Clear Filter
+                                    </button>
+                                </span>
+                            ) : "Review and resolve logical contradictions across all your project requirements."}
+                        </p>
+                        {projectId && (
+                            <button
+                                onClick={() => startAnalysis(projectId)}
+                                disabled={analysisProgress.status === 'running'}
+                                className="flex items-center gap-2 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-200 dark:shadow-none transition-all hover:scale-105 active:scale-95"
+                            >
+                                {analysisProgress.status === 'running' ? (
+                                    <>
+                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                        Analyzing {analysisProgress.percent}%
+                                    </>
+                                ) : (
+                                    <>
+                                        <BrainCircuit className="w-3 h-3" />
+                                        Re-scan for Conflicts
+                                    </>
+                                )}
+                            </button>
+                        )}
+                    </div>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="relative">
