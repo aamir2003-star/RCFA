@@ -25,9 +25,15 @@ import { cn } from "../lib/utils";
 import useConflictStore from "../stores/useConflictStore";
 
 export default function ConflictDetection() {
-    const { conflictId } = useParams();
+    const { id: conflictId } = useParams();
     const navigate = useNavigate();
-    const { conflicts, loading, resolveConflict } = useConflictStore();
+    const { conflicts, loading, resolveConflict, fetchAllPmConflicts } = useConflictStore();
+
+    useEffect(() => {
+        if (conflicts.length === 0) {
+            fetchAllPmConflicts();
+        }
+    }, [conflicts, fetchAllPmConflicts]);
 
     const conflict = useMemo(() => {
         return conflicts.find(c => c._id === conflictId);
@@ -185,7 +191,7 @@ export default function ConflictDetection() {
                         <div className="space-y-6 relative z-10">
                             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10">
                                 <p className="text-indigo-100 leading-relaxed font-medium">
-                                    {conflict.aiAnalysis || "The system has detected a logical cross-module conflict. Requirement A specifies a restrictive rule that directly contradicts the operational flexibility required by Requirement B."}
+                                    {conflict.explanation || "The system has detected a logical cross-module conflict. Requirement A specifies a restrictive rule that directly contradicts the operational flexibility required by Requirement B."}
                                 </p>
                             </div>
 
@@ -193,15 +199,15 @@ export default function ConflictDetection() {
                                 <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all cursor-default">
                                     <TrendingDown className="w-5 h-5 text-red-400 mt-1" />
                                     <div>
-                                        <p className="text-xs font-black uppercase tracking-widest text-indigo-200 mb-1">Operational Risk</p>
-                                        <p className="text-sm font-medium text-white/80">Potential delay of {conflict.estimatedRiskDays || 5} days in module synchronization due to logic gaps.</p>
+                                        <p className="text-xs font-black uppercase tracking-widest text-indigo-200 mb-1">Timeline Impact</p>
+                                        <p className="text-sm font-medium text-white/80">Estimated logic sync delay: {conflict.feasibility?.timelineImpact || "10%"}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all cursor-default">
                                     <DollarSign className="w-5 h-5 text-emerald-400 mt-1" />
                                     <div>
-                                        <p className="text-xs font-black uppercase tracking-widest text-indigo-200 mb-1">Financial Impact</p>
-                                        <p className="text-sm font-medium text-white/80">Estimated cost of oversight: ${conflict.estimatedCost || '2,500'} USD in rework effort.</p>
+                                        <p className="text-xs font-black uppercase tracking-widest text-indigo-200 mb-1">Cost Impact</p>
+                                        <p className="text-sm font-medium text-white/80">Estimated rework overhead: {conflict.feasibility?.costImpact || "5%"}</p>
                                     </div>
                                 </div>
                             </div>
@@ -216,17 +222,32 @@ export default function ConflictDetection() {
                             AI Suggestions
                         </h3>
                         <div className="space-y-4">
-                            {(conflict.suggestions || ["Renegotiate priority of Requirement A", "Add conditional logic to Requirement B", "Merge into a unified requirement document"]).map((suggestion, i) => (
-                                <div key={i} className="group p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 hover:border-emerald-500/50 transition-all cursor-pointer">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Resolution {i + 1}</span>
-                                        <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-emerald-500 transition-colors" />
+                            {conflict.resolutions?.length > 0 ? (
+                                conflict.resolutions.map((res, i) => (
+                                    <div key={i} className="group p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 hover:border-emerald-500/50 transition-all cursor-pointer">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">{res.strategyType || 'Resolution'} {i + 1}</span>
+                                            <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-emerald-500 transition-colors" />
+                                        </div>
+                                        <h5 className="text-xs font-black text-slate-900 dark:text-white mb-1">{res.title}</h5>
+                                        <p className="text-sm font-bold text-slate-700 dark:text-slate-300 leading-relaxed">
+                                            {res.description}
+                                        </p>
                                     </div>
-                                    <p className="text-sm font-bold text-slate-700 dark:text-slate-300 leading-relaxed">
-                                        {suggestion}
-                                    </p>
-                                </div>
-                            ))}
+                                ))
+                            ) : (
+                                ["Renegotiate priority", "Add conditional logic", "Merge items"].map((suggestion, i) => (
+                                    <div key={i} className="group p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 hover:border-emerald-500/50 transition-all cursor-pointer">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">General Resolution {i + 1}</span>
+                                            <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-emerald-500 transition-colors" />
+                                        </div>
+                                        <p className="text-sm font-bold text-slate-700 dark:text-slate-300 leading-relaxed">
+                                            {suggestion}
+                                        </p>
+                                    </div>
+                                ))
+                            )}
                         </div>
                         <Button className="w-full mt-8 rounded-2xl bg-slate-900 dark:bg-white dark:text-slate-900 text-white h-12 font-bold uppercase tracking-widest text-[10px]">
                             Generate More Options

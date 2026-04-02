@@ -104,27 +104,30 @@ const useProjectStore = create((set, get) => ({
     fetchProjectStats: async (projectId, timeframe = 'WEEKLY') => {
         try {
             const response = await api.get(`/projects/${projectId}/stats?timeframe=${timeframe}`);
-            set({ projectStats: response.data });
+            set({ projectStats: response.data, error: null });
         } catch (error) {
             console.error("Failed to fetch project stats:", error);
+            set({ error: error.response?.data?.message || error.message });
         }
     },
 
     fetchBdeStats: async () => {
         try {
             const response = await api.get("/projects/bde/stats");
-            set({ bdeStats: response.data });
+            set({ bdeStats: response.data, error: null });
         } catch (error) {
             console.error("Failed to fetch BDE stats:", error);
+            set({ error: error.response?.data?.message || error.message });
         }
     },
 
     fetchPmStats: async () => {
         try {
             const response = await api.get("/projects/pm/stats");
-            set({ pmStats: response.data });
+            set({ pmStats: response.data, error: null });
         } catch (error) {
             console.error("Failed to fetch PM stats:", error);
+            set({ error: error.response?.data?.message || error.message });
         }
     },
 
@@ -228,6 +231,9 @@ const useProjectStore = create((set, get) => ({
 
     clearCurrentProject: () => {
         set({ currentProject: null, projectStats: null });
+    },
+    clearError: () => {
+        set({ error: null });
     }
 }));
 

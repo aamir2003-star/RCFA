@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Download, FileText, Rocket, AlertTriangle, CheckCircle2, AlertCircle, Clock, BarChart } from 'lucide-react';
+import { Calendar, Download, FileText, Rocket, AlertTriangle, CheckCircle2, AlertCircle, Clock, BarChart, ArrowLeft } from 'lucide-react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import useProjectStore from '../../stores/useProjectStore';
+import ProjectSelector from '../shared/ProjectSelector';
 import {
   ANALYTICS_TIMEFRAMES,
   TIMEFRAME_SUBHEADERS,
@@ -10,7 +12,15 @@ import {
 } from '../../constants/analytics';
 
 const IconMap = {
-  FileText, Rocket, AlertTriangle, CheckCircle2, AlertCircle, Clock
+  Calendar,
+  Download,
+  FileText,
+  Rocket,
+  AlertTriangle,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  BarChart
 };
 
 const StatCard = ({ title, value, change, isPositive, iconName, colorClass, progressClass, progressValue, tooltip }) => {
@@ -47,7 +57,6 @@ const StatCard = ({ title, value, change, isPositive, iconName, colorClass, prog
 
 const ConflictTrendsChart = ({ timeline, timeframe }) => {
   const max = Math.max(...(timeline?.map(t => t.count) || [0]), 10);
-
   const subheader = TIMEFRAME_SUBHEADERS[timeframe] || DEFAULT_SUBHEADER;
 
   return (
@@ -183,16 +192,48 @@ const ActivityLog = ({ activity }) => (
 );
 
 const AnalyticsDashboard = () => {
-  const { currentProject, projectStats, fetchProjectStats } = useProjectStore();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const projectId = searchParams.get("projectId");
+  const isPm = window.location.pathname.startsWith('/pm');
+
+  const {
+    projects,
+    fetchProjects,
+    currentProject,
+    setCurrentProject,
+    projectStats,
+    fetchProjectStats,
+    loading: storeLoading,
+    error: storeError,
+    clearError
+  } = useProjectStore();
+
   const [isLoading, setIsLoading] = useState(false);
   const [timeframe, setTimeframe] = useState(ANALYTICS_TIMEFRAMES.WEEKLY);
 
   useEffect(() => {
-    if (currentProject?._id) {
-      setIsLoading(true);
-      fetchProjectStats(currentProject._id, timeframe).finally(() => setIsLoading(false));
+    if (!projectId) {
+      fetchProjects();
+    } else {
+      // Find project in state or set it if we have ID
+      const project = projects.find(p => p._id === projectId);
+      if (project) {
+        setCurrentProject(project);
+      } else if (projects.length > 0) {
+        // If not found but projects are loaded, might be an invalid ID or not assigned
+        console.warn("Project not found in user's assigned list");
+      }
     }
-  }, [currentProject?._id, timeframe, fetchProjectStats]);
+    return () => clearError();
+  }, [projectId, projects, fetchProjects, setCurrentProject, clearError]);
+
+  useEffect(() => {
+    if (projectId) {
+      setIsLoading(true);
+      fetchProjectStats(projectId, timeframe).finally(() => setIsLoading(false));
+    }
+  }, [projectId, timeframe, fetchProjectStats]);
 
   const stats = projectStats || {};
   const conflictTotal = stats.conflicts?.total || 0;
@@ -218,19 +259,63 @@ const AnalyticsDashboard = () => {
     colorClass: template.colorClass
   }));
 
-  if (!currentProject) {
+  if (!projectId) {
+    return (
+      <ProjectSelector
+        projects={projects}
+        onSelect={(id) => setSearchParams({ projectId: id })}
+        title="Intelligence Discovery"
+        description="Select a specific project from your vault to initialize the deep intelligence suite and health analytics."
+        loading={storeLoading}
+      />
+    );
+  }
+
+  // Handle API Errors (like 429)
+  if (projectId && storeError) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8 bg-white/50 dark:bg-[#0f1115]/50 backdrop-blur-md rounded-3xl border border-slate-200 dark:border-slate-800">
-        <div className="w-20 h-20 bg-indigo-500/10 rounded-3xl flex items-center justify-center mb-6 border border-indigo-500/20">
-          <BarChart className="w-10 h-10 text-indigo-500" />
+        <div className="w-20 h-20 bg-amber-500/10 rounded-3xl flex items-center justify-center mb-6 border border-amber-500/20">
+          <AlertTriangle className="w-10 h-10 text-amber-500" />
         </div>
-        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-2">Diagnostic Data Unavailable</h2>
+        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-2">Intelligence Interrupted</h2>
         <p className="text-slate-500 max-w-sm mb-8 font-medium">
-          Select a specific project from your dashboard to initialize the deep intelligence suite and health analytics.
+          {storeError.includes('429') || storeError.includes('Too many requests')
+            ? "The system is currently handling high volume. Please wait a few moments for diagnostics to clear."
+            : `An error occurred while fetching diagnostics: ${storeError}`}
+        </p>
+        <div className="flex gap-4">
+          <button
+            onClick={() => fetchProjectStats(projectId, timeframe)}
+            className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 active:scale-95 transition-all"
+          >
+            Retry Diagnostics
+          </button>
+          <button
+            onClick={() => setSearchParams({})}
+            className="px-8 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl font-black hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+          >
+            Switch Project
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle case where project is selected but not yet found/loaded
+  if (projectId && !currentProject && !isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8 bg-white/50 dark:bg-[#0f1115]/50 backdrop-blur-md rounded-3xl border border-slate-200 dark:border-slate-800">
+        <div className="w-20 h-20 bg-rose-500/10 rounded-3xl flex items-center justify-center mb-6 border border-rose-500/20">
+          <AlertCircle className="w-10 h-10 text-rose-500" />
+        </div>
+        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-2">Access Denied</h2>
+        <p className="text-slate-500 max-w-sm mb-8 font-medium">
+          You are attempting to access diagnostics for a project that is not in your authorized inventory.
         </p>
         <button
-          onClick={() => window.location.href = '/bde/dashboard'}
-          className="px-10 py-4 bg-indigo-600 text-white rounded-2xl font-black shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 active:scale-95 transition-all"
+          onClick={() => navigate(isPm ? '/pm/dashboard' : '/bde/dashboard')}
+          className="px-10 py-4 bg-slate-900 dark:bg-indigo-600 text-white rounded-2xl font-black shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 active:scale-95 transition-all"
         >
           Return to Dashboard
         </button>
@@ -242,12 +327,21 @@ const AnalyticsDashboard = () => {
     <div className={`w-full max-w-7xl mx-auto pb-8 ${isLoading ? 'opacity-50' : 'opacity-100'} transition-opacity duration-300`}>
       {/* Header Section */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-6">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <span className="px-2 py-0.5 rounded bg-indigo-500 text-[9px] font-black text-white uppercase tracking-widest shadow-sm">Live System</span>
-            <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Project Intelligence</h1>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setSearchParams({})}
+            className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center hover:bg-slate-50 transition-all shadow-sm"
+            title="Refresh Discovery"
+          >
+            <ArrowLeft className="w-5 h-5 text-slate-500" />
+          </button>
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <span className="px-2 py-0.5 rounded bg-indigo-500 text-[9px] font-black text-white uppercase tracking-widest shadow-sm">Live System</span>
+              <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Project Intelligence</h1>
+            </div>
+            <p className="text-sm text-slate-500 font-medium truncate max-w-md">Health metrics for <span className="text-indigo-600 font-bold underline decoration-indigo-500/30 underline-offset-4">{currentProject?.name}</span></p>
           </div>
-          <p className="text-sm text-slate-500 font-medium">Diagnostic health metrics and behavior analysis for <span className="text-indigo-600 font-bold underline decoration-indigo-500/30 underline-offset-4">{currentProject?.name}</span></p>
         </div>
         <div className="flex items-center bg-white/50 dark:bg-white/[0.02] p-1.5 rounded-2xl border border-slate-200 dark:border-white/[0.05] shadow-sm">
           {Object.values(ANALYTICS_TIMEFRAMES).map((tf) => (

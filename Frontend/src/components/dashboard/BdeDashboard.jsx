@@ -8,7 +8,16 @@ import { BDE_STATS_TEMPLATE, PROJECT_STATUS_COLORS } from "../../constants/dashb
 
 export default function BdeDashboard() {
   const navigate = useNavigate();
-  const { projects, fetchProjects, bdeStats, fetchBdeStats, setCurrentProject, deleteProject, loading } = useProjectStore();
+  const {
+    projects,
+    fetchProjects,
+    deleteProject,
+    setCurrentProject,
+    bdeStats,
+    fetchBdeStats,
+    loading,
+    error: storeError
+  } = useProjectStore();
 
   useEffect(() => {
     fetchProjects();
@@ -17,7 +26,7 @@ export default function BdeDashboard() {
 
   const handleProjectClick = (project) => {
     setCurrentProject(project);
-    navigate("/bde/analytics");
+    navigate(`/bde/analytics?projectId=${project._id}`);
   };
 
   const handleDeleteProject = async (e, projectId) => {

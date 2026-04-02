@@ -12,7 +12,8 @@ import {
   ShoppingCart,
   Shield,
   BarChart,
-  ArrowUpRight
+  ArrowUpRight,
+  AlertTriangle
 } from "lucide-react";
 import {
   PM_STATS_TEMPLATE,
@@ -28,7 +29,14 @@ import { cn } from "../../lib/utils";
 export default function PmDashboard() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { projects, fetchProjects, pmStats, fetchPmStats, loading } = useProjectStore();
+  const {
+    projects,
+    fetchProjects,
+    pmStats,
+    fetchPmStats,
+    loading,
+    error: storeError
+  } = useProjectStore();
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   useEffect(() => {
@@ -158,6 +166,33 @@ export default function PmDashboard() {
                     </p>
                   </div>
                   <div className="flex items-center justify-between sm:justify-end gap-6 sm:gap-10 mt-4 sm:mt-0 shrink-0">
+                    {/* Project Shortcuts */}
+                    <div className="hidden group-hover:flex items-center gap-2 transform translate-x-2 group-hover:translate-x-0 transition-all">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/pm/analytics?projectId=${proj._id}`);
+                        }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest border border-indigo-500/20 hover:bg-indigo-500 hover:text-white transition-all shadow-sm"
+                      >
+                        <BarChart className="w-3.5 h-3.5" />
+                        Analytics
+                      </button>
+
+                      {proj.conflictCount > 0 && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/pm/conflicts?projectId=${proj._id}`);
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[10px] font-black uppercase tracking-widest border border-rose-500/20 hover:bg-rose-500 hover:text-white transition-all shadow-sm"
+                        >
+                          <AlertTriangle className="w-3.5 h-3.5" />
+                          Triage
+                        </button>
+                      )}
+                    </div>
+
                     {/* Avatars */}
                     <div className="flex -space-x-2">
                       <div className="w-8 h-8 rounded-full bg-indigo-500 text-white border-2 border-white dark:border-slate-900 z-30 shadow-sm flex items-center justify-center text-[10px] font-bold">

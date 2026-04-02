@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
     AlertTriangle,
     Search,
@@ -14,11 +14,21 @@ import {
 import useConflictStore from "../stores/useConflictStore";
 
 export default function ConflictListPage() {
+    const [searchParams] = useSearchParams();
+    const projectId = searchParams.get("projectId");
     const { conflicts, loading, fetchAllPmConflicts } = useConflictStore();
 
     useEffect(() => {
         fetchAllPmConflicts();
     }, [fetchAllPmConflicts]);
+
+    const filteredConflicts = projectId
+        ? conflicts.filter(c => c.projectId?._id === projectId || c.projectId === projectId)
+        : conflicts;
+
+    const currentProjectName = projectId && filteredConflicts.length > 0
+        ? (filteredConflicts[0].projectId?.name || "Selected Project")
+        : null;
 
     if (loading && conflicts.length === 0) {
         return (
@@ -36,9 +46,21 @@ export default function ConflictListPage() {
                 <div>
                     <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
                         <AlertTriangle className="w-8 h-8 text-red-500" />
-                        Conflict Triage
+                        {projectId ? "Project Triage" : "Conflict Triage"}
                     </h1>
-                    <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">Review and resolve logical contradictions across all your project requirements.</p>
+                    <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">
+                        {projectId ? (
+                            <span className="flex items-center gap-2">
+                                <span className="text-indigo-600 font-bold underline decoration-indigo-500/30 underline-offset-4">{currentProjectName}</span>
+                                <button
+                                    onClick={() => setSearchParams({})}
+                                    className="ml-2 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-[9px] font-black uppercase tracking-widest rounded-md hover:bg-slate-200 transition-all"
+                                >
+                                    Clear Filter
+                                </button>
+                            </span>
+                        ) : "Review and resolve logical contradictions across all your project requirements."}
+                    </p>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="relative">
@@ -58,15 +80,15 @@ export default function ConflictListPage() {
             {/* Conflict Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                    { label: "Active Conflicts", val: conflicts.filter(c => c.status === 'open').length, color: "text-red-500", bg: "bg-red-50 dark:bg-red-500/10" },
-                    { label: "High Impact", val: conflicts.filter(c => c.severityScore >= 7).length, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-500/10" },
-                    { label: "Resolved", val: conflicts.filter(c => c.status === 'resolved').length, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
+                    { label: "Active Conflicts", val: filteredConflicts.filter(c => c.status === 'open').length, color: "text-red-500", bg: "bg-red-50 dark:bg-red-500/10" },
+                    { label: "High Impact", val: filteredConflicts.filter(c => c.severityScore >= 7).length, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-500/10" },
+                    { label: "Resolved", val: filteredConflicts.filter(c => c.status === 'resolved').length, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
                 ].map((stat, i) => (
                     <div key={i} className="bg-white/50 dark:bg-[#0f1115]/50 backdrop-blur-md rounded-3xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col gap-1 items-center md:items-start">
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{stat.label}</span>
                         <div className="flex items-baseline gap-2">
                             <span className={`text-3xl font-black ${stat.color}`}>{stat.val}</span>
-                            <span className="text-xs font-bold text-slate-400">/ {conflicts.length} Total</span>
+                            <span className="text-xs font-bold text-slate-400">/ {filteredConflicts.length} {projectId ? 'Project' : 'Total'}</span>
                         </div>
                     </div>
                 ))}
@@ -74,7 +96,7 @@ export default function ConflictListPage() {
 
             {/* Conflict List Content */}
             <div className="space-y-4">
-                {conflicts.length === 0 ? (
+                {filteredConflicts.length === 0 ? (
                     <div className="bg-white dark:bg-[#0f1115] border border-slate-200 dark:border-slate-800 rounded-[2rem] p-12 text-center flex flex-col items-center gap-4">
                         <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-500">
                             <BrainCircuit className="w-8 h-8" />
@@ -83,7 +105,7 @@ export default function ConflictListPage() {
                         <p className="text-slate-500 max-w-sm">All requirements are logically synchronized. Your project's semantic health is optimal.</p>
                     </div>
                 ) : (
-                    conflicts.map((conflict) => (
+                    filteredConflicts.map((conflict) => (
                         <Link
                             key={conflict._id}
                             to={`/pm/conflicts/${conflict._id}`}
