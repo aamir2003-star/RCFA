@@ -82,6 +82,27 @@ export default function ConflictDiscussion() {
         }
     });
 
+    if (!id) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[400px] gap-6 p-8 bg-white/40 dark:bg-[#0f1115]/60 backdrop-blur-xl rounded-[2.5rem] border border-white/20 dark:border-slate-800 shadow-xl">
+                <div className="w-20 h-20 rounded-3xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 mb-4">
+                    <MessageSquare className="w-10 h-10" />
+                </div>
+                <div className="text-center space-y-2">
+                    <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Select a Conflict</h2>
+                    <p className="text-slate-500 dark:text-slate-400 font-medium max-w-sm mx-auto">Please select a conflict from the registry to join the technical discussion.</p>
+                </div>
+                <Link
+                    to="/dev/conflicts"
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-black px-8 py-3.5 rounded-2xl shadow-lg shadow-indigo-600/20 active:scale-95 transition-all text-xs uppercase tracking-widest flex items-center gap-2"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to Registry
+                </Link>
+            </div>
+        );
+    }
+
     if (isLoading) return <div className="p-10 text-center font-black animate-pulse text-indigo-500">Retrieving Conflict Intel...</div>;
     if (error || !conflictData) return <div className="p-10 text-center text-red-500 font-bold">Conflict data unavailable.</div>;
 

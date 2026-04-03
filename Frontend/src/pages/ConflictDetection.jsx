@@ -110,29 +110,12 @@ export default function ConflictDetection() {
 
                 <div className="flex items-center gap-4">
                     <Button
-                        variant="outline"
                         onClick={() => navigate(`/pm/conflicts/${conflictId}/discussion`)}
-                        className="rounded-2xl border-slate-200 dark:border-slate-800 h-14 px-8 text-slate-600 dark:text-slate-300 font-bold uppercase tracking-widest text-xs hover:bg-slate-50 dark:hover:bg-slate-900"
+                        className="rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white h-14 px-12 font-black uppercase tracking-widest text-xs shadow-xl shadow-indigo-500/25 transition-all hover:scale-105 active:scale-95 flex items-center gap-3"
                     >
-                        <MessageSquare className="w-4 h-4 mr-2" />
-                        Discuss
-                    </Button>
-                    <Button
-                        onClick={handleResolve}
-                        disabled={conflict.status === 'resolved'}
-                        className="rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white h-14 px-10 font-bold uppercase tracking-widest text-xs shadow-xl shadow-indigo-500/25 transition-all hover:scale-105 active:scale-95"
-                    >
-                        {conflict.status === 'resolved' ? (
-                            <>
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                                Resolved
-                            </>
-                        ) : (
-                            <>
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                                Resolve Conflict
-                            </>
-                        )}
+                        <MessageSquare className="w-5 h-5" />
+                        Join Discussion & Resolve
+                        <ChevronRight className="w-4 h-4 ml-2" />
                     </Button>
                 </div>
             </div>

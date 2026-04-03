@@ -84,6 +84,16 @@ export default function AppRoutes() {
                 }
             />
             <Route
+                path="/dev/conflicts/discussion"
+                element={
+                    <ProtectedRoute allowedRoles={["dev"]}>
+                        <MainLayout role="dev">
+                            <ConflictDiscussion />
+                        </MainLayout>
+                    </ProtectedRoute>
+                }
+            />
+            <Route
                 path="/dev/conflicts"
                 element={
                     <ProtectedRoute allowedRoles={["dev"]}>
@@ -217,6 +227,16 @@ export default function AppRoutes() {
             />
             <Route
                 path="/pm/conflicts/:id/discussion"
+                element={
+                    <ProtectedRoute allowedRoles={["pm"]}>
+                        <MainLayout role="pm">
+                            <ConflictResolution />
+                        </MainLayout>
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/pm/conflicts/discussion"
                 element={
                     <ProtectedRoute allowedRoles={["pm"]}>
                         <MainLayout role="pm">

@@ -310,9 +310,11 @@ export const voteProposal = async (req, res) => {
     }
 };
 
+import { RequirementModel } from '../models/requirements/requirement.model.js';
+
 /**
  * PATCH /api/v1/conflicts/:id/confirm
- * PM confirms a resolution strategy.
+ * PM confirms a resolution strategy and updates requirements accordingly.
  */
 export const confirmConflictResolution = async (req, res) => {
     try {
@@ -323,29 +325,48 @@ export const confirmConflictResolution = async (req, res) => {
             return res.status(400).json({ success: false, message: 'resolutionId is required' });
         }
 
-        const conflict = await ConflictModel.findByIdAndUpdate(
-            id,
-            {
-                status: 'resolved',
-                pmResolution: {
-                    resolutionId,
-                    type,
-                    confirmedBy: req.user._id,
-                    confirmedAt: new Date()
-                }
-            },
-            { new: true }
-        );
-
+        // 1. Fetch Conflict and Resolution Details
+        const conflict = await ConflictModel.findById(id);
         if (!conflict) {
             return res.status(404).json({ success: false, message: 'Conflict not found' });
+        }
+
+        let resolutionText = "";
+        if (type === 'ai_resolution') {
+            const strategy = conflict.resolutions.id(resolutionId);
+            resolutionText = strategy ? `${strategy.strategyType}: ${strategy.title} - ${strategy.description}` : "AI Strategy";
+        } else {
+            const proposal = conflict.proposals.id(resolutionId);
+            resolutionText = proposal ? `Developer/PM Proposal: ${proposal.text}` : "Manual Proposal";
+        }
+
+        // 2. Update the Conflict Status
+        conflict.status = 'resolved';
+        conflict.pmResolution = {
+            resolutionId,
+            type,
+            confirmedBy: req.user._id,
+            confirmedAt: new Date()
+        };
+        await conflict.save();
+
+        // 3. Update the Conflicting Requirements
+        const resolutionNote = `\n\n[RESOLVED CONFLICT: ${conflict.conflictType}]\nResolution: ${resolutionText}\nDecision by: ${req.user.name} on ${new Date().toLocaleDateString()}`;
+
+        const requirements = await RequirementModel.find({ _id: { $in: [conflict.requirementA, conflict.requirementB] } });
+
+        for (const reqDoc of requirements) {
+            reqDoc.description = (reqDoc.description || "") + resolutionNote;
+            reqDoc.status = 'approved';
+            reqDoc.version = (reqDoc.version || 1) + 1;
+            await reqDoc.save();
         }
 
         emitConflictResolved(conflict.projectId, id);
 
         return res.json({
             success: true,
-            message: 'Conflict resolution confirmed by PM',
+            message: 'Conflict resolution confirmed and requirements updated',
             conflict
         });
     } catch (err) {

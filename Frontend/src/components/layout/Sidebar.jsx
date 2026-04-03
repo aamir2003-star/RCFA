@@ -31,16 +31,18 @@ export function Sidebar({ role, isOpen, onClose }) {
   };
 
   // NavLink renderer component block
-  const SidebarLink = ({ to, icon: Icon, label, badge, activePaths = [] }) => (
+  const SidebarLink = ({ to, icon: Icon, label, badge, activePaths = [], matchSubPath }) => (
     <NavLink
       to={to}
+      end={!matchSubPath}
       onClick={onClose}
       className={({ isActive }) => {
         const isManuallyActive = activePaths.some(
           (p) =>
             location.pathname === p || location.pathname.startsWith(`${p}/`),
         );
-        const active = isActive || isManuallyActive;
+        const isSubPathActive = matchSubPath && location.pathname.includes(matchSubPath);
+        const active = isActive || isManuallyActive || isSubPathActive;
         return cn(
           "flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 cursor-pointer border border-transparent",
           active
@@ -105,6 +107,7 @@ export function Sidebar({ role, isOpen, onClose }) {
               icon={item.icon}
               label={item.label}
               badge={item.badge}
+              matchSubPath={item.matchSubPath}
             />
           )
         ))}
