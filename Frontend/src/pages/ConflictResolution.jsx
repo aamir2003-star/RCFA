@@ -1,61 +1,158 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../lib/api";
 import useAuthStore from "../stores/useAuthStore";
 import useProjectStore from "../stores/useProjectStore";
-import { discussionMessages, discussionParticipants } from "../lib/features_utils";
 import { cn } from "../lib/utils";
+import {
+    ChevronRight,
+    CheckCircle,
+    Bold,
+    Italic,
+    Link as LinkIcon,
+    Code as CodeIcon,
+    AtSign,
+    Paperclip,
+    Trash2,
+    UserPlus,
+    Sparkles,
+    ThumbsUp,
+    ThumbsDown,
+    File as FileIcon,
+    Download,
+    Reply,
+    Check,
+    Zap,
+    Plus,
+    X,
+    ArrowLeft
+} from "lucide-react";
+import { toast } from "react-hot-toast";
+import { useState, useRef } from "react";
 
 export default function ConflictResolution() {
-    const { id } = useParams(); // Conflict ID
+    const { id } = useParams();
+    const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { user } = useAuthStore();
     const { currentProject } = useProjectStore();
+    const [comment, setComment] = useState("");
+    const [isProposing, setIsProposing] = useState(false);
+    const [proposalText, setProposalText] = useState("");
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const fileInputRef = useRef(null);
+    const proposalFileInputRef = useRef(null);
 
     // Fetch Conflict Details
     const { data: conflict, isLoading, error } = useQuery({
         queryKey: ["conflict", id],
         queryFn: async () => {
-            const response = await api.get(`/conflicts/${currentProject?._id}`);
-            // Find the specific conflict in the list (temporary until individual GET /conflicts/:id is added)
-            return response.data.conflicts.find(c => c._id === id);
+            const response = await api.get(`/conflicts/detail/${id}`);
+            return response.data.conflict;
         },
-        enabled: !!id && !!currentProject?._id
+        enabled: !!id
     });
 
-    // Vote Mutation
-    const voteMutation = useMutation({
-        mutationFn: async (voteData) => {
-            return await api.post("/votes", voteData);
+    // Fetch Votes
+    const { data: voteResults } = useQuery({
+        queryKey: ["conflict-votes", id],
+        queryFn: async () => {
+            const response = await api.get(`/votes/${id}`);
+            return response.data;
         },
+        enabled: !!id
+    });
+
+    // Mutations
+    const confirmMutation = useMutation({
+        mutationFn: ({ resId, type }) => api.patch(`/conflicts/${id}/confirm`, { resolutionId: resId, type }),
         onSuccess: () => {
             queryClient.invalidateQueries(["conflict", id]);
-            // In a real app, Socket.io would handle the update, but invalidation ensures sync
+            toast.success("Conflict Resolution Confirmed");
+            navigate("/pm/conflicts");
         }
     });
 
-    if (isLoading) return <div className="p-10 text-center font-black animate-pulse">Loading intelligence...</div>;
-    if (error || !conflict) return <div className="p-10 text-center text-red-500 font-bold">Conflict not found or error loading.</div>;
+    const commentMutation = useMutation({
+        mutationFn: (formData) => api.post(`/conflicts/${id}/comment`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        }),
+        onSuccess: () => {
+            queryClient.invalidateQueries(["conflict", id]);
+            setComment("");
+            setSelectedFiles([]);
+            toast.success("Comment added");
+        }
+    });
 
-    const handleVote = (resolutionId) => {
-        voteMutation.mutate({
-            conflictId: id,
-            choice: resolutionId,
-            comment: "Stakeholder decision via Triage Center"
-        });
+    const proposalMutation = useMutation({
+        mutationFn: (formData) => api.post(`/conflicts/${id}/propose`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        }),
+        onSuccess: () => {
+            queryClient.invalidateQueries(["conflict", id]);
+            setProposalText("");
+            setSelectedFiles([]);
+            setIsProposing(false);
+            toast.success("Proposal submitted");
+        }
+    });
+
+    const voteMutation = useMutation({
+        mutationFn: (proposalId) => api.post(`/conflicts/proposals/${proposalId}/vote`),
+        onSuccess: () => {
+            queryClient.invalidateQueries(["conflict", id]);
+            toast.success("Vote updated");
+        }
+    });
+
+    if (isLoading) return <div className="p-10 text-center font-black animate-pulse text-indigo-500">Initializing Resolution Strategy...</div>;
+    if (error || !conflict) return <div className="p-10 text-center text-red-500 font-bold">Conflict intel unavailable.</div>;
+
+    // Determine highest voted AI resolution
+    const highestVotedResId = voteResults?.tally ? Object.entries(voteResults.tally).reduce((a, b) => b[1] > a[1] ? b : a, ["", 0])[0] : null;
+
+    // Determine highest voted Developer Proposal
+    const topProposal = conflict.proposals?.length > 0
+        ? [...conflict.proposals].sort((a, b) => (b.votes?.length || 0) - (a.votes?.length || 0))[0]
+        : null;
+
+    const handleSendComment = (e) => {
+        if (!comment.trim() && selectedFiles.length === 0) return;
+        const formData = new FormData();
+        formData.append("message", comment);
+        selectedFiles.forEach(file => formData.append("attachments", file));
+        commentMutation.mutate(formData);
+    };
+
+    const handleSumbitProposal = (e) => {
+        e.preventDefault();
+        if (!proposalText.trim()) return;
+        const formData = new FormData();
+        formData.append("text", proposalText);
+        selectedFiles.forEach(file => formData.append("attachments", file));
+        proposalMutation.mutate(formData);
+    };
+
+    const handleFileChange = (e) => {
+        const files = Array.from(e.target.files);
+        setSelectedFiles(prev => [...prev, ...files]);
+    };
+
+    const removeFile = (index) => {
+        setSelectedFiles(prev => prev.filter((_, i) => i !== index));
     };
 
     return (
         <div className="flex flex-col h-full xl:flex-row gap-8 overflow-hidden">
             {/* Main Discussion Area */}
-            <div className="flex-1 flex flex-col bg-white/50 dark:bg-[#0f1115]/50 backdrop-blur-md rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl shadow-indigo-500/5 dark:shadow-none overflow-hidden">
+            <div className="flex-1 flex flex-col bg-white/50 dark:bg-[#0f1115]/50 backdrop-blur-md rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
                 {/* Discussion Header */}
                 <div className="p-8 border-b border-slate-200 dark:border-slate-800 sticky top-0 bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md z-20">
-                    <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">
-                        <span>{currentProject?.name || "Project"}</span>
-                        <ChevronRight className="w-3 h-3" />
-                        <span className="text-indigo-600 dark:text-indigo-400">#{id.slice(-6).toUpperCase()}</span>
-                    </div>
+                    <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 hover:text-indigo-500 transition-colors">
+                        <ArrowLeft className="w-3 h-3" />
+                        Back
+                    </button>
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                         <div className="space-y-2">
                             <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
@@ -76,46 +173,124 @@ export default function ConflictResolution() {
                                 </span>
                             </div>
                         </div>
-                        {conflict.status === 'open' && (
-                            <Button className="bg-indigo-600 hover:bg-indigo-500 text-white font-black px-6 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-indigo-600/20 transition-all active:scale-95 text-xs uppercase tracking-widest">
-                                <CheckCircle className="w-4 h-4" />
-                                Resolve Conflict
-                            </Button>
-                        )}
+
+                        <div className="flex items-center gap-3">
+                            {conflict.status !== 'resolved' && (
+                                <button
+                                    onClick={() => setIsProposing(true)}
+                                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-black px-6 py-3 rounded-2xl shadow-xl shadow-indigo-600/20 flex items-center gap-2 active:scale-95 transition-all text-[11px] uppercase tracking-widest whitespace-nowrap"
+                                >
+                                    <Zap className="w-4 h-4" />
+                                    Propose Solution
+                                </button>
+                            )}
+                            {conflict.status === 'resolved' && (
+                                <div className="flex items-center gap-4 bg-emerald-500/10 border border-emerald-500/20 px-6 py-3 rounded-2xl animate-in fade-in slide-in-from-top-4 duration-500 text-right">
+                                    <div className="text-right">
+                                        <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest leading-none mb-1 text-right">Resolution Active</p>
+                                        <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                                            Locked on {new Date(conflict.pmResolution?.confirmedAt).toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                    <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+                                        <CheckCircle className="w-5 h-5" />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
                 {/* Messages Thread */}
                 <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
-                    {discussionMessages.map((msg) => (
-                        <MessageItem key={msg.id} msg={msg} />
+                    {conflict.discussions?.map((msg, i) => (
+                        <div key={i} className="flex gap-6 group">
+                            <div className="shrink-0 flex flex-col items-center gap-2">
+                                <img src={msg.user?.avatar || `https://ui-avatars.com/api/?name=${msg.user?.name}`} alt={msg.user?.name} className="size-11 rounded-2xl object-cover border-2 border-white dark:border-slate-800 shadow-md group-hover:scale-105 transition-transform" />
+                            </div>
+                            <div className="flex-1 space-y-4">
+                                <div className="flex items-center gap-3">
+                                    <span className="font-extrabold text-slate-900 dark:text-white text-base">{msg.user?.name}</span>
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{new Date(msg.timestamp).toLocaleTimeString()}</span>
+                                </div>
+                                <div className="text-slate-700 dark:text-slate-300 text-[15px] font-medium leading-relaxed bg-white/30 dark:bg-white/5 p-5 rounded-2xl border border-slate-100 dark:border-slate-800/50">
+                                    {msg.message}
+
+                                    {msg.attachments?.length > 0 && (
+                                        <div className="mt-4 flex flex-wrap gap-2">
+                                            {msg.attachments.map((url, idx) => (
+                                                <a key={idx} href={api.defaults.baseURL + url} target="_blank" rel="noreferrer" className="flex items-center gap-2 p-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-500/50 transition-all group/file">
+                                                    {url.match(/\.(jpg|jpeg|png|gif)$/i) ? (
+                                                        <img src={api.defaults.baseURL + url} alt="attachment" className="size-12 rounded-lg object-cover" />
+                                                    ) : (
+                                                        <div className="size-12 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+                                                            <Paperclip className="w-6 h-6" />
+                                                        </div>
+                                                    )}
+                                                    <div className="pr-2">
+                                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">ATTACHMENT</p>
+                                                        <p className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 truncate max-w-[100px]">View Detail</p>
+                                                    </div>
+                                                </a>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     ))}
+                    {(!conflict.discussions || conflict.discussions.length === 0) && (
+                        <div className="text-center py-20 text-slate-400 font-bold italic">No developer comments yet.</div>
+                    )}
                 </div>
 
-                {/* Reply Area */}
                 <div className="p-6 bg-slate-50/50 dark:bg-[#0f1115]/50 border-t border-slate-200 dark:border-slate-800">
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden focus-within:border-indigo-500/50 transition-all">
-                        <div className="flex items-center gap-1 p-2 border-b border-slate-100 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-800/50">
-                            <ToolbarButton icon={Bold} />
-                            <ToolbarButton icon={Italic} />
-                            <ToolbarButton icon={LinkIcon} />
-                            <ToolbarButton icon={CodeIcon} />
-                            <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-2"></div>
-                            <ToolbarButton icon={AtSign} />
+                    {selectedFiles.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-4 animate-in slide-in-from-bottom-2">
+                            {selectedFiles.map((file, i) => (
+                                <div key={i} className="flex items-center gap-2 bg-indigo-500/10 text-indigo-500 px-3 py-1.5 rounded-xl border border-indigo-500/20 text-xs font-bold">
+                                    <Paperclip className="w-3 h-3" />
+                                    {file.name}
+                                    <button onClick={() => removeFile(i)} className="hover:text-red-500"><X className="w-3 h-3" /></button>
+                                </div>
+                            ))}
                         </div>
+                    )}
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden focus-within:border-indigo-500/50 transition-all">
                         <textarea
                             className="w-full border-none focus:ring-0 text-[15px] font-medium dark:bg-slate-900 dark:text-white p-5 resize-none placeholder-slate-400"
-                            placeholder="Add your comment or propose a resolution..."
-                            rows="3"
+                            placeholder="Add PM perspective or resolution guidance..."
+                            rows="2"
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
                         ></textarea>
                         <div className="flex items-center justify-between p-4 bg-slate-50/50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800/50">
-                            <button className="flex items-center gap-2 text-[11px] font-black text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all uppercase tracking-widest">
-                                <Paperclip className="w-4 h-4" />
-                                Attach files
-                            </button>
-                            <Button className="bg-[#1e2532] hover:bg-slate-800 text-white font-black px-8 py-2 rounded-xl shadow-lg shadow-slate-900/10 text-xs uppercase tracking-widest active:scale-95 transition-all">
+                            <div className="flex items-center gap-1">
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current.click()}
+                                    className="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-indigo-500 transition-all"
+                                >
+                                    <Paperclip className="w-5 h-5" />
+                                </button>
+                                <input
+                                    type="file"
+                                    multiple
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    onChange={handleFileChange}
+                                />
+                                <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-2">
+                                    PM Directive
+                                </span>
+                            </div>
+                            <button
+                                onClick={handleSendComment}
+                                disabled={commentMutation.isLoading || (!comment.trim() && selectedFiles.length === 0)}
+                                className="bg-[#1e2532] hover:bg-slate-800 text-white font-black px-8 py-2 rounded-xl shadow-lg text-xs uppercase tracking-widest active:scale-95 transition-all disabled:opacity-50"
+                            >
                                 Comment
-                            </Button>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -123,225 +298,281 @@ export default function ConflictResolution() {
 
             {/* Right Sidebar */}
             <aside className="w-full xl:w-85 flex flex-col gap-6 shrink-0 h-full overflow-y-auto custom-scrollbar pb-6">
-                {/* Participants */}
-                <div className="bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/10 dark:shadow-none space-y-6">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Participants</h3>
-                        <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg text-[10px] font-black">{discussionParticipants.length}</span>
-                    </div>
-                    <div className="space-y-4">
-                        {discussionParticipants.map((p) => (
-                            <div key={p.id} className="flex items-center justify-between group cursor-pointer">
-                                <div className="flex items-center gap-3">
-                                    <div className="relative">
-                                        <img src={p.avatar} alt={p.name} className="size-9 rounded-xl object-cover border border-slate-200 dark:border-slate-700" />
-                                        {p.online && <div className="absolute -bottom-1 -right-1 size-3 bg-emerald-500 rounded-full border-2 border-white dark:border-[#0f1115]"></div>}
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-black text-slate-900 dark:text-white leading-tight group-hover:text-indigo-600 transition-colors">{p.name}</p>
-                                        <p className="text-[10px] text-slate-500 font-bold mt-0.5">{p.role}</p>
-                                    </div>
-                                </div>
-                                <button className="p-1 px-1.5 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100">
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                </button>
+                {/* Community Consensus Engine */}
+                {conflict.proposals?.length > 0 && (
+                    <div className="bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <UserPlus className="w-4 h-4 text-emerald-500" />
+                                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Consensus Engine</h3>
                             </div>
-                        ))}
-                        <button className="flex items-center gap-3 w-full p-3.5 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 text-slate-400 hover:text-indigo-500 hover:border-indigo-500/50 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/5 transition-all duration-300 group">
-                            <UserPlus className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                            <span className="text-[10px] font-black uppercase tracking-widest">Invite Others</span>
-                        </button>
-                    </div>
-                </div>
-
-                {/* Conflicting Requirements */}
-                <div className="bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/10 dark:shadow-none space-y-6">
-                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Affected Requirements</h3>
-                    <div className="space-y-3">
-                        <RequirementTiny
-                            iconBg="bg-indigo-100 dark:bg-indigo-900/30"
-                            id={`REQ-${conflict.requirementA?._id?.slice(-4).toUpperCase()}`}
-                            title={conflict.requirementA?.title}
-                        />
-                        <RequirementTiny
-                            iconBg="bg-amber-100 dark:bg-amber-900/30"
-                            id={`REQ-${conflict.requirementB?._id?.slice(-4).toUpperCase()}`}
-                            title={conflict.requirementB?.title}
-                        />
-                    </div>
-                </div>
-
-                {/* AI Resolution Strategies */}
-                {conflict.resolutions?.length > 0 && (
-                    <div className="bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/10 dark:shadow-none space-y-6">
-                        <div className="flex items-center gap-2">
-                            <Sparkles className="w-4 h-4 text-indigo-500" />
-                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">AI Proposed Strategies</h3>
+                            <span className="text-[9px] font-black text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md uppercase tracking-widest">
+                                {conflict.proposals.length} Proposals
+                            </span>
                         </div>
                         <div className="space-y-4">
-                            {conflict.resolutions.map((res) => (
-                                <div key={res._id} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 hover:border-indigo-500/50 transition-all group">
+                            {[...conflict.proposals].sort((a, b) => (b.votes?.length || 0) - (a.votes?.length || 0)).map((prop) => (
+                                <div key={prop._id} className={cn(
+                                    "p-4 rounded-xl border transition-all group",
+                                    topProposal?._id === prop._id ? "border-emerald-500 bg-emerald-500/5" : "bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800",
+                                    conflict.pmResolution?.resolutionId === prop._id ? "border-emerald-500 bg-emerald-500/5 ring-1 ring-emerald-500" : ""
+                                )}>
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest bg-indigo-50 dark:bg-indigo-900/20 px-2 py-0.5 rounded-md">
-                                            {res.strategyType}
-                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <img src={prop.user?.avatar || `https://ui-avatars.com/api/?name=${prop.user?.name}`} className="w-5 h-5 rounded-full border border-white" alt="" />
+                                            <span className="text-[9px] font-black text-slate-900 dark:text-white uppercase tracking-widest">
+                                                {prop.user?.name}
+                                            </span>
+                                            {topProposal?._id === prop._id && (
+                                                <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md uppercase tracking-widest flex items-center gap-1">
+                                                    <Sparkles className="w-2.5 h-2.5" />
+                                                    Top Rated
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                                            {prop.votes?.length || 0} Votes
+                                        </div>
+                                    </div>
+                                    <p className="text-[11px] text-slate-700 dark:text-slate-300 font-medium leading-relaxed mb-3">
+                                        {prop.text}
+                                    </p>
+
+                                    {prop.attachments?.length > 0 && (
+                                        <div className="flex flex-wrap gap-2 mb-4">
+                                            {prop.attachments.map((url, idx) => (
+                                                <a key={idx} href={api.defaults.baseURL + url} target="_blank" rel="noreferrer" className="flex items-center gap-1 px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-[9px] font-bold text-slate-500 hover:text-indigo-500 transition-colors">
+                                                    <Paperclip className="w-2.5 h-2.5" />
+                                                    Attachment {idx + 1}
+                                                </a>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    <div className="flex items-center justify-between mb-4 pt-3 border-t border-slate-100 dark:border-slate-800/50">
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex -space-x-1.5">
+                                                {prop.votes?.slice(0, 3).map((v, i) => (
+                                                    <div key={i} className="w-4 h-4 rounded-full border border-white dark:border-slate-800 bg-slate-200" />
+                                                ))}
+                                            </div>
+                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                                                {prop.votes?.length || 0} Votes
+                                            </span>
+                                        </div>
                                         <button
-                                            onClick={() => handleVote(res._id)}
-                                            disabled={voteMutation.isLoading}
-                                            className="text-[9px] font-black text-slate-400 hover:text-indigo-600 uppercase tracking-widest flex items-center gap-1 transition-colors"
+                                            onClick={() => voteMutation.mutate(prop._id)}
+                                            className={cn(
+                                                "p-1.5 rounded-lg transition-all active:scale-90",
+                                                prop.votes?.includes(user?._id)
+                                                    ? "bg-indigo-500 text-white"
+                                                    : "text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                            )}
                                         >
                                             <ThumbsUp className="w-3 h-3" />
-                                            Vote
                                         </button>
                                     </div>
-                                    <p className="text-xs font-black text-slate-900 dark:text-white mb-1 group-hover:text-indigo-600 transition-colors">
-                                        {res.title}
-                                    </p>
-                                    <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
-                                        {res.description}
-                                    </p>
+
+                                    {conflict.status !== 'resolved' && (
+                                        <button
+                                            onClick={() => confirmMutation.mutate({ resId: prop._id, type: 'developer_proposal' })}
+                                            disabled={confirmMutation.isLoading}
+                                            className="w-full flex items-center justify-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 hover:text-emerald-600 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                                        >
+                                            <Check className="w-3 h-3 text-emerald-500" />
+                                            Confirm Developer Selection
+                                        </button>
+                                    )}
+                                    {conflict.pmResolution?.resolutionId === prop._id && (
+                                        <div className="w-full flex items-center justify-center gap-2 text-emerald-600 py-2.5 text-[10px] font-black uppercase tracking-widest">
+                                            <CheckCircle className="w-3 h-3" />
+                                            Active Resolution
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
                     </div>
                 )}
 
-                {/* Feasibility Impact */}
-                <div className="bg-linear-to-br from-[#1e2532] to-slate-900 rounded-3xl p-6 relative overflow-hidden text-white shadow-2xl shadow-indigo-500/20 border border-indigo-500/20 group hover:-translate-y-1 transition-all duration-500 mt-auto">
-                    <div className="flex items-center gap-2.5 mb-5 relative z-10">
-                        <div className="w-8 h-8 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 shadow-lg shadow-indigo-500/10">
-                            <Sparkles className="w-5 h-5 animate-pulse" />
+                {/* AI Resolution Strategies */}
+                {conflict.resolutions?.length > 0 && (
+                    <div className="bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
+                        <div className="flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-indigo-500" />
+                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">AI Strategy Recommender</h3>
                         </div>
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">Intelligent Impact Audit</h3>
-                    </div>
-                    <div className="space-y-4 relative z-10">
-                        <div className="grid grid-cols-2 gap-4 mb-4">
-                            <div className="space-y-1">
-                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Timeline Hit</p>
-                                <p className="text-xl font-black text-indigo-400">{conflict.feasibility?.timelineImpact || "N/A"}</p>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Budget Hit</p>
-                                <p className="text-xl font-black text-amber-400">{conflict.feasibility?.costImpact || "N/A"}</p>
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                <span>Risk Level</span>
-                                <span className={cn(
-                                    "font-black",
-                                    conflict.feasibility?.riskLevel === 'High' ? "text-red-400" : "text-emerald-400"
-                                )}>{conflict.feasibility?.riskLevel || "Low"}</span>
-                            </div>
-                            <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                                <div className={cn(
-                                    "h-full rounded-full transition-all duration-1000",
-                                    conflict.feasibility?.riskLevel === 'High' ? "bg-red-500 w-[85%]" : "bg-emerald-500 w-[30%]"
-                                )}></div>
-                            </div>
-                        </div>
-                        {conflict.explanation && (
-                            <p className="text-[11px] text-slate-400 font-bold border-l-2 border-indigo-500/30 pl-3 py-1 italic">
-                                {conflict.explanation}
-                            </p>
-                        )}
-                    </div>
-                </div>
-            </aside>
-        </div>
-    );
-}
-
-function MessageItem({ msg }) {
-    return (
-        <div className="flex gap-6 group">
-            <div className="shrink-0 flex flex-col items-center gap-2">
-                <img src={msg.user.avatar} alt={msg.user.name} className="size-11 rounded-2xl object-cover border-2 border-white dark:border-slate-800 shadow-md group-hover:scale-105 transition-transform" />
-            </div>
-            <div className="flex-1 space-y-4">
-                <div className="flex items-center gap-3">
-                    <span className="font-extrabold text-slate-900 dark:text-white text-base">{msg.user.name}</span>
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{msg.time}</span>
-                </div>
-                <div className="text-slate-700 dark:text-slate-300 text-[15px] font-medium leading-relaxed bg-white/30 dark:bg-white/5 p-5 rounded-2xl border border-slate-100 dark:border-slate-800/50">
-                    {msg.content}
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[10px] font-black uppercase tracking-wider text-slate-500 hover:text-indigo-600 transition-colors">
-                        <Reply className="w-3.5 h-3.5" />
-                        Reply
-                    </button>
-                    <button className="p-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-indigo-600 transition-all">
-                        <ThumbsUp className="w-3.5 h-3.5" />
-                    </button>
-                </div>
-
-                {/* Replies */}
-                {msg.replies && (
-                    <div className="mt-8 ml-4 pl-8 border-l-2 border-slate-100 dark:border-slate-800/50 space-y-8">
-                        {msg.replies.map(reply => (
-                            <div key={reply.id} className="flex gap-4 relative group/reply">
-                                <div className="absolute -left-[34px] top-6 w-8 border-t-2 border-slate-100 dark:border-slate-800/50 rounded-full"></div>
-                                <img src={reply.user.avatar} alt={reply.user.name} className="size-9 rounded-xl object-cover border-2 border-white dark:border-slate-800 shadow-sm shrink-0" />
-                                <div className="flex-1 space-y-3">
-                                    <div className="flex items-center gap-2">
-                                        <span className="font-extrabold text-slate-900 dark:text-white text-sm">{reply.user.name}</span>
-                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{reply.time}</span>
-                                    </div>
-
-                                    <div className="text-slate-700 dark:text-slate-300 text-[14px] font-medium leading-relaxed">
-                                        {reply.content}
-                                    </div>
-
-                                    {reply.code && (
-                                        <div className="bg-slate-900 rounded-2xl p-5 font-mono text-[13px] text-blue-300 overflow-x-auto border border-slate-800 shadow-xl relative group/code">
-                                            <pre><code>{reply.code}</code></pre>
-                                            <button className="absolute top-4 right-4 p-2 text-slate-500 hover:text-indigo-400 transition-colors opacity-0 group-hover/code:opacity-100">
-                                                <CodeIcon className="w-4 h-4" />
+                        <div className="space-y-4">
+                            {conflict.resolutions.map((res) => (
+                                <div key={res._id} className={cn(
+                                    "p-4 rounded-xl border transition-all group",
+                                    res._id === highestVotedResId ? "border-indigo-500 bg-indigo-500/5" : "bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800",
+                                    conflict.pmResolution?.resolutionId === res._id ? "border-emerald-500 bg-emerald-500/5 ring-1 ring-emerald-500" : ""
+                                )}>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest bg-indigo-50 dark:bg-indigo-900/20 px-2 py-0.5 rounded-md">
+                                                {res.strategyType}
+                                            </span>
+                                            {res._id === highestVotedResId && (
+                                                <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md uppercase tracking-widest flex items-center gap-1">
+                                                    <ThumbsUp className="w-2.5 h-2.5" />
+                                                    Consensus
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => voteMutation.mutate(res._id)}
+                                                className={cn(
+                                                    "p-1.5 rounded-lg transition-all active:scale-90",
+                                                    (voteResults?.userVotes?.[res._id])
+                                                        ? "bg-indigo-500 text-white"
+                                                        : "text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                                )}
+                                            >
+                                                <ThumbsUp className="w-3 h-3" />
                                             </button>
-                                        </div>
-                                    )}
-
-                                    {reply.proposal && (
-                                        <div className="p-6 rounded-2xl bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-900/30 space-y-4">
-                                            <p className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.15em]">Proposed Solution</p>
-                                            <p className="text-base font-extrabold text-slate-900 dark:text-white">{reply.proposal.title}</p>
-                                            <div className="flex items-center gap-3">
-                                                <button className="bg-white dark:bg-indigo-900/50 border border-slate-200 dark:border-indigo-800 px-5 py-2 rounded-xl text-sm font-black flex items-center gap-2.5 hover:border-indigo-600 hover:text-indigo-600 transition-all shadow-sm">
-                                                    <ThumbsUp className="w-4 h-4 text-emerald-500" />
-                                                    {reply.proposal.votes.up}
-                                                </button>
-                                                <button className="bg-white dark:bg-indigo-900/50 border border-slate-200 dark:border-indigo-800 px-5 py-2 rounded-xl text-sm font-black flex items-center gap-2.5 hover:border-red-600 hover:text-red-600 transition-all shadow-sm">
-                                                    <ThumbsDown className="w-4 h-4 text-red-500" />
-                                                    {reply.proposal.votes.down}
-                                                </button>
-                                                <button className="text-indigo-600 dark:text-indigo-400 text-xs font-black uppercase tracking-widest ml-auto hover:underline underline-offset-4 decoration-2">
-                                                    Approve Solution
-                                                </button>
+                                            <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                                                {voteResults?.tally?.[res._id] || 0} Votes
                                             </div>
                                         </div>
+                                    </div>
+                                    <p className="text-xs font-black text-slate-900 dark:text-white mb-1">
+                                        {res.title}
+                                    </p>
+                                    <p className="text-[10px] text-slate-500 font-medium leading-relaxed mb-4">
+                                        {res.description}
+                                    </p>
+                                    {conflict.status !== 'resolved' && (
+                                        <button
+                                            onClick={() => confirmMutation.mutate({ resId: res._id, type: 'ai_resolution' })}
+                                            disabled={confirmMutation.isLoading}
+                                            className="w-full flex items-center justify-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 hover:text-emerald-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                                        >
+                                            <Check className="w-3 h-3 text-emerald-500" />
+                                            Confirm AI Strategy
+                                        </button>
                                     )}
-
-                                    {reply.attachment && (
-                                        <div className="flex items-center gap-4 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900/50 w-fit cursor-pointer hover:shadow-xl hover:shadow-indigo-500/5 hover:-translate-y-0.5 transition-all group/file">
-                                            <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-xl text-red-600 group-hover/file:scale-110 transition-transform">
-                                                <FileIcon className="w-6 h-6" />
-                                            </div>
-                                            <div className="pr-6">
-                                                <p className="text-sm font-black text-slate-900 dark:text-white">{reply.attachment.name}</p>
-                                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{reply.attachment.size} • {reply.attachment.type}</p>
-                                            </div>
-                                            <Download className="w-5 h-5 text-slate-300 group-hover/file:text-indigo-600 transition-colors" />
+                                    {conflict.pmResolution?.resolutionId === res._id && (
+                                        <div className="w-full flex items-center justify-center gap-2 text-emerald-600 py-2.5 text-[10px] font-black uppercase tracking-widest">
+                                            <CheckCircle className="w-3 h-3" />
+                                            Active Resolution
                                         </div>
                                     )}
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 )}
-            </div>
+
+                {/* Scorecard */}
+                <div className="bg-linear-to-br from-[#1e2532] to-slate-900 rounded-3xl p-6 text-white shadow-2xl border border-indigo-500/20">
+                    <div className="flex items-center gap-3 mb-6 relative z-10">
+                        <div className="w-8 h-8 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400">
+                            <Sparkles className="w-5 h-5" />
+                        </div>
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">Impact Analysis</h3>
+                    </div>
+                    <div className="space-y-4 relative z-10">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Timeline</p>
+                                <p className="text-xl font-black text-indigo-400">{conflict.feasibility?.timelineImpact || "0%"}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Budget</p>
+                                <p className="text-xl font-black text-amber-400">{conflict.feasibility?.costImpact || "0%"}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            {/* Proposal Modal */}
+            {isProposing && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onClick={() => setIsProposing(false)} />
+                    <div className="relative w-full max-w-2xl bg-white dark:bg-[#0f1115] rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-3xl overflow-hidden animate-in zoom-in-95 duration-300">
+                        <div className="p-8 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-white/[0.02]">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 rounded-2xl bg-indigo-500 text-white shadow-lg shadow-indigo-500/20">
+                                    <Plus className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Propose PM Solution</h2>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Detail your technical directive</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setIsProposing(false)} className="p-2 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 transition-all">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <form onSubmit={handleSumbitProposal} className="p-8 space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">TECHNICAL CONTEXT & RATIONALE</label>
+                                <textarea
+                                    required
+                                    className="w-full bg-slate-50 dark:bg-black/40 rounded-2xl border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-0 text-sm font-medium dark:text-white p-4 min-h-[150px] resize-none"
+                                    placeholder="Explain how this proposal resolves the contradiction while maintaining project integrity..."
+                                    value={proposalText}
+                                    onChange={(e) => setProposalText(e.target.value)}
+                                ></textarea>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">SUPPORTING ASSETS (IMAGES, ARCH DIAGRAMS)</label>
+                                    <button
+                                        type="button"
+                                        onClick={() => proposalFileInputRef.current.click()}
+                                        className="text-[10px] font-black text-indigo-500 hover:text-indigo-400 uppercase tracking-widest flex items-center gap-1"
+                                    >
+                                        <Plus className="w-3 h-3" /> Add Files
+                                    </button>
+                                    <input
+                                        type="file"
+                                        multiple
+                                        ref={proposalFileInputRef}
+                                        className="hidden"
+                                        onChange={handleFileChange}
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {selectedFiles.map((file, i) => (
+                                        <div key={i} className="flex items-center justify-between bg-slate-50 dark:bg-white/[0.02] p-3 rounded-2xl border border-slate-200 dark:border-slate-800 group">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-lg">
+                                                    <Paperclip className="w-4 h-4" />
+                                                </div>
+                                                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate max-w-[120px]">{file.name}</span>
+                                            </div>
+                                            <button type="button" onClick={() => removeFile(i)} className="text-slate-400 hover:text-red-500"><X className="w-4 h-4" /></button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="pt-4 flex gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsProposing(false)}
+                                    className="flex-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-black py-4 rounded-2xl transition-all text-xs uppercase tracking-widest"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={proposalMutation.isLoading || !proposalText.trim()}
+                                    className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 rounded-2xl shadow-xl shadow-indigo-600/20 transition-all active:scale-95 text-xs uppercase tracking-widest"
+                                >
+                                    Submit Proposal
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -14,11 +14,11 @@ export const castVote = async (voteData) => {
 export const getVotesForConflict = async (conflictId) => {
     const votes = await VoteModel.find({ conflictId }).populate("userId", "name role");
 
-    // Calculate tally
+    // Calculate dynamic tally
     const tally = votes.reduce((acc, vote) => {
         acc[vote.choice] = (acc[vote.choice] || 0) + 1;
         return acc;
-    }, { requirementA: 0, requirementB: 0, none: 0, both: 0 });
+    }, {});
 
     return {
         votes,
@@ -28,24 +28,6 @@ export const getVotesForConflict = async (conflictId) => {
 };
 
 export const checkAndResolveConflict = async (conflictId) => {
-    const { tally, total } = await getVotesForConflict(conflictId);
-
-    // Basic resolution logic: if total votes > 3 and a clear majority (e.g. > 60%)
-    if (total >= 3) {
-        const threshold = total * 0.6;
-        let winner = null;
-
-        if (tally.requirementA > threshold) winner = "requirementA";
-        if (tally.requirementB > threshold) winner = "requirementB";
-
-        if (winner) {
-            await ConflictModel.findByIdAndUpdate(conflictId, {
-                status: "resolved",
-                aiSuggestion: `Resolved by stakeholder consensus: ${winner === "requirementA" ? "Requirement A" : "Requirement B"} selected.`
-            });
-            return { resolved: true, winner };
-        }
-    }
-
+    // Legacy automated resolution logic removed in favor of PM manual confirmation
     return { resolved: false };
 };

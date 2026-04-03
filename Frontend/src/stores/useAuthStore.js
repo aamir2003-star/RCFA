@@ -3,6 +3,7 @@ import api from "../lib/api";
 
 const storedUser = localStorage.getItem("spectra-ai-user");
 const storedToken = localStorage.getItem("spectra-ai-token");
+const storedRefreshToken = localStorage.getItem("spectra-ai-refresh-token");
 
 let parsedUser = null;
 try {
@@ -14,17 +15,19 @@ try {
 const useAuthStore = create((set) => ({
     user: parsedUser,
     token: storedToken,
+    refreshToken: storedRefreshToken,
     isAuthenticated: !!storedToken && !!parsedUser,
 
     login: async (email, password) => {
         try {
             const response = await api.post("/auth/login", { email, password });
-            const { user, accessToken } = response.data;
+            const { user, accessToken, refreshToken } = response.data;
 
             localStorage.setItem("spectra-ai-token", accessToken);
+            localStorage.setItem("spectra-ai-refresh-token", refreshToken);
             localStorage.setItem("spectra-ai-user", JSON.stringify(user));
 
-            set({ user, token: accessToken, isAuthenticated: true });
+            set({ user, token: accessToken, refreshToken, isAuthenticated: true });
             return { success: true };
         } catch (error) {
             return {
@@ -37,12 +40,13 @@ const useAuthStore = create((set) => ({
     register: async (userData) => {
         try {
             const response = await api.post("/auth/register", userData);
-            const { user, accessToken } = response.data;
+            const { user, accessToken, refreshToken } = response.data;
 
             localStorage.setItem("spectra-ai-token", accessToken);
+            localStorage.setItem("spectra-ai-refresh-token", refreshToken);
             localStorage.setItem("spectra-ai-user", JSON.stringify(user));
 
-            set({ user, token: accessToken, isAuthenticated: true });
+            set({ user, token: accessToken, refreshToken, isAuthenticated: true });
             return { success: true };
         } catch (error) {
             return {
@@ -52,11 +56,21 @@ const useAuthStore = create((set) => ({
         }
     },
 
-    logout: () => {
-        localStorage.removeItem("spectra-ai-token");
-        localStorage.removeItem("spectra-ai-user");
-        set({ user: null, token: null, isAuthenticated: false });
-        window.location.href = "/";
+    logout: async () => {
+        const refreshToken = localStorage.getItem("spectra-ai-refresh-token");
+        try {
+            if (refreshToken) {
+                await api.post("/auth/logout", { refreshToken });
+            }
+        } catch (_) {
+            // Ignore errors — we always clear locally
+        } finally {
+            localStorage.removeItem("spectra-ai-token");
+            localStorage.removeItem("spectra-ai-refresh-token");
+            localStorage.removeItem("spectra-ai-user");
+            set({ user: null, token: null, refreshToken: null, isAuthenticated: false });
+            window.location.href = "/login";
+        }
     },
 
     updateUser: (user) => {

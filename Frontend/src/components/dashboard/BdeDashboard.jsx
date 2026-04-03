@@ -62,7 +62,7 @@ export default function BdeDashboard() {
           </p>
         </div>
         <Button
-          onClick={() => navigate("/bde/create-project")}
+          onClick={() => navigate("/bde/projects")}
           className="h-10 bg-[#1e2532] hover:bg-slate-800 dark:bg-slate-700 text-white font-bold shadow-sm transition-all focus:ring-[#1e2532]"
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -232,7 +232,7 @@ export default function BdeDashboard() {
 
             {/* New Project CTA Card */}
             <div
-              onClick={() => navigate("/bde/create-project")}
+              onClick={() => navigate("/bde/projects")}
               className="bg-slate-50/50 dark:bg-[#080b11]/50 backdrop-blur-sm rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 p-5 flex flex-col items-center justify-center text-center hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 hover:border-indigo-400 dark:hover:border-indigo-500 transition-all duration-300 min-h-[220px] cursor-pointer group"
             >
               <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 mb-3 shadow-sm group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:scale-110 transition-all">
@@ -256,7 +256,7 @@ export default function BdeDashboard() {
               You haven't initialized any projects yet. Start by creating a project to leverage Spectra AI's conflict detection.
             </p>
             <Button
-              onClick={() => navigate("/bde/create-project")}
+              onClick={() => navigate("/bde/projects")}
               className="px-8 py-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-indigo-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0"
             >
               <Plus className="w-5 h-5 mr-2" />

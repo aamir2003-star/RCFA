@@ -16,24 +16,32 @@ export default function CreateProject() {
   const { analysisProgress, resetAnalysisProgress, subscribeToConflicts, unsubscribeFromConflicts } = useConflictStore();
 
   const [projectManagers, setProjectManagers] = useState([]);
-  const [developers, setDevelopers] = useState([]);
-  const [formData, setFormData] = useState(PROJECT_FORM_INITIAL_STATE);
+  const [formData, setFormData] = useState(() => {
+    // Restore form data from sessionStorage if available (prevents loss on navigation)
+    try {
+      const saved = sessionStorage.getItem("spectra-create-project-form");
+      return saved ? JSON.parse(saved) : PROJECT_FORM_INITIAL_STATE;
+    } catch {
+      return PROJECT_FORM_INITIAL_STATE;
+    }
+  });
   const [requirementFile, setRequirementFile] = useState(null);
   const [showProgress, setShowProgress] = useState(false);
 
+  // Persist formData to sessionStorage on every change
   useEffect(() => {
-    // Fetch PMs
+    sessionStorage.setItem("spectra-create-project-form", JSON.stringify(formData));
+  }, [formData]);
+
+  useEffect(() => {
+    // Fetch PMs only
     const fetchData = async () => {
       try {
-        const [pmsRes, devsRes] = await Promise.all([
-          api.get('/users?role=pm'),
-          api.get('/users?role=dev')
-        ]);
+        const pmsRes = await api.get('/users?role=pm');
         setProjectManagers(pmsRes.data);
-        setDevelopers(devsRes.data);
       } catch (error) {
-        console.error("Failed to fetch users:", error);
-        toast.error("Failed to fetch team members");
+        console.error("Failed to fetch PMs:", error);
+        toast.error("Failed to fetch project managers");
       }
     };
     fetchData();
@@ -73,7 +81,7 @@ export default function CreateProject() {
 
     // Comprehensive Validation using constants
     const missingFields = PROJECT_FORM_FIELDS
-      .filter(f => f.required && !formData[f.name] && (f.name !== 'requirementFile')) // requirementFile is handled separately
+      .filter(f => f.required && !formData[f.name] && (f.name !== 'requirementFile'))
       .map(f => f.label);
 
     if (!requirementFile) missingFields.push("Requirement CSV File");
@@ -93,14 +101,16 @@ export default function CreateProject() {
       setShowProgress(true);
       subscribeToConflicts(result.project._id);
 
+      // Clear saved form on successful submission
+      sessionStorage.removeItem("spectra-create-project-form");
+
       try {
         const uploadResult = await uploadRequirementsCSV(result.project._id, requirementFile);
         if (!uploadResult.success) {
           toast.error("CSV Error: " + uploadResult.message, { duration: 6000 });
-          setShowProgress(false); // Only hide if we want to allow re-upload or fixing
+          setShowProgress(false);
           unsubscribeFromConflicts(result.project._id);
         }
-        // If success, the analysisProgress useEffect will handle navigation
       } catch (err) {
         toast.error("Upload failed: " + err.message);
         setShowProgress(false);
@@ -247,64 +257,6 @@ export default function CreateProject() {
               </div>
             </div>
 
-            {/* Developer Team Selection */}
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                Assign Developer Team <span className="text-slate-400 font-medium">(Optional)</span>
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {developers.map(dev => {
-                  const isSelected = formData.team.includes(dev._id);
-                  return (
-                    <button
-                      key={dev._id}
-                      type="button"
-                      onClick={() => {
-                        const newTeam = isSelected
-                          ? formData.team.filter(id => id !== dev._id)
-                          : [...formData.team, dev._id];
-                        setFormData(prev => ({ ...prev, team: newTeam }));
-                      }}
-                      className={cn(
-                        "flex items-center gap-3 p-3 rounded-xl border transition-all text-left group",
-                        isSelected
-                          ? "bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/40 ring-1 ring-indigo-500/20"
-                          : "bg-slate-50/50 dark:bg-white/5 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
-                      )}
-                    >
-                      <div className={cn(
-                        "size-8 rounded-lg flex items-center justify-center text-xs font-black shrink-0 transition-colors",
-                        isSelected
-                          ? "bg-indigo-600 text-white"
-                          : "bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
-                      )}>
-                        {dev.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={cn(
-                          "text-xs font-bold truncate",
-                          isSelected ? "text-indigo-900 dark:text-indigo-200" : "text-slate-700 dark:text-slate-300"
-                        )}>{dev.name}</p>
-                        <p className="text-[10px] text-slate-400 truncate tracking-tight">{dev.email}</p>
-                      </div>
-                      {isSelected && (
-                        <div className="size-4 rounded-full bg-indigo-600 flex items-center justify-center text-white shrink-0">
-                          <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-              {developers.length === 0 && (
-                <div className="p-4 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 text-center">
-                  <p className="text-xs text-slate-400 font-medium">No developers available in the system.</p>
-                </div>
-              )}
-            </div>
-
             {/* Action Buttons */}
             <div className="flex items-center gap-3 pt-2">
               <button
@@ -319,7 +271,10 @@ export default function CreateProject() {
               </button>
               <button
                 type="button"
-                onClick={() => navigate(-1)}
+                onClick={() => {
+                  sessionStorage.removeItem("spectra-create-project-form");
+                  navigate(-1);
+                }}
                 className="px-6 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-all"
               >
                 Cancel

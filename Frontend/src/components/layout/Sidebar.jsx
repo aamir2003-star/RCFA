@@ -100,7 +100,7 @@ export function Sidebar({ role, isOpen, onClose }) {
             </div>
           ) : (
             <SidebarLink
-              key={item.to}
+              key={`${item.to}-${index}`}
               to={item.to}
               icon={item.icon}
               label={item.label}

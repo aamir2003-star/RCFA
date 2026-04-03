@@ -36,6 +36,7 @@ import NotFound from "../pages/NotFound";
 import BdeReports from "../pages/BdeReports";
 import DevVault from "../pages/DevVault";
 import ProfilePage from "../pages/ProfilePage";
+import ConflictDiscussion from "../pages/ConflictDiscussion";
 
 export default function AppRoutes() {
     return (
@@ -68,6 +69,16 @@ export default function AppRoutes() {
                     <ProtectedRoute allowedRoles={["dev"]}>
                         <MainLayout role="dev">
                             <DevModules />
+                        </MainLayout>
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/dev/conflicts/:id/discussion"
+                element={
+                    <ProtectedRoute allowedRoles={["dev"]}>
+                        <MainLayout role="dev">
+                            <ConflictDiscussion />
                         </MainLayout>
                     </ProtectedRoute>
                 }
@@ -256,16 +267,6 @@ export default function AppRoutes() {
             />
 
             {/* BDE Protected Routes */}
-            <Route
-                path="/bde/create-project"
-                element={
-                    <ProtectedRoute allowedRoles={["bde"]}>
-                        <MainLayout role="bde">
-                            <CreateProject />
-                        </MainLayout>
-                    </ProtectedRoute>
-                }
-            />
             <Route
                 path="/bde/dashboard"
                 element={

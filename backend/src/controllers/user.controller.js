@@ -38,42 +38,62 @@ export const getPmTeam = async (req, res, next) => {
     try {
         const pmId = req.user._id;
 
-        // Find all projects managed by this PM, populate team members
-        const pmProjects = await ProjectModel.find({ projectManager: pmId })
-            .select('name team')
-            .populate('team', 'name email role avatar')
+        // Fetch all users with relevant roles
+        const allUsers = await User.find({
+            role: { $in: ['Dev', 'PM', 'BDE'] }
+        }).select('name email role avatar').lean();
+
+        // Fetch ALL projects to calculate global workload
+        const allProjects = await ProjectModel.find({})
+            .select('name team projectManager')
             .lean();
 
-        // Build a map of unique members with their project assignments
+        // Map users to their project assignments
         const memberMap = new Map();
 
-        pmProjects.forEach(project => {
-            (project.team || []).forEach(member => {
-                const id = member._id.toString();
-                if (memberMap.has(id)) {
-                    const existing = memberMap.get(id);
-                    existing.projectCount += 1;
-                    existing.projects.push(project.name);
-                } else {
-                    memberMap.set(id, {
-                        _id: member._id,
-                        name: member.name,
-                        email: member.email,
-                        role: member.role,
-                        avatar: member.avatar || null,
-                        projectCount: 1,
-                        projects: [project.name]
-                    });
-                }
+        // Initialize map with all users
+        allUsers.forEach(user => {
+            memberMap.set(user._id.toString(), {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                avatar: user.avatar || null,
+                projectCount: 0,
+                projects: []
             });
         });
 
+        // Calculate workload across all projects
+        allProjects.forEach(project => {
+            // Check team members
+            (project.team || []).forEach(memberId => {
+                const id = memberId.toString();
+                if (memberMap.has(id)) {
+                    const entry = memberMap.get(id);
+                    entry.projectCount += 1;
+                    entry.projects.push(project.name);
+                }
+            });
+
+            // Check PM
+            if (project.projectManager) {
+                const pmIdStr = project.projectManager.toString();
+                if (memberMap.has(pmIdStr)) {
+                    const entry = memberMap.get(pmIdStr);
+                    entry.projectCount += 1;
+                    entry.projects.push(project.name);
+                }
+            }
+        });
+
         const teamMembers = Array.from(memberMap.values());
+        const pmProjectCount = allProjects.filter(p => p.projectManager?.toString() === pmId.toString()).length;
 
         res.json({
             success: true,
             totalMembers: teamMembers.length,
-            totalProjects: pmProjects.length,
+            totalProjects: pmProjectCount, // Keeping this as the PM's managed projects count for the header
             members: teamMembers
         });
     } catch (err) {

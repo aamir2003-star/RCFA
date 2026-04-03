@@ -13,10 +13,9 @@ const voteSchema = new mongoose.Schema(
             ref: "User",
             required: true
         },
-        // Which requirement the user thinks should stay
+        // Which requirement or resolution strategy the user thinks should stay/be implemented
         choice: {
-            type: String,
-            enum: ["requirementA", "requirementB", "none", "both"],
+            type: String, // Can be "requirementA", "requirementB", or a Resolution ID
             required: true
         },
         comment: {

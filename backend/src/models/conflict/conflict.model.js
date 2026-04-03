@@ -95,10 +95,30 @@ const conflictSchema = new mongoose.Schema(
     // Resolution status
     status: {
       type: String,
-      enum: ["open", "resolved", "ignored"],
+      enum: ["open", "resolved", "ignored", "pending_confirmation"],
       default: "open",
       index: true
     },
+
+    discussions: [
+      {
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+        message: { type: String, required: true },
+        attachments: [{ type: String }], // URL-to-file
+        timestamp: { type: Date, default: Date.now }
+      }
+    ],
+
+    // User-proposed resolution ideas
+    proposals: [
+      {
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+        text: { type: String, required: true },
+        attachments: [{ type: String }],
+        votes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Those who liked it
+        timestamp: { type: Date, default: Date.now }
+      }
+    ],
 
     aiSuggestion: String,
 
@@ -117,6 +137,13 @@ const conflictSchema = new mongoose.Schema(
     resolvedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User"
+    },
+
+    pmResolution: {
+      resolutionId: { type: String }, // Reference to resolution _id (string because subdoc ids can be tricky)
+      type: { type: String, enum: ["ai_resolution", "developer_proposal"], default: "ai_resolution" },
+      confirmedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      confirmedAt: { type: Date }
     }
   },
   { timestamps: true }

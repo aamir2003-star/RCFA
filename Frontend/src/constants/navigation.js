@@ -16,7 +16,8 @@ import {
 export const NAV_ITEMS = {
     dev: [
         { to: "/dev/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-        { to: "/dev/editor", icon: FileText, label: "Specifications" },
+        { to: "/dev/modules", icon: Box, label: "Modules" },
+        { to: "/dev/conflicts", icon: MessageSquare, label: "Discussions" },
         { to: "/dev/conflicts", icon: AlertTriangle, label: "Conflicts", badge: 4 },
         { type: 'separator', label: 'SYSTEMS' },
         { to: "/dev/settings", icon: Settings, label: "Settings" },
@@ -25,6 +26,7 @@ export const NAV_ITEMS = {
         { to: "/pm/dashboard", icon: LayoutDashboard, label: "Dashboard" },
         { to: "/pm/editor", icon: FileText, label: "Requirements" },
         { to: "/pm/modules", icon: Box, label: "Modules" },
+        { to: "/pm/conflicts", icon: MessageSquare, label: "Discussions" },
         { to: "/pm/conflicts", icon: AlertTriangle, label: "Conflicts" },
         { to: "/pm/timeline", icon: Clock, label: "Activity" },
         { to: "/pm/team", icon: Users, label: "Team" },

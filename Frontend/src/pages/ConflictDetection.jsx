@@ -109,7 +109,11 @@ export default function ConflictDetection() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <Button variant="outline" className="rounded-2xl border-slate-200 dark:border-slate-800 h-14 px-8 text-slate-600 dark:text-slate-300 font-bold uppercase tracking-widest text-xs hover:bg-slate-50 dark:hover:bg-slate-900">
+                    <Button
+                        variant="outline"
+                        onClick={() => navigate(`/pm/conflicts/${conflictId}/discussion`)}
+                        className="rounded-2xl border-slate-200 dark:border-slate-800 h-14 px-8 text-slate-600 dark:text-slate-300 font-bold uppercase tracking-widest text-xs hover:bg-slate-50 dark:hover:bg-slate-900"
+                    >
                         <MessageSquare className="w-4 h-4 mr-2" />
                         Discuss
                     </Button>
