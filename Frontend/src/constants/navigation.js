@@ -24,6 +24,7 @@ export const NAV_ITEMS = {
     pm: [
         { to: "/pm/dashboard", icon: LayoutDashboard, label: "Dashboard" },
         { to: "/pm/editor", icon: FileText, label: "Requirements" },
+        { to: "/pm/modules", icon: Box, label: "Modules" },
         { to: "/pm/conflicts", icon: AlertTriangle, label: "Conflicts" },
         { to: "/pm/timeline", icon: Clock, label: "Activity" },
         { to: "/pm/team", icon: Users, label: "Team" },

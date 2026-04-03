@@ -87,3 +87,25 @@ export const getProjectDevelopers = async (req, res, next) => {
     next(error);
   }
 };
+
+export const suggestModuleInfo = async (req, res, next) => {
+  try {
+    const { requirementIds } = req.body;
+    const suggestion = await moduleService.generateModuleInfo(requirementIds);
+    res.json(suggestion);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateModuleStatus = async (req, res, next) => {
+  try {
+    const moduleDoc = await moduleService.updateModuleStatus(
+      req.params.id,
+      req.body.status
+    );
+    res.json(moduleDoc);
+  } catch (error) {
+    next(error);
+  }
+};

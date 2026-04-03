@@ -9,6 +9,7 @@ const useProjectStore = create((set, get) => ({
     bdeStats: null,
     pmStats: null,
     pmActivity: [],
+    conflicts: [],
     loading: false,
     error: null,
 
@@ -234,6 +235,40 @@ const useProjectStore = create((set, get) => ({
     },
     clearError: () => {
         set({ error: null });
+    },
+
+    // Sync requirement moduleId locally for performance and reactivity
+    syncRequirementsAfterModuleDelete: (moduleId) => {
+        set((state) => ({
+            requirements: state.requirements.map(r =>
+                // Handle both object and string ID comparisons
+                (r.moduleId === moduleId || r.moduleId?._id === moduleId)
+                    ? { ...r, moduleId: null }
+                    : r
+            )
+        }));
+    },
+
+    syncRequirementsAfterModuleCreate: (requirementIds, moduleId) => {
+        set((state) => ({
+            requirements: state.requirements.map(r =>
+                requirementIds.includes(r._id)
+                    ? { ...r, moduleId }
+                    : r
+            )
+        }));
+    },
+
+    fetchConflicts: async (projectId) => {
+        try {
+            const response = await api.get(`/conflicts/${projectId}`);
+            const fetchedConflicts = response.data.conflicts || response.data;
+            set((state) => ({
+                conflicts: [...state.conflicts.filter(c => c.projectId !== projectId), ...fetchedConflicts]
+            }));
+        } catch (error) {
+            console.error("Failed to fetch conflicts:", error);
+        }
     }
 }));
 

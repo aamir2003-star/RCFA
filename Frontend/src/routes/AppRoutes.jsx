@@ -24,6 +24,7 @@ import ActivityTimeline from "../pages/ActivityTimeline";
 import ConflictResolution from "../pages/ConflictResolution";
 import TeamManagement from "../pages/TeamManagement";
 import PmSettings from "../pages/PmSettings";
+import PmModules from "../pages/PmModules";
 import BdeTeams from "../pages/BdeTeams";
 import BdeSettings from "../pages/BdeSettings";
 import DevModules from "../pages/DevModules";
@@ -159,6 +160,16 @@ export default function AppRoutes() {
                     <ProtectedRoute allowedRoles={["pm"]}>
                         <MainLayout role="pm">
                             <RequirementEditor role="pm" />
+                        </MainLayout>
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/pm/modules"
+                element={
+                    <ProtectedRoute allowedRoles={["pm"]}>
+                        <MainLayout role="pm">
+                            <PmModules />
                         </MainLayout>
                     </ProtectedRoute>
                 }
