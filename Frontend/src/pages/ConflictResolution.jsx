@@ -30,6 +30,11 @@ import {
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useState, useRef } from "react";
+import {
+    CONFLICT_STATUS_VARIANT,
+    RESOLUTION_TYPES
+} from "../constants/conflicts";
+import { ROLES } from "../constants/roles";
 
 export default function ConflictResolution() {
     const { id } = useParams();
@@ -183,9 +188,7 @@ export default function ConflictResolution() {
                             <div className="flex items-center gap-4">
                                 <div className={cn(
                                     "flex items-center gap-2 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border",
-                                    conflict.status === 'open'
-                                        ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30"
-                                        : "bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700"
+                                    CONFLICT_STATUS_VARIANT[conflict.status] || CONFLICT_STATUS_VARIANT.default
                                 )}>
                                     <span className={cn("w-1.5 h-1.5 rounded-full", conflict.status === 'open' ? "bg-emerald-500" : "bg-slate-400")}></span>
                                     {conflict.status}
@@ -397,7 +400,7 @@ export default function ConflictResolution() {
 
                                     {conflict.status !== 'resolved' && (
                                         <button
-                                            onClick={() => confirmMutation.mutate({ resId: prop._id, type: 'developer_proposal' })}
+                                            onClick={() => confirmMutation.mutate({ resId: prop._id, type: RESOLUTION_TYPES.DEVELOPER_PROPOSAL })}
                                             disabled={confirmMutation.isLoading}
                                             className="w-full flex items-center justify-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 hover:text-emerald-600 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
                                         >
@@ -468,7 +471,7 @@ export default function ConflictResolution() {
                                     </p>
                                     {conflict.status !== 'resolved' && (
                                         <button
-                                            onClick={() => confirmMutation.mutate({ resId: res._id, type: 'ai_resolution' })}
+                                            onClick={() => confirmMutation.mutate({ resId: res._id, type: RESOLUTION_TYPES.AI_RESOLUTION })}
                                             disabled={confirmMutation.isLoading}
                                             className="w-full flex items-center justify-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 hover:text-emerald-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
                                         >

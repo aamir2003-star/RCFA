@@ -38,9 +38,9 @@ export const getPmTeam = async (req, res, next) => {
     try {
         const pmId = req.user._id;
 
-        // Fetch all users with relevant roles
-        const allUsers = await User.find({
-            role: { $in: ['Dev', 'PM', 'BDE'] }
+        // Fetch all developers (case-insensitive role check)
+        const allDevs = await User.find({
+            role: { $regex: /^dev$/i }
         }).select('name email role avatar').lean();
 
         // Fetch ALL projects to calculate global workload
@@ -48,16 +48,16 @@ export const getPmTeam = async (req, res, next) => {
             .select('name team projectManager')
             .lean();
 
-        // Map users to their project assignments
+        // Map devs to their project assignments
         const memberMap = new Map();
 
-        // Initialize map with all users
-        allUsers.forEach(user => {
+        // Initialize map with all developers
+        allDevs.forEach(user => {
             memberMap.set(user._id.toString(), {
                 _id: user._id,
                 name: user.name,
                 email: user.email,
-                role: user.role,
+                role: 'Developer',
                 avatar: user.avatar || null,
                 projectCount: 0,
                 projects: []
@@ -66,7 +66,6 @@ export const getPmTeam = async (req, res, next) => {
 
         // Calculate workload across all projects
         allProjects.forEach(project => {
-            // Check team members
             (project.team || []).forEach(memberId => {
                 const id = memberId.toString();
                 if (memberMap.has(id)) {
@@ -75,26 +74,28 @@ export const getPmTeam = async (req, res, next) => {
                     entry.projects.push(project.name);
                 }
             });
-
-            // Check PM
-            if (project.projectManager) {
-                const pmIdStr = project.projectManager.toString();
-                if (memberMap.has(pmIdStr)) {
-                    const entry = memberMap.get(pmIdStr);
-                    entry.projectCount += 1;
-                    entry.projects.push(project.name);
-                }
-            }
         });
 
-        const teamMembers = Array.from(memberMap.values());
-        const pmProjectCount = allProjects.filter(p => p.projectManager?.toString() === pmId.toString()).length;
+        const devs = Array.from(memberMap.values());
+
+        // Calculate Specialized Stats
+        const totalDevs = devs.length;
+        const availableDevs = devs.filter(d => d.projectCount === 0).length;
+        const inProductionCount = devs.filter(d => d.projectCount > 0 && d.projectCount <= 2).length;
+        const highLoadDevs = devs.filter(d => d.projectCount > 2).length;
+        const totalProjectsCount = devs.reduce((sum, d) => sum + d.projectCount, 0);
+        const averageWorkload = totalDevs > 0 ? (totalProjectsCount / totalDevs).toFixed(1) : 0;
 
         res.json({
             success: true,
-            totalMembers: teamMembers.length,
-            totalProjects: pmProjectCount, // Keeping this as the PM's managed projects count for the header
-            members: teamMembers
+            stats: {
+                totalDevs,
+                availableDevs,
+                inProductionCount,
+                highLoadDevs,
+                averageWorkload
+            },
+            members: devs
         });
     } catch (err) {
         next(new AppError(err.message, 500));

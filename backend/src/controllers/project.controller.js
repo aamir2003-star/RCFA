@@ -136,6 +136,7 @@ export const getPmActivity = async (req, res) => {
     });
 
     recentConflicts.forEach(conflict => {
+      // Add the conflict detection/open entry
       activities.push({
         id: conflict._id,
         type: 'conflict',
@@ -149,6 +150,29 @@ export const getPmActivity = async (req, res) => {
         status: conflict.status,
         timestamp: conflict.createdAt
       });
+
+      // If resolved, add a dedicated resolution entry with details
+      if (conflict.status === 'resolved' && conflict.pmResolution?.resolutionId) {
+        const resolution = (conflict.resolutions || []).find(
+          r => r._id?.toString() === conflict.pmResolution.resolutionId
+        );
+
+        if (resolution) {
+          activities.push({
+            id: `${conflict._id}_res`,
+            type: 'resolution',
+            action: 'settled',
+            title: `Resolution: ${resolution.title}`,
+            description: resolution.description,
+            strategyType: resolution.strategyType,
+            projectName: conflict.projectId?.name || 'Unknown Project',
+            reqA: conflict.requirementA?.title,
+            reqB: conflict.requirementB?.title,
+            timestamp: conflict.pmResolution.confirmedAt || conflict.updatedAt,
+            confirmedBy: conflict.pmResolution.confirmedBy
+          });
+        }
+      }
     });
 
     // Sort by timestamp descending

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
@@ -13,22 +13,11 @@ import { cn } from "../lib/utils";
 import {
     REQUIREMENT_CATEGORIES,
     REQUIREMENT_PRIORITIES,
-    STAKEHOLDERS
+    STAKEHOLDERS,
+    SMART_TEMPLATES
 } from "../constants/requirements";
 import ProjectSelector from "../components/shared/ProjectSelector";
 
-const SMART_TEMPLATES = {
-    'Developer': [
-        { label: 'Scale', text: 'Must support up to 10k concurrent users with <200ms latency.' },
-        { label: 'Auth', text: 'Implement OAuth2.0 with JWT rotating refresh tokens.' },
-        { label: 'Audit', text: 'Log all state changes to a secure, tamper-proof audit trail.' }
-    ],
-    'Legal': [
-        { label: 'GDPR', text: 'Explicit user consent required before collecting any PII data.' },
-        { label: 'Right to Erase', text: 'All user data must be permanently deletable within 48 hours of request.' },
-        { label: 'Sovereignty', text: 'Data must be stored on servers physically located within EU borders.' }
-    ]
-};
 
 export default function RequirementEditor() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -92,7 +81,8 @@ export default function RequirementEditor() {
         );
     }, [requirements, searchTerm]);
 
-    const handleSelectReq = (req) => {
+
+    const handleSelectReq = useCallback((req) => {
         setSelectedReq(req);
         setIsAdding(false);
         setFormData({
@@ -102,9 +92,9 @@ export default function RequirementEditor() {
             category: req.category || "Functional",
             stakeholder: req.stakeholder || "Developer"
         });
-    };
+    }, []);
 
-    const handleAddNew = () => {
+    const handleAddNew = useCallback(() => {
         setSelectedReq(null);
         setIsAdding(true);
         setFormData({
@@ -114,9 +104,9 @@ export default function RequirementEditor() {
             category: 'Functional',
             stakeholder: 'Developer'
         });
-    };
+    }, []);
 
-    const handleSave = async () => {
+    const handleSave = useCallback(async () => {
         if (!formData.title.trim()) {
             toast.error("Requirement title is required");
             return;
@@ -138,9 +128,9 @@ export default function RequirementEditor() {
         } else {
             toast.error(result?.message || "Failed to save requirement");
         }
-    };
+    }, [formData, isAdding, projectId, selectedReq, addRequirement, updateRequirement]);
 
-    const handleQuickAdd = async (e) => {
+    const handleQuickAdd = useCallback(async (e) => {
         if (e.key === 'Enter' && quickTitle.trim()) {
             const result = await addRequirement({
                 projectId,
@@ -156,9 +146,9 @@ export default function RequirementEditor() {
                 toast.success("Quick-added to inventory!", { icon: '⚡' });
             }
         }
-    };
+    }, [quickTitle, projectId, addRequirement]);
 
-    const handleDelete = async (e, id) => {
+    const handleDelete = useCallback(async (e, id) => {
         e.stopPropagation();
         if (window.confirm("Are you sure you want to delete this requirement?")) {
             const result = await deleteRequirement(id);
@@ -170,21 +160,21 @@ export default function RequirementEditor() {
                 }
             }
         }
-    };
+    }, [deleteRequirement, selectedReq]);
 
-    const handleApprove = async () => {
+    const handleApprove = useCallback(async () => {
         if (!selectedReq) return;
         const result = await approveRequirement(selectedReq._id);
         if (result.success) {
             toast.success("Requirement approved!");
             setSelectedReq({ ...selectedReq, status: 'approved' });
         }
-    };
+    }, [selectedReq, approveRequirement]);
 
-    const applyTemplate = (text) => {
+    const applyTemplate = useCallback((text) => {
         setFormData(prev => ({ ...prev, description: text }));
         toast.success("Template applied!", { icon: '📝' });
-    };
+    }, []);
 
 
     return (
@@ -250,36 +240,13 @@ export default function RequirementEditor() {
                                 <div className="flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar">
                                     <AnimatePresence mode="popLayout">
                                         {filteredRequirements.map((req) => (
-                                            <motion.div
-                                                layout
-                                                initial={{ opacity: 0, scale: 0.95 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                exit={{ opacity: 0, x: -20 }}
+                                            <RequirementCard
                                                 key={req._id}
-                                                onClick={() => handleSelectReq(req)}
-                                                className={cn(
-                                                    "p-4 rounded-2xl cursor-pointer transition-all border group relative overflow-hidden",
-                                                    selectedReq?._id === req._id
-                                                        ? "bg-slate-900 border-slate-900 text-white shadow-xl shadow-slate-900/20"
-                                                        : "bg-white dark:bg-slate-900/30 border-slate-100 dark:border-slate-800 hover:border-indigo-500"
-                                                )}
-                                            >
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500">
-                                                        {req.stakeholder}
-                                                    </span>
-                                                    <button onClick={(e) => handleDelete(e, req._id)} className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-500 transition-all">
-                                                        <Trash2 className="w-3.5 h-3.5" />
-                                                    </button>
-                                                </div>
-                                                <h3 className="text-[14px] font-bold truncate leading-tight">{req.title}</h3>
-                                                {req.status === 'review' && (
-                                                    <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-500/10 text-amber-600 text-[9px] font-bold uppercase tracking-widest border border-amber-200">
-                                                        <AlertTriangle className="w-2.5 h-2.5" />
-                                                        Review
-                                                    </div>
-                                                )}
-                                            </motion.div>
+                                                req={req}
+                                                isSelected={selectedReq?._id === req._id}
+                                                onSelect={handleSelectReq}
+                                                onDelete={handleDelete}
+                                            />
                                         ))}
                                     </AnimatePresence>
 
@@ -417,3 +384,48 @@ function FormControl({ label, children }) {
         </div>
     );
 }
+
+const RequirementCard = React.memo(({ req, isSelected, onSelect, onDelete }) => {
+    return (
+        <motion.div
+            layout
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, x: -20 }}
+            onClick={() => onSelect(req)}
+            className={cn(
+                "p-4 rounded-2xl cursor-pointer transition-all border group relative overflow-hidden",
+                isSelected
+                    ? "bg-slate-900 border-slate-900 text-white shadow-xl shadow-slate-900/20"
+                    : "bg-white dark:bg-slate-900/30 border-slate-100 dark:border-slate-800 hover:border-indigo-500"
+            )}
+        >
+            <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                    <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500">
+                        {req.stakeholder}
+                    </span>
+                    <span className="text-[8px] font-bold text-slate-400">
+                        {new Date(req.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                    </span>
+                </div>
+                <button onClick={(e) => onDelete(e, req._id)} className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-500 transition-all">
+                    <Trash2 className="w-3.5 h-3.5" />
+                </button>
+            </div>
+            <h3 className="text-[14px] font-bold truncate leading-tight mb-1">{req.title}</h3>
+            <p className={cn(
+                "text-[10px] line-clamp-2 leading-relaxed mb-2 font-medium",
+                isSelected ? "text-slate-300" : "text-slate-500"
+            )}>
+                {req.description || "No description provided."}
+            </p>
+            {req.status === 'review' && (
+                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-500/10 text-amber-600 text-[9px] font-bold uppercase tracking-widest border border-amber-200">
+                    <AlertTriangle className="w-2.5 h-2.5" />
+                    Review
+                </div>
+            )}
+        </motion.div>
+    );
+});

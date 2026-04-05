@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
     Search,
     Calendar,
@@ -17,18 +17,12 @@ import {
 import { Button } from "../components/ui/Button";
 import useProjectStore from "../stores/useProjectStore";
 import { cn } from "../lib/utils";
+import {
+    ACTIVITY_ICONS,
+    ACTIVITY_COLORS,
+    TIMELINE_GROUPS
+} from "../constants/timeline";
 
-const ICON_MAP = {
-    requirement: PlusCircle,
-    conflict: AlertTriangle,
-    resolution: CheckCircle,
-};
-
-const ICON_COLOR_MAP = {
-    requirement: { icon: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-100 dark:bg-indigo-900/30" },
-    conflict: { icon: "text-red-600 dark:text-red-400", bg: "bg-red-100 dark:bg-red-900/30" },
-    resolution: { icon: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-100 dark:bg-emerald-900/30" },
-};
 
 function formatTimeAgo(timestamp) {
     if (!timestamp) return "";
@@ -71,29 +65,32 @@ export default function ActivityTimeline() {
         loadData();
     }, [fetchPmActivity, fetchProjects]);
 
-    // Filter activities
-    const filteredActivities = pmActivity.filter(a => {
-        if (filterType !== "all" && a.type !== filterType) return false;
-        if (searchQuery) {
-            const q = searchQuery.toLowerCase();
-            return (
-                a.title?.toLowerCase().includes(q) ||
-                a.projectName?.toLowerCase().includes(q) ||
-                a.type?.toLowerCase().includes(q)
-            );
-        }
-        return true;
-    });
+    // Filter activities - Memoized
+    const filteredActivities = useMemo(() => {
+        return pmActivity.filter(a => {
+            if (filterType !== "all" && a.type !== filterType) return false;
+            if (searchQuery) {
+                const q = searchQuery.toLowerCase();
+                return (
+                    a.title?.toLowerCase().includes(q) ||
+                    a.projectName?.toLowerCase().includes(q) ||
+                    a.type?.toLowerCase().includes(q)
+                );
+            }
+            return true;
+        });
+    }, [pmActivity, filterType, searchQuery]);
 
-    // Group by date
-    const grouped = {};
-    filteredActivities.forEach(activity => {
-        const group = getDateGroup(activity.timestamp);
-        if (!grouped[group]) grouped[group] = [];
-        grouped[group].push(activity);
-    });
-
-    const groupOrder = ["Today", "Yesterday", "This Week", "Earlier"];
+    // Group by date - Memoized
+    const grouped = useMemo(() => {
+        const groups = {};
+        filteredActivities.forEach(activity => {
+            const group = getDateGroup(activity.timestamp);
+            if (!groups[group]) groups[group] = [];
+            groups[group].push(activity);
+        });
+        return groups;
+    }, [filteredActivities]);
 
     if (loading) {
         return (
@@ -129,6 +126,7 @@ export default function ActivityTimeline() {
                             {[
                                 { key: "all", label: "All Events", icon: FileText, color: "text-slate-500" },
                                 { key: "conflict", label: "Conflicts", icon: AlertTriangle, color: "text-red-500" },
+                                { key: "resolution", label: "Resolved", icon: CheckCircle, color: "text-emerald-500" },
                                 { key: "requirement", label: "Requirements", icon: PlusCircle, color: "text-indigo-500" },
                             ].map(f => (
                                 <button
@@ -163,9 +161,9 @@ export default function ActivityTimeline() {
                                 <p className="text-2xl font-black text-red-500">{pmActivity.filter(a => a.type === 'conflict').length}</p>
                                 <p className="text-[9px] font-bold text-red-400 uppercase mt-1">Conflicts</p>
                             </div>
-                            <div className="p-3 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-center">
-                                <p className="text-2xl font-black text-indigo-500">{pmActivity.filter(a => a.type === 'requirement').length}</p>
-                                <p className="text-[9px] font-bold text-indigo-400 uppercase mt-1">Requirements</p>
+                            <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-center">
+                                <p className="text-2xl font-black text-emerald-500">{pmActivity.filter(a => a.type === 'resolution').length}</p>
+                                <p className="text-[9px] font-bold text-emerald-400 uppercase mt-1">Resolved</p>
                             </div>
                         </div>
                     </div>
@@ -198,7 +196,7 @@ export default function ActivityTimeline() {
                         <div className="absolute left-7 top-4 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-800/50 rounded-full"></div>
 
                         <div className="space-y-12 relative">
-                            {groupOrder.map(groupName => {
+                            {TIMELINE_GROUPS.map(groupName => {
                                 const items = grouped[groupName];
                                 if (!items || items.length === 0) return null;
                                 return (
@@ -227,9 +225,9 @@ export default function ActivityTimeline() {
     );
 }
 
-function TimelineEntry({ item }) {
-    const IconComponent = ICON_MAP[item.type] || PlusCircle;
-    const colors = ICON_COLOR_MAP[item.type] || ICON_COLOR_MAP.requirement;
+const TimelineEntry = React.memo(({ item }) => {
+    const IconComponent = ACTIVITY_ICONS[item.type] || PlusCircle;
+    const colors = ACTIVITY_COLORS[item.type] || ACTIVITY_COLORS.requirement;
 
     return (
         <div className="flex gap-8 relative group">
@@ -257,15 +255,35 @@ function TimelineEntry({ item }) {
                     "p-4 rounded-xl border mb-4",
                     item.type === 'conflict'
                         ? "bg-red-50/50 dark:bg-red-900/10 border-red-100 dark:border-red-900/30 border-l-4 border-l-red-500"
-                        : "bg-slate-50/50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800"
+                        : item.type === 'resolution'
+                            ? "bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/30 border-l-4 border-l-emerald-500"
+                            : "bg-slate-50/50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800"
                 )}>
-                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed">
+                    <p className={cn(
+                        "text-sm leading-relaxed",
+                        item.type === 'resolution' ? "font-black text-slate-900 dark:text-white" : "font-medium text-slate-700 dark:text-slate-300"
+                    )}>
                         {item.title}
                     </p>
-                    {item.reqA && item.reqB && (
-                        <p className="text-xs text-slate-500 mt-2 flex items-center gap-1.5">
+
+                    {item.type === 'resolution' && item.description && (
+                        <div className="mt-3 space-y-3">
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-600 text-white px-2 py-0.5 rounded">
+                                    {item.strategyType || "Strategy"}
+                                </span>
+                                <span className="text-[10px] font-bold text-slate-400 italic">Resolution Path Applied</span>
+                            </div>
+                            <p className="text-xs text-slate-500 font-medium border-l-2 border-emerald-200 dark:border-emerald-800 pl-3 py-1">
+                                {item.description}
+                            </p>
+                        </div>
+                    )}
+
+                    {(item.reqA && item.reqB) && (
+                        <p className="text-[10px] text-slate-400 mt-3 flex items-center gap-1.5 font-bold uppercase tracking-tight">
                             <BrainCircuit className="w-3.5 h-3.5" />
-                            {item.reqA} vs {item.reqB}
+                            Impact Area: {item.reqA} <span className="text-indigo-500">↔</span> {item.reqB}
                         </p>
                     )}
                 </div>
@@ -302,4 +320,4 @@ function TimelineEntry({ item }) {
             </div>
         </div>
     );
-}
+});

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
     Box,
@@ -24,6 +24,11 @@ import ProjectSelector from "../components/shared/ProjectSelector";
 import { Button } from "../components/ui/Button";
 import { cn } from "../lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+    MODULE_STAT_CONFIG,
+    MODULE_STATUS_VARIANT
+} from "../constants/modules";
+import { ROLES } from "../constants/roles";
 
 export default function PmModules() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -62,7 +67,8 @@ export default function PmModules() {
     const [newModule, setNewModule] = useState({
         name: "",
         description: "",
-        requirementIds: []
+        requirementIds: [],
+        assignedTo: ""
     });
 
     useEffect(() => {
@@ -77,7 +83,27 @@ export default function PmModules() {
         }
     }, [projectId, fetchModules, fetchRequirements, fetchProjectDevelopers]);
 
-    const handleGenerateAiSuggestion = async () => {
+    const moduleStats = useMemo(() => {
+        return MODULE_STAT_CONFIG.map(config => {
+            let val = 0;
+            switch (config.id) {
+                case "total": val = modules.length; break;
+                case "assigned": val = modules.filter(m => m.assignedTo).length; break;
+                case "pending": val = modules.filter(m => !m.assignedTo).length; break;
+                case "coverage":
+                    val = `${Math.min(100, Math.round((modules.reduce((acc, m) => acc + (m.requirements?.length || 0), 0) / (requirements.length || 1)) * 100))}%`;
+                    break;
+                default: break;
+            }
+            return { ...config, val };
+        });
+    }, [modules, requirements.length]);
+
+    const availableRequirements = useMemo(() => {
+        return requirements.filter(r => !r.moduleId);
+    }, [requirements]);
+
+    const handleGenerateAiSuggestion = useCallback(async () => {
         if (newModule.requirementIds.length < 2) return;
 
         setIsSuggestingModule(true);
@@ -99,13 +125,13 @@ export default function PmModules() {
         } finally {
             setIsSuggestingModule(false);
         }
-    };
+    }, [newModule.requirementIds, generateModuleSuggestion]);
 
-    const handleProjectSelect = (id) => {
+    const handleProjectSelect = useCallback((id) => {
         setSearchParams({ projectId: id });
-    };
+    }, [setSearchParams]);
 
-    const handleCreateModule = async (e) => {
+    const handleCreateModule = useCallback(async (e) => {
         e.preventDefault();
         const result = await createModule({
             ...newModule,
@@ -114,19 +140,18 @@ export default function PmModules() {
         });
         if (result.success) {
             setIsCreateModalOpen(false);
-            setNewModule({ name: "", description: "", requirementIds: [] });
-            // Sync requirements locally for immediate UI update
+            setNewModule({ name: "", description: "", requirementIds: [], assignedTo: "" });
             syncRequirementsAfterModuleCreate(newModule.requirementIds, result.module._id);
         }
-    };
+    }, [newModule, projectId, createModule, syncRequirementsAfterModuleCreate]);
 
-    const handleOpenAssignModal = async (mod) => {
+    const handleOpenAssignModal = useCallback(async (mod) => {
         setSelectedModule(mod);
         setIsAssignModalOpen(true);
         setAiSuggestion(null);
-    };
+    }, []);
 
-    const handleGetAiSuggestion = async () => {
+    const handleGetAiSuggestion = useCallback(async () => {
         setIsAiLoading(true);
         try {
             const suggestion = await getAssignmentSuggestions(selectedModule._id);
@@ -136,15 +161,39 @@ export default function PmModules() {
         } finally {
             setIsAiLoading(false);
         }
-    };
+    }, [selectedModule, getAssignmentSuggestions]);
 
-    const handleAssign = async (devId) => {
+    const handleAssign = useCallback(async (devId) => {
         const result = await assignDeveloper(selectedModule._id, devId);
         if (result.success) {
             setIsAssignModalOpen(false);
             setSelectedModule(null);
         }
-    };
+    }, [selectedModule, assignDeveloper]);
+
+    const handleDeleteModule = useCallback(async (modId) => {
+        const res = await deleteModule(modId);
+        if (res.success) {
+            syncRequirementsAfterModuleDelete(modId);
+        }
+    }, [deleteModule, syncRequirementsAfterModuleDelete]);
+
+    const toggleRequirement = useCallback((reqId, checked) => {
+        setNewModule(prev => ({
+            ...prev,
+            requirementIds: checked
+                ? [...prev.requirementIds, reqId]
+                : prev.requirementIds.filter(id => id !== reqId)
+        }));
+    }, []);
+
+    const toggleExpandRequirement = useCallback((reqId) => {
+        setExpandedReqs(prev =>
+            prev.includes(reqId)
+                ? prev.filter(id => id !== reqId)
+                : [...prev, reqId]
+        );
+    }, []);
 
     if (!projectId) {
         return (
@@ -188,12 +237,7 @@ export default function PmModules() {
 
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                {[
-                    { label: "Total Modules", val: modules.length, icon: Layout, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-500/10" },
-                    { label: "Assigned", val: modules.filter(m => m.assignedTo).length, icon: Users, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
-                    { label: "Pending", val: modules.filter(m => !m.assignedTo).length, icon: Clock, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-500/10" },
-                    { label: "Coverage", val: `${Math.min(100, Math.round((modules.reduce((acc, m) => acc + (m.requirements?.length || 0), 0) / (requirements.length || 1)) * 100))}%`, icon: CheckCircle2, color: "text-indigo-500", bg: "bg-indigo-50 dark:bg-indigo-500/10" },
-                ].map((stat, i) => (
+                {moduleStats.map((stat, i) => (
                     <div key={i} className="bg-white/50 dark:bg-[#0f1115]/50 backdrop-blur-md rounded-3xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col gap-1">
                         <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center mb-2", stat.bg, stat.color)}>
                             <stat.icon className="w-5 h-5" />
@@ -226,91 +270,12 @@ export default function PmModules() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {modules.map((mod) => (
-                        <motion.div
-                            layout
+                        <ModuleCard
                             key={mod._id}
-                            className="group bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl shadow-slate-200/5 dark:shadow-none hover:border-indigo-500/40 hover:-translate-y-1.5 transition-all duration-300 relative overflow-hidden"
-                        >
-                            <div className="flex justify-between items-start mb-6">
-                                <div className="size-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 transition-colors">
-                                    <Cpu className="w-6 h-6" />
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <span className={cn(
-                                        "px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border",
-                                        mod.status === 'completed' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                                            mod.status === 'in-progress' ? 'bg-blue-50 text-blue-600 border-blue-100' :
-                                                'bg-slate-50 text-slate-500 border-slate-100'
-                                    )}>
-                                        {mod.status || 'Pending'}
-                                    </span>
-                                    <button
-                                        onClick={async () => {
-                                            const res = await deleteModule(mod._id);
-                                            if (res.success) {
-                                                // Sync requirements locally for immediate UI update
-                                                syncRequirementsAfterModuleDelete(mod._id);
-                                            }
-                                        }}
-                                        className="p-1 text-slate-300 hover:text-red-500 transition-colors"
-                                    >
-                                        <X className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </div>
-
-                            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1 tracking-tight">{mod.name}</h3>
-                            <p className="text-xs text-slate-500 line-clamp-2 min-h-[2.5rem] mb-6 leading-relaxed">
-                                {mod.description || "No description provided for this architectural block."}
-                            </p>
-
-                            <div className="space-y-4 mb-6">
-                                <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                    <span>Requirements</span>
-                                    <span className="text-slate-900 dark:text-white">{mod.requirements?.length || 0} items</span>
-                                </div>
-                                <div className="flex flex-wrap gap-1.5">
-                                    {mod.requirements?.slice(0, 3).map((req, i) => (
-                                        <span key={i} className="px-2 py-0.5 bg-slate-50 dark:bg-slate-900 text-[8px] font-bold text-slate-400 rounded-md border border-slate-100 dark:border-slate-800">
-                                            {typeof req === 'object' ? req.title : 'Requirement'}
-                                        </span>
-                                    ))}
-                                    {mod.requirements?.length > 3 && (
-                                        <span className="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-500/10 text-[8px] font-black text-indigo-500 rounded-md">
-                                            +{mod.requirements.length - 3} more
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-
-                            <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                                {mod.assignedTo ? (
-                                    <div className="flex items-center gap-3">
-                                        <div className="size-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-black text-[10px] shadow-lg shadow-indigo-500/20">
-                                            {mod.assignedTo.name?.charAt(0) || 'D'}
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-black text-slate-900 dark:text-white leading-none">{mod.assignedTo.name}</p>
-                                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Assigned Developer</p>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center gap-3 text-slate-400">
-                                        <div className="size-8 rounded-full border-2 border-dashed border-slate-200 dark:border-slate-800 flex items-center justify-center">
-                                            <UserPlus className="w-3.5 h-3.5" />
-                                        </div>
-                                        <p className="text-[10px] font-black uppercase tracking-widest italic">Awaiting Lead</p>
-                                    </div>
-                                )}
-                                <Button
-                                    size="sm"
-                                    onClick={() => handleOpenAssignModal(mod)}
-                                    className="bg-slate-950 dark:bg-white text-white dark:text-slate-950 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all"
-                                >
-                                    {mod.assignedTo ? 'Reassign' : 'Assign'}
-                                </Button>
-                            </div>
-                        </motion.div>
+                            mod={mod}
+                            onDelete={handleDeleteModule}
+                            onAssign={handleOpenAssignModal}
+                        />
                     ))}
                 </div>
             )}
@@ -379,25 +344,39 @@ export default function PmModules() {
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Context / Focus Area</label>
-                                            <input
-                                                disabled={isSuggestingModule}
-                                                placeholder='e.g. JWT, OAuth, MFA'
-                                                value={newModule.description}
-                                                onChange={(e) => setNewModule({ ...newModule, description: e.target.value })}
-                                                className={cn(
-                                                    "w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none",
-                                                    isSuggestingModule && "opacity-50 cursor-not-allowed"
-                                                )}
-                                            />
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Developer Lead (Optional)</label>
+                                            <select
+                                                value={newModule.assignedTo}
+                                                onChange={(e) => setNewModule({ ...newModule, assignedTo: e.target.value })}
+                                                className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none appearance-none"
+                                            >
+                                                <option value="">Unassigned</option>
+                                                {availableDevs.map(dev => (
+                                                    <option key={dev._id} value={dev._id}>{dev.name}</option>
+                                                ))}
+                                            </select>
                                         </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Context / Focus Area</label>
+                                        <input
+                                            disabled={isSuggestingModule}
+                                            placeholder='e.g. JWT, OAuth, MFA'
+                                            value={newModule.description}
+                                            onChange={(e) => setNewModule({ ...newModule, description: e.target.value })}
+                                            className={cn(
+                                                "w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none",
+                                                isSuggestingModule && "opacity-50 cursor-not-allowed"
+                                            )}
+                                        />
                                     </div>
 
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Link Requirements ({newModule.requirementIds.length} selected)</label>
                                         <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 h-64 overflow-y-auto custom-scrollbar">
                                             <div className="grid grid-cols-1 gap-2">
-                                                {requirements.filter(r => !r.moduleId).length === 0 ? (
+                                                {availableRequirements.length === 0 ? (
                                                     <div className="flex flex-col items-center justify-center h-full text-center p-8">
                                                         <Search className="w-8 h-8 text-slate-300 mb-2" />
                                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
@@ -405,70 +384,15 @@ export default function PmModules() {
                                                         </p>
                                                     </div>
                                                 ) : (
-                                                    requirements.filter(r => !r.moduleId).map((req) => (
-                                                        <div
+                                                    availableRequirements.map((req) => (
+                                                        <RequirementSelectionItem
                                                             key={req._id}
-                                                            className={cn(
-                                                                "flex flex-col gap-2 p-4 rounded-2xl border transition-all",
-                                                                newModule.requirementIds.includes(req._id)
-                                                                    ? "bg-white dark:bg-slate-900 border-indigo-500/40 shadow-lg shadow-indigo-500/5"
-                                                                    : "bg-transparent border-transparent hover:bg-white/50"
-                                                            )}
-                                                        >
-                                                            <div className="flex items-center gap-4">
-                                                                <label className="flex items-center gap-4 cursor-pointer flex-1">
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        className="hidden"
-                                                                        checked={newModule.requirementIds.includes(req._id)}
-                                                                        onChange={(e) => {
-                                                                            const ids = e.target.checked
-                                                                                ? [...newModule.requirementIds, req._id]
-                                                                                : newModule.requirementIds.filter(id => id !== req._id);
-                                                                            setNewModule({ ...newModule, requirementIds: ids });
-                                                                        }}
-                                                                    />
-                                                                    <div className={cn(
-                                                                        "size-5 rounded-md border-2 flex items-center justify-center transition-all",
-                                                                        newModule.requirementIds.includes(req._id) ? "bg-indigo-600 border-indigo-600 text-white" : "border-slate-300 dark:border-slate-700"
-                                                                    )}>
-                                                                        {newModule.requirementIds.includes(req._id) && <Plus className="w-3 h-3" />}
-                                                                    </div>
-                                                                    <div className="flex-1">
-                                                                        <p className="text-xs font-black text-slate-900 dark:text-white leading-none mb-1">{req.title}</p>
-                                                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{req.category || 'General'} • {req.priority}</p>
-                                                                    </div>
-                                                                </label>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => {
-                                                                        setExpandedReqs(prev =>
-                                                                            prev.includes(req._id)
-                                                                                ? prev.filter(id => id !== req._id)
-                                                                                : [...prev, req._id]
-                                                                        );
-                                                                    }}
-                                                                    className="p-1 px-2 text-[10px] font-black text-slate-400 hover:text-indigo-600 transition-colors uppercase tracking-widest"
-                                                                >
-                                                                    {expandedReqs.includes(req._id) ? "Hide" : "Details"}
-                                                                </button>
-                                                            </div>
-
-                                                            {expandedReqs.includes(req._id) && (
-                                                                <motion.div
-                                                                    initial={{ height: 0, opacity: 0 }}
-                                                                    animate={{ height: "auto", opacity: 1 }}
-                                                                    exit={{ height: 0, opacity: 0 }}
-                                                                    className="overflow-hidden"
-                                                                >
-                                                                    <div className="pt-2 mt-2 border-t border-slate-100 dark:border-slate-800">
-                                                                        <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
-                                                                            {req.description || "No description available for this requirement."}
-                                                                        </p>
-                                                                    </div>
-                                                                </motion.div>
-                                                            )}
-                                                        </div>
+                                                            req={req}
+                                                            isSelected={newModule.requirementIds.includes(req._id)}
+                                                            isExpanded={expandedReqs.includes(req._id)}
+                                                            onToggle={toggleRequirement}
+                                                            onToggleExpand={toggleExpandRequirement}
+                                                        />
                                                     ))
                                                 )}
                                             </div>
@@ -603,3 +527,143 @@ export default function PmModules() {
         </div>
     );
 }
+
+const ModuleCard = React.memo(({ mod, onDelete, onAssign }) => {
+    return (
+        <motion.div
+            layout
+            className="group bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl shadow-slate-200/5 dark:shadow-none hover:border-indigo-500/40 hover:-translate-y-1.5 transition-all duration-300 relative overflow-hidden"
+        >
+            <div className="flex justify-between items-start mb-6">
+                <div className="size-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 transition-colors">
+                    <Cpu className="w-6 h-6" />
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className={cn(
+                        "px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border",
+                        MODULE_STATUS_VARIANT[mod.status] || MODULE_STATUS_VARIANT.pending
+                    )}>
+                        {mod.status || 'Pending'}
+                    </span>
+                    <button
+                        onClick={() => onDelete(mod._id)}
+                        className="p-1 text-slate-300 hover:text-red-500 transition-colors"
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
+                </div>
+            </div>
+
+            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1 tracking-tight">{mod.name}</h3>
+            <p className="text-xs text-slate-500 line-clamp-2 min-h-[2.5rem] mb-6 leading-relaxed">
+                {mod.description || "No description provided for this architectural block."}
+            </p>
+
+            <div className="space-y-4 mb-6">
+                <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <span>Requirements</span>
+                    <span className="text-slate-900 dark:text-white">{mod.requirements?.length || 0} items</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                    {mod.requirements?.slice(0, 3).map((req, i) => (
+                        <span key={i} className="px-2 py-0.5 bg-slate-50 dark:bg-slate-900 text-[8px] font-bold text-slate-400 rounded-md border border-slate-100 dark:border-slate-800">
+                            {typeof req === 'object' ? req.title : 'Requirement'}
+                        </span>
+                    ))}
+                    {mod.requirements?.length > 3 && (
+                        <span className="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-500/10 text-[8px] font-black text-indigo-500 rounded-md">
+                            +{mod.requirements.length - 3} more
+                        </span>
+                    )}
+                </div>
+            </div>
+
+            <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                {mod.assignedTo ? (
+                    <div className="flex items-center gap-3">
+                        <div className="size-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-black text-[10px] shadow-lg shadow-indigo-500/20">
+                            {mod.assignedTo.name?.charAt(0) || 'D'}
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black text-slate-900 dark:text-white leading-none">{mod.assignedTo.name}</p>
+                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Assigned Developer</p>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-3 text-slate-400">
+                        <div className="size-8 rounded-full border-2 border-dashed border-slate-200 dark:border-slate-800 flex items-center justify-center">
+                            <UserPlus className="w-3.5 h-3.5" />
+                        </div>
+                        <p className="text-[10px] font-black uppercase tracking-widest italic">Awaiting Lead</p>
+                    </div>
+                )}
+                <Button
+                    size="sm"
+                    onClick={() => onAssign(mod)}
+                    className="bg-slate-950 dark:bg-white text-white dark:text-slate-950 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all"
+                >
+                    {mod.assignedTo ? 'Reassign' : 'Assign'}
+                </Button>
+            </div>
+        </motion.div>
+    );
+});
+
+const RequirementSelectionItem = React.memo(({ req, isSelected, isExpanded, onToggle, onToggleExpand }) => {
+    return (
+        <div
+            className={cn(
+                "flex flex-col gap-2 p-4 rounded-2xl border transition-all",
+                isSelected
+                    ? "bg-white dark:bg-slate-900 border-indigo-500/40 shadow-lg shadow-indigo-500/5"
+                    : "bg-transparent border-transparent hover:bg-white/50"
+            )}
+        >
+            <div className="flex items-center gap-4">
+                <label className="flex items-center gap-4 cursor-pointer flex-1">
+                    <input
+                        type="checkbox"
+                        className="hidden"
+                        checked={isSelected}
+                        onChange={(e) => onToggle(req._id, e.target.checked)}
+                    />
+                    <div className={cn(
+                        "size-5 rounded-md border-2 flex items-center justify-center transition-all",
+                        isSelected ? "bg-indigo-600 border-indigo-600 text-white" : "border-slate-300 dark:border-slate-700"
+                    )}>
+                        {isSelected && <Plus className="w-3 h-3" />}
+                    </div>
+                    <div className="flex-1">
+                        <p className="text-xs font-black text-slate-900 dark:text-white leading-none mb-1">{req.title}</p>
+                        <p className="text-[10px] text-slate-500 line-clamp-1 mb-1 font-medium italic">
+                            {req.description}
+                        </p>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{req.category || 'General'} • {req.priority}</p>
+                    </div>
+                </label>
+                <button
+                    type="button"
+                    onClick={() => onToggleExpand(req._id)}
+                    className="p-1 px-2 text-[10px] font-black text-slate-400 hover:text-indigo-600 transition-colors uppercase tracking-widest"
+                >
+                    {isExpanded ? "Hide" : "Details"}
+                </button>
+            </div>
+
+            {isExpanded && (
+                <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                >
+                    <div className="pt-2 mt-2 border-t border-slate-100 dark:border-slate-800">
+                        <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
+                            {req.description || "No description available for this requirement."}
+                        </p>
+                    </div>
+                </motion.div>
+            )}
+        </div>
+    );
+});

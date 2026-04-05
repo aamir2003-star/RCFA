@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -106,7 +106,7 @@ export default function ConflictDiscussion() {
     if (isLoading) return <div className="p-10 text-center font-black animate-pulse text-indigo-500">Retrieving Conflict Intel...</div>;
     if (error || !conflictData) return <div className="p-10 text-center text-red-500 font-bold">Conflict data unavailable.</div>;
 
-    const handleSendComment = (e) => {
+    const handleSendComment = useCallback((e) => {
         e.preventDefault();
         if (!message.trim() && selectedFiles.length === 0) return;
 
@@ -115,9 +115,9 @@ export default function ConflictDiscussion() {
         selectedFiles.forEach(file => formData.append("attachments", file));
 
         commentMutation.mutate(formData);
-    };
+    }, [message, selectedFiles, commentMutation]);
 
-    const handleSumbitProposal = (e) => {
+    const handleSumbitProposal = useCallback((e) => {
         e.preventDefault();
         if (!proposalText.trim()) return;
 
@@ -126,20 +126,33 @@ export default function ConflictDiscussion() {
         selectedFiles.forEach(file => formData.append("attachments", file));
 
         proposalMutation.mutate(formData);
-    };
+    }, [proposalText, selectedFiles, proposalMutation]);
 
-    const handleFileChange = (e, target = "comment") => {
+    const handleFileChange = useCallback((e) => {
         const files = Array.from(e.target.files);
         setSelectedFiles(prev => [...prev, ...files]);
-    };
+    }, []);
 
-    const removeFile = (index) => {
+    const removeFile = useCallback((index) => {
         setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-    };
+    }, []);
 
-    // Logic for Top Proposals
-    const sortedProposals = [...(conflictData.proposals || [])].sort((a, b) => (b.votes?.length || 0) - (a.votes?.length || 0));
-    const topProposalIds = sortedProposals.slice(0, 2).map(p => p._id);
+    const handleVote = useCallback((proposalId) => {
+        voteMutation.mutate(proposalId);
+    }, [voteMutation]);
+
+    // Logic for Top Proposals - Memoized
+    const sortedProposals = useMemo(() => {
+        return [...(conflictData?.proposals || [])].sort((a, b) => (b.votes?.length || 0) - (a.votes?.length || 0));
+    }, [conflictData?.proposals]);
+
+    const topProposalIds = useMemo(() => {
+        return sortedProposals.slice(0, 2).map(p => p._id);
+    }, [sortedProposals]);
+
+    const participantCount = useMemo(() => {
+        return [...new Set(conflictData?.discussions?.map(d => d.user?._id))].length;
+    }, [conflictData?.discussions]);
 
     return (
         <div className="flex flex-col h-[calc(100vh-120px)] lg:flex-row gap-8">
@@ -217,52 +230,7 @@ export default function ConflictDiscussion() {
                     </div>
 
                     {conflictData.discussions?.map((msg, i) => (
-                        <div key={i} className="flex gap-5 group animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <div className="relative shrink-0">
-                                <img src={msg.user?.avatar || `https://ui-avatars.com/api/?name=${msg.user?.name}&background=6366f1&color=fff`} alt={msg.user?.name} className="size-12 rounded-[1.25rem] object-cover ring-2 ring-white/10 shadow-lg" />
-                                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full" />
-                            </div>
-                            <div className="space-y-2 flex-1">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <span className="font-black text-slate-900 dark:text-white text-sm tracking-tight">{msg.user?.name}</span>
-                                        <span className="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black text-slate-500 uppercase tracking-widest">
-                                            {msg.user?.role || "Developer"}
-                                        </span>
-                                    </div>
-                                    <span className="text-[10px] font-bold text-slate-400">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                </div>
-                                <div className="bg-white/60 dark:bg-white/[0.03] p-5 rounded-[1.5rem] rounded-tl-none border border-white/20 dark:border-slate-800 text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed shadow-sm group-hover:shadow-md transition-all">
-                                    {msg.message}
-
-                                    {msg.attachments?.length > 0 && (
-                                        <div className="mt-4 flex flex-wrap gap-2">
-                                            {msg.attachments.map((url, idx) => (
-                                                <a
-                                                    key={idx}
-                                                    href={api.defaults.baseURL + url}
-                                                    target="_blank"
-                                                    rel="noreferrer"
-                                                    className="flex items-center gap-2 p-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-500/50 transition-all group/file"
-                                                >
-                                                    {url.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-                                                        <img src={api.defaults.baseURL + url} alt="attachment" className="size-12 rounded-lg object-cover" />
-                                                    ) : (
-                                                        <div className="size-12 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500">
-                                                            <FileText className="w-6 h-6" />
-                                                        </div>
-                                                    )}
-                                                    <div className="pr-2">
-                                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">ATTACHMENT</p>
-                                                        <p className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 truncate max-w-[100px]">View Detail</p>
-                                                    </div>
-                                                </a>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
+                        <DiscussionMessage key={i} msg={msg} />
                     ))}
                     <div className="h-4" /> {/* Spacer */}
                 </div>
@@ -345,76 +313,15 @@ export default function ConflictDiscussion() {
 
                     <div className="space-y-6 flex-1 overflow-y-auto pr-2 custom-scrollbar">
                         {conflictData.proposals?.length > 0 ? (
-                            sortedProposals.map((prop, idx) => (
-                                <div key={prop._id} className={cn(
-                                    "p-6 rounded-[2rem] border transition-all animate-in slide-in-from-right-4 duration-500 group",
-                                    topProposalIds.includes(prop._id)
-                                        ? "bg-indigo-600 shadow-[0_20px_40px_rgba(99,102,241,0.15)] border-indigo-500/50"
-                                        : "bg-white/40 dark:bg-white/[0.02] border-slate-200 dark:border-slate-800 hover:border-indigo-500/30"
-                                )}>
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className="flex items-center gap-3">
-                                            <img src={prop.user?.avatar || `https://ui-avatars.com/api/?name=${prop.user?.name}`} className="size-8 rounded-lg outline outline-2 outline-white/20" alt="avatar" />
-                                            <div>
-                                                <p className={cn("text-[10px] font-black tracking-tight", topProposalIds.includes(prop._id) ? "text-white" : "text-slate-900 dark:text-white")}>{prop.user?.name}</p>
-                                                <p className={cn("text-[8px] font-bold uppercase tracking-widest", topProposalIds.includes(prop._id) ? "text-indigo-200" : "text-slate-400")}>{new Date(prop.timestamp).toLocaleDateString()}</p>
-                                            </div>
-                                        </div>
-                                        {topProposalIds.includes(prop._id) && (
-                                            <div className="px-2 py-0.5 rounded-lg bg-white/20 text-white text-[8px] font-black uppercase tracking-widest flex items-center gap-1">
-                                                <CheckCircle2 className="w-2.5 h-2.5" />
-                                                Top Rated
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <p className={cn("text-[11px] font-medium leading-relaxed mb-4", topProposalIds.includes(prop._id) ? "text-white/90" : "text-slate-600 dark:text-slate-400")}>
-                                        {prop.text}
-                                    </p>
-
-                                    {prop.attachments?.length > 0 && (
-                                        <div className="mb-4 flex gap-2">
-                                            {prop.attachments.slice(0, 3).map((url, i) => (
-                                                <div key={i} className="size-10 rounded-lg bg-black/20 border border-white/10 flex items-center justify-center text-white/50">
-                                                    <ImageIcon className="w-4 h-4" />
-                                                </div>
-                                            ))}
-                                            {prop.attachments.length > 3 && (
-                                                <div className="size-10 rounded-lg bg-black/20 border border-white/10 flex items-center justify-center text-[10px] font-black text-white/50">
-                                                    +{prop.attachments.length - 3}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                                        <div className="flex items-center gap-1.5 overflow-hidden">
-                                            <div className="flex -space-x-1.5">
-                                                {prop.votes?.slice(0, 3).map((v, i) => (
-                                                    <div key={i} className="w-5 h-5 rounded-full border border-white/20 bg-slate-300 overflow-hidden" />
-                                                ))}
-                                            </div>
-                                            {prop.votes?.length > 0 && (
-                                                <span className={cn("text-[9px] font-bold", topProposalIds.includes(prop._id) ? "text-white/70" : "text-slate-400")}>
-                                                    {prop.votes.length} Votes
-                                                </span>
-                                            )}
-                                        </div>
-                                        <button
-                                            onClick={() => voteMutation.mutate(prop._id)}
-                                            disabled={voteMutation.isLoading}
-                                            className={cn(
-                                                "px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all active:scale-90 flex items-center gap-1.5 shadow-lg",
-                                                prop.votes?.includes(user?._id)
-                                                    ? "bg-white text-indigo-600"
-                                                    : "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-500 hover:text-white"
-                                            )}
-                                        >
-                                            <ThumbsUp className={cn("w-3 h-3", prop.votes?.includes(user?._id) ? "fill-indigo-600" : "")} />
-                                            {prop.votes?.includes(user?._id) ? "LIKED" : "VOTE"}
-                                        </button>
-                                    </div>
-                                </div>
+                            sortedProposals.map((prop) => (
+                                <ProposalCard
+                                    key={prop._id}
+                                    prop={prop}
+                                    isTopRated={topProposalIds.includes(prop._id)}
+                                    user={user}
+                                    onVote={handleVote}
+                                    isVoting={voteMutation.isLoading}
+                                />
                             ))
                         ) : (
                             <div className="h-full flex flex-col items-center justify-center text-slate-400/50 py-10">
@@ -453,7 +360,7 @@ export default function ConflictDiscussion() {
                             <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Participants</p>
                             <div className="flex items-end gap-1.5">
                                 <p className="text-3xl font-black text-white leading-none">
-                                    {[...new Set(conflictData.discussions?.map(d => d.user?._id))].length}
+                                    {participantCount}
                                 </p>
                                 <p className="text-[10px] font-bold text-slate-500 pb-0.5">DEVS</p>
                             </div>
@@ -562,3 +469,128 @@ export default function ConflictDiscussion() {
         </div>
     );
 }
+
+const DiscussionMessage = React.memo(({ msg }) => {
+    return (
+        <div className="flex gap-5 group animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="relative shrink-0">
+                <img src={msg.user?.avatar || `https://ui-avatars.com/api/?name=${msg.user?.name}&background=6366f1&color=fff`} alt={msg.user?.name} className="size-12 rounded-[1.25rem] object-cover ring-2 ring-white/10 shadow-lg" />
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full" />
+            </div>
+            <div className="space-y-2 flex-1">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <span className="font-black text-slate-900 dark:text-white text-sm tracking-tight">{msg.user?.name}</span>
+                        <span className="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                            {msg.user?.role || "Developer"}
+                        </span>
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-400">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+                <div className="bg-white/60 dark:bg-white/[0.03] p-5 rounded-[1.5rem] rounded-tl-none border border-white/20 dark:border-slate-800 text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed shadow-sm group-hover:shadow-md transition-all">
+                    {msg.message}
+
+                    {msg.attachments?.length > 0 && (
+                        <div className="mt-4 flex flex-wrap gap-2">
+                            {msg.attachments.map((url, idx) => (
+                                <a
+                                    key={idx}
+                                    href={api.defaults.baseURL + url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="flex items-center gap-2 p-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-500/50 transition-all group/file"
+                                >
+                                    {url.match(/\.(jpg|jpeg|png|gif)$/i) ? (
+                                        <img src={api.defaults.baseURL + url} alt="attachment" className="size-12 rounded-lg object-cover" />
+                                    ) : (
+                                        <div className="size-12 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+                                            <FileText className="w-6 h-6" />
+                                        </div>
+                                    )}
+                                    <div className="pr-2">
+                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">ATTACHMENT</p>
+                                        <p className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 truncate max-w-[100px]">View Detail</p>
+                                    </div>
+                                </a>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+});
+
+const ProposalCard = React.memo(({ prop, isTopRated, user, onVote, isVoting }) => {
+    return (
+        <div className={cn(
+            "p-6 rounded-[2rem] border transition-all animate-in slide-in-from-right-4 duration-500 group",
+            isTopRated
+                ? "bg-indigo-600 shadow-[0_20px_40px_rgba(99,102,241,0.15)] border-indigo-500/50"
+                : "bg-white/40 dark:bg-white/[0.02] border-slate-200 dark:border-slate-800 hover:border-indigo-500/30"
+        )}>
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                    <img src={prop.user?.avatar || `https://ui-avatars.com/api/?name=${prop.user?.name}`} className="size-8 rounded-lg outline outline-2 outline-white/20" alt="avatar" />
+                    <div>
+                        <p className={cn("text-[10px] font-black tracking-tight", isTopRated ? "text-white" : "text-slate-900 dark:text-white")}>{prop.user?.name}</p>
+                        <p className={cn("text-[8px] font-bold uppercase tracking-widest", isTopRated ? "text-indigo-200" : "text-slate-400")}>{new Date(prop.timestamp).toLocaleDateString()}</p>
+                    </div>
+                </div>
+                {isTopRated && (
+                    <div className="px-2 py-0.5 rounded-lg bg-white/20 text-white text-[8px] font-black uppercase tracking-widest flex items-center gap-1">
+                        <CheckCircle2 className="w-2.5 h-2.5" />
+                        Top Rated
+                    </div>
+                )}
+            </div>
+
+            <p className={cn("text-[11px] font-medium leading-relaxed mb-4", isTopRated ? "text-white/90" : "text-slate-600 dark:text-slate-400")}>
+                {prop.text}
+            </p>
+
+            {prop.attachments?.length > 0 && (
+                <div className="mb-4 flex gap-2">
+                    {prop.attachments.slice(0, 3).map((url, i) => (
+                        <div key={i} className="size-10 rounded-lg bg-black/20 border border-white/10 flex items-center justify-center text-white/50">
+                            <ImageIcon className="w-4 h-4" />
+                        </div>
+                    ))}
+                    {prop.attachments.length > 3 && (
+                        <div className="size-10 rounded-lg bg-black/20 border border-white/10 flex items-center justify-center text-[10px] font-black text-white/50">
+                            +{prop.attachments.length - 3}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                <div className="flex items-center gap-1.5 overflow-hidden">
+                    <div className="flex -space-x-1.5">
+                        {prop.votes?.slice(0, 3).map((v, i) => (
+                            <div key={i} className="w-5 h-5 rounded-full border border-white/20 bg-slate-300 overflow-hidden" />
+                        ))}
+                    </div>
+                    {prop.votes?.length > 0 && (
+                        <span className={cn("text-[9px] font-bold", isTopRated ? "text-white/70" : "text-slate-400")}>
+                            {prop.votes.length} Votes
+                        </span>
+                    )}
+                </div>
+                <button
+                    onClick={() => onVote(prop._id)}
+                    disabled={isVoting}
+                    className={cn(
+                        "px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all active:scale-90 flex items-center gap-1.5 shadow-lg",
+                        prop.votes?.includes(user?._id)
+                            ? "bg-white text-indigo-600"
+                            : "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-500 hover:text-white"
+                    )}
+                >
+                    <ThumbsUp className={cn("w-3 h-3", prop.votes?.includes(user?._id) ? "fill-indigo-600" : "")} />
+                    {prop.votes?.includes(user?._id) ? "LIKED" : "VOTE"}
+                </button>
+            </div>
+        </div>
+    );
+});

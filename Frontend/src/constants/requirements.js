@@ -50,3 +50,16 @@ export const AI_ASSISTANT_CARDS_TEMPLATE = [
         action: "Apply Suggestion"
     }
 ];
+
+export const SMART_TEMPLATES = {
+    'Developer': [
+        { label: 'Scale', text: 'Must support up to 10k concurrent users with <200ms latency.' },
+        { label: 'Auth', text: 'Implement OAuth2.0 with JWT rotating refresh tokens.' },
+        { label: 'Audit', text: 'Log all state changes to a secure, tamper-proof audit trail.' }
+    ],
+    'Legal': [
+        { label: 'GDPR', text: 'Explicit user consent required before collecting any PII data.' },
+        { label: 'Right to Erase', text: 'All user data must be permanently deletable within 48 hours of request.' },
+        { label: 'Sovereignty', text: 'Data must be stored on servers physically located within EU borders.' }
+    ]
+};

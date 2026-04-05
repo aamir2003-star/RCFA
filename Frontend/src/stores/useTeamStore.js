@@ -3,8 +3,13 @@ import api from "../lib/api";
 
 const useTeamStore = create((set) => ({
     members: [],
-    totalMembers: 0,
-    totalProjects: 0,
+    stats: {
+        totalDevs: 0,
+        availableDevs: 0,
+        inProductionCount: 0,
+        highLoadDevs: 0,
+        averageWorkload: 0
+    },
     loading: false,
     error: null,
 
@@ -14,8 +19,13 @@ const useTeamStore = create((set) => ({
             const response = await api.get('/users/team');
             set({
                 members: response.data.members || [],
-                totalMembers: response.data.totalMembers || 0,
-                totalProjects: response.data.totalProjects || 0,
+                stats: response.data.stats || {
+                    totalDevs: 0,
+                    availableDevs: 0,
+                    inProductionCount: 0,
+                    highLoadDevs: 0,
+                    averageWorkload: 0
+                },
                 loading: false
             });
         } catch (error) {

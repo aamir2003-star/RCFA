@@ -19,6 +19,14 @@ export const createModule = async (moduleData) => {
     );
   }
 
+  // If a developer is assigned, ensure they are in the project team
+  if (moduleData.assignedTo && moduleData.projectId) {
+    await ProjectModel.findByIdAndUpdate(
+      moduleData.projectId,
+      { $addToSet: { team: moduleData.assignedTo } }
+    );
+  }
+
   return moduleDoc;
 };
 
@@ -92,6 +100,13 @@ export const assignDeveloperToModule = async (moduleId, developerId) => {
   if (!moduleDoc) {
     throw new Error("Module not found");
   }
+
+  // Ensure developer is in the project team
+  await ProjectModel.findByIdAndUpdate(
+    moduleDoc.projectId,
+    { $addToSet: { team: developerId } }
+  );
+
   return moduleDoc;
 };
 
@@ -104,9 +119,16 @@ export const getProjectDevelopers = async (projectId) => {
     throw new Error("Project not found");
   }
 
-  // Filter only users with role that matches Developer (case insensitive or specific constant)
-  // Usually 'DEV' or 'Developer'
-  return project.team.filter(user => user.role === 'DEV' || user.role === 'Developer');
+  let developers = project.team.filter(user => user.role === 'DEV' || user.role === 'Developer');
+
+  // Fallback: If no developers are in the project team, show all developers in the system
+  if (developers.length === 0) {
+    developers = await User.find({
+      role: { $regex: /^(DEV|Developer)$/i }
+    }).select('name email role avatar').lean();
+  }
+
+  return developers;
 };
 
 /**
