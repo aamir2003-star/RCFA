@@ -3,6 +3,7 @@ import { ModuleModel } from "../models/module/module.model.js";
 import { ProjectModel } from "../models/project/project.model.js";
 import User from "../models/user/user.model.js";
 import { callGeminiJSON } from "../utils/geminiHelper.js";
+import { createNotification } from "./notification.service.js";
 
 /**
  * Create a new module
@@ -107,6 +108,15 @@ export const assignDeveloperToModule = async (moduleId, developerId) => {
     { $addToSet: { team: developerId } }
   );
 
+  // Notify the developer
+  await createNotification({
+    recipient: developerId,
+    title: "New Module Assigned",
+    message: `You have been assigned as the lead for module: ${moduleDoc.name}`,
+    type: "info",
+    link: `/dev/modules`
+  });
+
   return moduleDoc;
 };
 
@@ -114,19 +124,15 @@ export const assignDeveloperToModule = async (moduleId, developerId) => {
  * Get developers available for a project
  */
 export const getProjectDevelopers = async (projectId) => {
-  const project = await ProjectModel.findById(projectId).populate("team", "name email role");
+  const project = await ProjectModel.findById(projectId);
   if (!project) {
     throw new Error("Project not found");
   }
 
-  let developers = project.team.filter(user => user.role === 'DEV' || user.role === 'Developer');
-
-  // Fallback: If no developers are in the project team, show all developers in the system
-  if (developers.length === 0) {
-    developers = await User.find({
-      role: { $regex: /^(DEV|Developer)$/i }
-    }).select('name email role avatar').lean();
-  }
+  // Show all developers in the system so PM can assign any of them
+  const developers = await User.find({
+    role: { $regex: /^(DEV|Developer)$/i }
+  }).select('name email role avatar').lean();
 
   return developers;
 };

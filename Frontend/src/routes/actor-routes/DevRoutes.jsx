@@ -14,6 +14,7 @@ import DevVault from "../../pages/DevVault";
 import RequirementEditor from "../../pages/RequirementEditor";
 import ProfilePage from "../../pages/ProfilePage";
 import DevSettings from "../../pages/DevSettings";
+import Notifications from "../../pages/Notifications";
 
 export default function DevRoutes() {
     return (
@@ -30,6 +31,7 @@ export default function DevRoutes() {
                     <Route path="editor" element={<RequirementEditor role={ROLES.DEV} />} />
                     <Route path="profile" element={<ProfilePage />} />
                     <Route path="settings" element={<DevSettings />} />
+                    <Route path="notifications" element={<Notifications />} />
                 </Routes>
             </MainLayout>
         </ProtectedRoute>

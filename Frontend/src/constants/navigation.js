@@ -18,9 +18,7 @@ export const NAV_ITEMS = {
         { to: "/dev/dashboard", icon: LayoutDashboard, label: "Dashboard" },
         { to: "/dev/modules", icon: Box, label: "Modules" },
         { to: "/dev/conflicts/discussion", icon: MessageSquare, label: "Discussions", matchSubPath: "/discussion" },
-        { to: "/dev/conflicts", icon: AlertTriangle, label: "Conflicts", badge: 4 },
-        { type: 'separator', label: 'SYSTEMS' },
-        { to: "/dev/settings", icon: Settings, label: "Settings" },
+        { to: "/dev/conflicts", icon: AlertTriangle, label: "Conflicts", badge: 4 }
     ],
     pm: [
         { to: "/pm/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -30,9 +28,7 @@ export const NAV_ITEMS = {
         { to: "/pm/conflicts", icon: AlertTriangle, label: "Conflicts" },
         { to: "/pm/timeline", icon: Clock, label: "Activity" },
         { to: "/pm/team", icon: Users, label: "Team" },
-        { type: 'separator', label: 'SYSTEMS' },
-        { to: "/pm/analytics", icon: BarChart, label: "Analytics" },
-        { to: "/pm/settings", icon: Settings, label: "Settings" },
+        { to: "/pm/analytics", icon: BarChart, label: "Analytics" }
     ],
     bde: [
         { to: "/bde/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -40,8 +36,6 @@ export const NAV_ITEMS = {
         { to: "/bde/editor", icon: Layers, label: "Specifications" },
         { to: "/bde/analytics", icon: BarChart, label: "Analytics" },
         { to: "/bde/teams", icon: Users, label: "Teams" },
-        { to: "/bde/reports", icon: FileText, label: "Reports" },
-        { type: 'separator', label: 'SYSTEMS' },
-        { to: "/bde/settings", icon: Settings, label: "Settings" },
+        { to: "/bde/reports", icon: FileText, label: "Reports" }
     ]
 };

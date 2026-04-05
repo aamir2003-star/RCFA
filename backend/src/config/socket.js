@@ -25,6 +25,12 @@ export const initSocket = (httpServer) => {
             console.log(`📦 Socket ${socket.id} joined project:${projectId}`);
         });
 
+        // Client joins a user room to receive user-specific notifications
+        socket.on('join:user', (userId) => {
+            socket.join(`user:${userId}`);
+            console.log(`👤 Socket ${socket.id} joined user:${userId}`);
+        });
+
         socket.on('disconnect', () => {
             console.log(`❌ Socket disconnected: ${socket.id}`);
         });

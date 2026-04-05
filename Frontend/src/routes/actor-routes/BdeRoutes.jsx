@@ -12,6 +12,7 @@ import CreateProject from "../../pages/CreateProject";
 import BdeTeams from "../../pages/BdeTeams";
 import ProfilePage from "../../pages/ProfilePage";
 import BdeSettings from "../../pages/BdeSettings";
+import Notifications from "../../pages/Notifications";
 import BdeReports from "../../pages/BdeReports";
 
 export default function BdeRoutes() {
@@ -26,6 +27,7 @@ export default function BdeRoutes() {
                     <Route path="teams" element={<BdeTeams />} />
                     <Route path="profile" element={<ProfilePage />} />
                     <Route path="settings" element={<BdeSettings />} />
+                    <Route path="notifications" element={<Notifications />} />
                     <Route path="reports" element={<BdeReports />} />
                 </Routes>
             </MainLayout>

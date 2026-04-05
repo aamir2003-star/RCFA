@@ -6,6 +6,8 @@ import ThemeToggle from "../ThemeToggle";
 import useAuthStore from "../../stores/useAuthStore";
 import { Dropdown } from "../ui/Dropdown";
 import { useNavigate } from "react-router-dom";
+import useNotificationStore from "../../stores/useNotificationStore";
+import { useEffect } from "react";
 
 export function TopHeader({ role, onMenuClick }) {
   const { theme, setTheme } = useTheme();
@@ -30,6 +32,21 @@ export function TopHeader({ role, onMenuClick }) {
     navigate(`/${role}/settings`);
   };
 
+  const { unreadCount, fetchNotifications, initSocket } = useNotificationStore();
+
+  useEffect(() => {
+    const userId = user?._id || user?.id;
+    if (userId) {
+      fetchNotifications();
+      const cleanup = initSocket(userId);
+      return cleanup;
+    }
+  }, [user?._id, user?.id, fetchNotifications, initSocket]);
+
+  const handleNotificationsClick = () => {
+    navigate(`/${role}/notifications`);
+  };
+
   return (
     <header className="h-16 bg-white/70 dark:bg-[#0f1115]/70 backdrop-blur-md flex items-center justify-between px-4 md:px-6 shrink-0 z-50 shadow-sm border-b border-slate-200/50 dark:border-slate-800/50 sticky top-0 transition-colors duration-300">
       <div className="flex-1 flex items-center gap-3 md:gap-4">
@@ -51,34 +68,26 @@ export function TopHeader({ role, onMenuClick }) {
         )}
       </div>
 
-      <div className="flex-1 max-w-xl mx-4">
-        <div className="group relative rounded-full bg-slate-100/80 dark:bg-slate-800/50 flex items-center px-4 py-2 text-sm w-full max-w-md mx-auto xl:mx-0 border border-transparent focus-within:border-indigo-500/30 focus-within:bg-white dark:focus-within:bg-[#0f1115] focus-within:ring-4 focus-within:ring-indigo-500/10 transition-all duration-300 shadow-inner dark:shadow-none">
-          <Search className="w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 mr-2 transition-colors duration-300" />
-          <input
-            type="text"
-            placeholder={searchPlaceholder}
-            className="bg-transparent border-none outline-none w-full text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500"
-          />
-        </div>
-      </div>
 
       <div className="flex-1 flex items-center justify-end gap-5">
-        <button className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 relative hover:scale-110 active:scale-95 transition-all">
+        <button
+          onClick={handleNotificationsClick}
+          className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 relative hover:scale-110 active:scale-95 transition-all"
+        >
           <Bell className="w-5 h-5" />
-          <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-[#0f1115] -mt-0.5 -mr-0.5 animate-pulse"></span>
+          {unreadCount > 0 && (
+            <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-white dark:border-[#0f1115] -mt-1.5 -mr-1.5 animate-in zoom-in duration-300">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
         </button>
 
-        {role === "pm" && (
-          <button className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:scale-110 active:scale-95 transition-all">
-            <Settings className="w-5 h-5" />
-          </button>
-        )}
-
-        {role === "dev" && (
-          <button className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:scale-110 active:scale-95 transition-all">
-            <HelpCircle className="w-5 h-5" />
-          </button>
-        )}
+        <button
+          onClick={handleSettingsClick}
+          className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:scale-110 active:scale-95 transition-all"
+        >
+          <Settings className="w-5 h-5" />
+        </button>
 
         <ThemeToggle />
 

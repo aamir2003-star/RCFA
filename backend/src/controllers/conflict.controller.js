@@ -20,7 +20,7 @@ export const analyzeConflicts = async (req, res) => {
             });
         }
 
-        const { jobId, estimatedTime } = startJob(projectId);
+        const { jobId, estimatedTime } = startJob(projectId, req.user.id);
 
         return res.status(202).json({
             success: true,

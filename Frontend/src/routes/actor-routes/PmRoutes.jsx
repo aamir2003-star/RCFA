@@ -17,6 +17,7 @@ import TeamManagement from "../../pages/TeamManagement";
 import AnalyticsDashboard from "../../components/dashboard/AnalyticsDashboard";
 import ProfilePage from "../../pages/ProfilePage";
 import PmSettings from "../../pages/PmSettings";
+import Notifications from "../../pages/Notifications";
 
 export default function PmRoutes() {
     return (
@@ -36,6 +37,7 @@ export default function PmRoutes() {
                     <Route path="analytics" element={<AnalyticsDashboard />} />
                     <Route path="profile" element={<ProfilePage />} />
                     <Route path="settings" element={<PmSettings />} />
+                    <Route path="notifications" element={<Notifications />} />
                 </Routes>
             </MainLayout>
         </ProtectedRoute>
