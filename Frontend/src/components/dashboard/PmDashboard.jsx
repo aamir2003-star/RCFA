@@ -70,11 +70,11 @@ export default function PmDashboard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-[28px] font-extrabold tracking-tight text-[#1e2532] dark:text-white">
+          <h1 className="text-2xl md:text-[28px] font-extrabold tracking-tight text-[#1e2532] dark:text-white">
             Welcome back, {user?.name?.split(' ')[0] || 'Manager'}
           </h1>
-          <p className="text-sm font-medium text-slate-500 mt-1">
-            Here is the conflict resolution status for your {pmStats?.totalProjects || 0} active projects.
+          <p className="text-xs md:text-sm font-medium text-slate-500 mt-1">
+            Status for your {pmStats?.totalProjects || 0} active projects.
           </p>
         </div>
         <button

@@ -37,3 +37,27 @@ export const markAllRead = async (req, res, next) => {
         next(error);
     }
 };
+
+export const markUnread = async (req, res, next) => {
+    try {
+        const notification = await notificationService.markAsUnread(req.params.id);
+        res.json({
+            success: true,
+            notification
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const deleteNotification = async (req, res, next) => {
+    try {
+        await notificationService.deleteNotification(req.params.id);
+        res.json({
+            success: true,
+            message: "Notification deleted"
+        });
+    } catch (error) {
+        next(error);
+    }
+};

@@ -85,13 +85,13 @@ export default function DevDashboard() {
     <div className="flex flex-col gap-8 w-full max-w-full pb-10 animate-in fade-in duration-700">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
+        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
           Welcome back, {user?.name?.split(' ')[0] || 'Developer'}{" "}
-          <span className="text-4xl leading-none origin-bottom-right rotate-12 inline-block">
+          <span className="text-3xl md:text-4xl leading-none origin-bottom-right rotate-12 inline-block">
             👋
           </span>
         </h1>
-        <p className="text-muted-foreground mt-2 font-medium">
+        <p className="text-sm md:text-base text-muted-foreground mt-2 font-medium">
           You have{" "}
           <span className="text-slate-900 dark:text-white font-bold">
             {totalConflicts} unresolved conflicts

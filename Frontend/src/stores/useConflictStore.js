@@ -116,11 +116,26 @@ const useConflictStore = create((set, get) => ({
             }
         });
 
-        socket.on("conflict:resolved", (data) => {
+        socket.on("conflict:comment", (data) => {
+            if (data.projectId === projectId) {
+                // We don't have a full conflicts list of details in the store, 
+                // but we can trigger a query invalidation if we have access to queryClient.
+                // Alternatively, if this store is used for the detail view, we'd update it here.
+                // For now, since we use React Query for details, we might need a different approach 
+                // or just rely on the store to signal an update.
+                set((state) => ({
+                    conflicts: state.conflicts.map((c) =>
+                        c._id === data.conflictId ? { ...c, lastComment: data.comment } : c
+                    )
+                }));
+            }
+        });
+
+        socket.on("conflict:proposal", (data) => {
             if (data.projectId === projectId) {
                 set((state) => ({
                     conflicts: state.conflicts.map((c) =>
-                        c._id === data.conflictId ? { ...c, status: "resolved" } : c
+                        c._id === data.conflictId ? { ...c, lastProposal: data.proposal } : c
                     )
                 }));
             }
@@ -133,6 +148,8 @@ const useConflictStore = create((set, get) => ({
         socket.off("analysis:progress");
         socket.off("conflict:new");
         socket.off("conflict:resolved");
+        socket.off("conflict:comment");
+        socket.off("conflict:proposal");
     }
 }));
 

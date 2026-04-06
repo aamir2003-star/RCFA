@@ -1,10 +1,15 @@
-// src/controllers/conflict.controller.js
 // Handles HTTP requests for conflict analysis endpoints
+import { createNotification } from '../services/notification.service.js';
+import { ModuleModel } from '../models/module/module.model.js';
 
 import { startJob, getJobStatus } from '../jobs/conflictScanJob.js';
 import { ConflictModel } from '../models/conflict/conflict.model.js';
 import { ProjectModel } from '../models/project/project.model.js';
-import { emitConflictResolved } from '../sockets/events/conflictEvents.js';
+import {
+    emitConflictResolved,
+    emitConflictComment,
+    emitConflictProposal
+} from '../sockets/events/conflictEvents.js';
 /**
  * POST /api/v1/conflicts/analyze/:projectId
  * Triggers async conflict detection. Returns jobId and estimatedTime.
@@ -227,10 +232,30 @@ export const addConflictComment = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Conflict not found' });
         }
 
+        // Notify PM if a Developer (or anyone else) comments
+        const project = await ProjectModel.findById(conflict.projectId);
+        if (project && project.projectManager && req.user._id.toString() !== project.projectManager.toString()) {
+            const populatedConflict = await ConflictModel.findById(id).populate('requirementA requirementB');
+            await createNotification({
+                recipient: project.projectManager,
+                title: "New Comment on Conflict",
+                message: `${req.user.name} commented on conflict: ${populatedConflict.requirementA?.title} vs ${populatedConflict.requirementB?.title}`,
+                type: "discussion",
+                link: `/pm/conflicts/detail/${id}`
+            });
+        }
+
+        const newComment = conflict.discussions[conflict.discussions.length - 1];
+        emitConflictComment(conflict.projectId, id, newComment);
+
         return res.json({ success: true, discussions: conflict.discussions });
     } catch (err) {
         console.error('addConflictComment error:', err);
-        return res.status(500).json({ success: false, message: err.message });
+        return res.status(500).json({
+            success: false,
+            message: err.message,
+            stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+        });
     }
 };
 
@@ -268,10 +293,29 @@ export const addConflictProposal = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Conflict not found' });
         }
 
+        // Notify PM about new proposal
+        const project = await ProjectModel.findById(conflict.projectId);
+        if (project && project.projectManager && req.user._id.toString() !== project.projectManager.toString()) {
+            await createNotification({
+                recipient: project.projectManager,
+                title: "New Resolution Proposal",
+                message: `${req.user.name} submitted a new proposal for a conflict in "${project.name}".`,
+                type: "ai",
+                link: `/pm/conflicts/detail/${id}`
+            });
+        }
+
+        const newProposal = conflict.proposals[conflict.proposals.length - 1];
+        emitConflictProposal(conflict.projectId, id, newProposal);
+
         return res.json({ success: true, proposals: conflict.proposals });
     } catch (err) {
         console.error('addConflictProposal error:', err);
-        return res.status(500).json({ success: false, message: err.message });
+        return res.status(500).json({
+            success: false,
+            message: err.message,
+            stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+        });
     }
 };
 
@@ -363,6 +407,24 @@ export const confirmConflictResolution = async (req, res) => {
         }
 
         emitConflictResolved(conflict.projectId, id);
+
+        // 4. Notify involved developers
+        // Find modules associated with requirementA and requirementB
+        const modules = await ModuleModel.find({
+            _id: { $in: [requirements[0]?.moduleId, requirements[1]?.moduleId] }
+        }).populate('assignedTo');
+
+        for (const mod of modules) {
+            if (mod.assignedTo) {
+                await createNotification({
+                    recipient: mod.assignedTo._id,
+                    title: "Conflict Resolved",
+                    message: `A conflict affecting your module "${mod.name}" has been resolved by PM.`,
+                    type: "success",
+                    link: `/dev/modules`
+                });
+            }
+        }
 
         return res.json({
             success: true,

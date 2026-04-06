@@ -178,7 +178,7 @@ export default function RequirementEditor() {
 
 
     return (
-        <div className="flex flex-col h-full bg-slate-50/30 dark:bg-transparent -m-4 sm:-m-6 lg:-m-8 p-4 sm:p-6 lg:p-8">
+        <div className="flex flex-col lg:h-full bg-slate-50/30 dark:bg-transparent -m-4 sm:-m-6 lg:-m-8 p-4 sm:p-6 lg:p-8">
             {!projectId ? (
                 <ProjectSelector
                     projects={projects}
@@ -215,10 +215,10 @@ export default function RequirementEditor() {
                         </div>
                     </div>
 
-                    <div className="flex flex-col lg:flex-row gap-8 flex-1 overflow-hidden">
+                    <div className="flex flex-col lg:flex-row gap-8 flex-1 lg:overflow-hidden">
                         {/* Sidebar Inventory */}
                         <div className="w-full lg:w-80 flex flex-col gap-6">
-                            <div className="bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col h-[500px] lg:h-full shadow-2xl shadow-slate-200/20">
+                            <div className="bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col h-[400px] lg:h-full shadow-2xl shadow-slate-200/20">
                                 <div className="p-4 border-b border-slate-100 dark:border-slate-800/50 space-y-4 text-slate-200">
                                     <div className="flex items-center justify-between">
                                         <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inventory</h2>
@@ -280,7 +280,7 @@ export default function RequirementEditor() {
                                         exit={{ opacity: 0, scale: 0.98 }}
                                         className={cn(
                                             "bg-white dark:bg-[#0f1115]/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden flex flex-col shadow-2xl",
-                                            isFocusMode ? "fixed inset-8 z-50 pointer-events-auto" : "relative h-[calc(100vh-180px)]"
+                                            isFocusMode ? "fixed inset-4 sm:inset-8 z-50 pointer-events-auto" : "relative min-h-[500px] lg:h-[calc(100vh-180px)]"
                                         )}
                                     >
                                         <div className="p-6 sm:p-8 flex-1 overflow-y-auto custom-scrollbar">
@@ -357,7 +357,7 @@ export default function RequirementEditor() {
                                         </div>
                                     </motion.div>
                                 ) : (
-                                    <div className="h-[calc(100vh-180px)] border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl flex flex-col items-center justify-center text-center p-12">
+                                    <div className="min-h-[300px] lg:h-[calc(100vh-180px)] border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl flex flex-col items-center justify-center text-center p-12">
                                         <div className="w-20 h-20 rounded-3xl bg-slate-50 dark:bg-slate-900 flex items-center justify-center text-slate-300 mb-6">
                                             <Plus className="w-8 h-8" />
                                         </div>

@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
     Bell,
     CheckCheck,
@@ -13,7 +14,11 @@ import {
     AlertTriangle,
     CheckCircle2,
     XCircle,
-    Loader2
+    Loader2,
+    Trash2,
+    MailOpen,
+    Mail,
+    Link as LinkIcon
 } from "lucide-react";
 import { cn } from "../lib/utils";
 import useNotificationStore from "../stores/useNotificationStore";
@@ -31,22 +36,59 @@ const TYPE_CONFIG = {
 };
 
 export default function Notifications() {
+    const navigate = useNavigate();
     const {
         notifications,
         loading,
         fetchNotifications,
         markAsRead,
+        markAsUnread,
+        deleteNotification,
         markAllAsRead,
         unreadCount
     } = useNotificationStore();
+
+    const [activeMenu, setActiveMenu] = useState(null);
+    const menuRef = useRef(null);
 
     useEffect(() => {
         fetchNotifications();
     }, [fetchNotifications]);
 
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setActiveMenu(null);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
     const sortedNotifications = useMemo(() => {
         return [...notifications].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     }, [notifications]);
+
+    const handleViewSource = (e, link) => {
+        e.stopPropagation();
+        if (link) navigate(link);
+    };
+
+    const handleDismiss = (e, id) => {
+        e.stopPropagation();
+        deleteNotification(id);
+    };
+
+    const toggleMenu = (e, id) => {
+        e.stopPropagation();
+        setActiveMenu(activeMenu === id ? null : id);
+    };
+
+    const handleMarkUnread = (e, id) => {
+        e.stopPropagation();
+        markAsUnread(id);
+        setActiveMenu(null);
+    };
 
     if (loading && notifications.length === 0) {
         return (
@@ -134,18 +176,77 @@ export default function Notifications() {
                                     </p>
                                     <div className="flex items-center gap-4 pt-2">
                                         {notif.link && (
-                                            <button className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.15em] hover:underline">
+                                            <button
+                                                onClick={(e) => handleViewSource(e, notif.link)}
+                                                className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.15em] hover:underline transition-all active:scale-95"
+                                            >
                                                 View Source →
                                             </button>
                                         )}
-                                        <button className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em] hover:text-slate-600 transition-colors">
+                                        <button
+                                            onClick={(e) => handleDismiss(e, notif._id)}
+                                            className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em] hover:text-red-500 transition-colors active:scale-95"
+                                        >
                                             Dismiss
                                         </button>
                                     </div>
                                 </div>
-                                <button className="self-start p-2 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <MoreHorizontal className="size-5" />
-                                </button>
+
+                                <div className="relative self-start">
+                                    <button
+                                        onClick={(e) => toggleMenu(e, notif._id)}
+                                        className={cn(
+                                            "p-2 text-slate-300 hover:text-slate-600 dark:hover:text-slate-200 transition-all rounded-lg hover:bg-slate-100 dark:hover:bg-white/5",
+                                            activeMenu === notif._id ? "opacity-100 bg-slate-100 dark:bg-white/5" : "opacity-0 group-hover:opacity-100"
+                                        )}
+                                    >
+                                        <MoreHorizontal className="size-5" />
+                                    </button>
+
+                                    {activeMenu === notif._id && (
+                                        <div
+                                            ref={menuRef}
+                                            className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-[#1a1c23] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in duration-200"
+                                        >
+                                            <div className="p-2 space-y-1">
+                                                {notif.isRead ? (
+                                                    <button
+                                                        onClick={(e) => handleMarkUnread(e, notif._id)}
+                                                        className="w-full flex items-center gap-3 px-3 py-2.5 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-colors uppercase tracking-wider"
+                                                    >
+                                                        <Mail className="size-4" />
+                                                        Mark as Unread
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); markAsRead(notif._id); setActiveMenu(null); }}
+                                                        className="w-full flex items-center gap-3 px-3 py-2.5 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-colors uppercase tracking-wider"
+                                                    >
+                                                        <MailOpen className="size-4" />
+                                                        Mark as Read
+                                                    </button>
+                                                )}
+                                                {notif.link && (
+                                                    <button
+                                                        onClick={(e) => handleViewSource(e, notif.link)}
+                                                        className="w-full flex items-center gap-3 px-3 py-2.5 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-colors uppercase tracking-wider"
+                                                    >
+                                                        <LinkIcon className="size-4" />
+                                                        Copy Link
+                                                    </button>
+                                                )}
+                                                <div className="h-px bg-slate-100 dark:bg-slate-800 my-1 mx-2" />
+                                                <button
+                                                    onClick={(e) => handleDismiss(e, notif._id)}
+                                                    className="w-full flex items-center gap-3 px-3 py-2.5 text-[11px] font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors uppercase tracking-wider"
+                                                >
+                                                    <Trash2 className="size-4" />
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         );
                     })}

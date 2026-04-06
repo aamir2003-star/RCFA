@@ -55,3 +55,21 @@ export const markAllAsRead = async (userId) => {
         { $set: { isRead: true } }
     );
 };
+
+/**
+ * Mark notification as unread
+ */
+export const markAsUnread = async (notificationId) => {
+    return await NotificationModel.findByIdAndUpdate(
+        notificationId,
+        { isRead: false },
+        { new: true }
+    );
+};
+
+/**
+ * Delete notification
+ */
+export const deleteNotification = async (notificationId) => {
+    return await NotificationModel.findByIdAndDelete(notificationId);
+};

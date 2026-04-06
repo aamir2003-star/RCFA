@@ -86,8 +86,8 @@ export default function DevModules() {
                         <span className="text-slate-300">/</span>
                         <span className="text-indigo-600 dark:text-indigo-400">Assigned Modules</span>
                     </nav>
-                    <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
-                        <Terminal className="w-8 h-8 text-indigo-500" />
+                    <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3 leading-tight">
+                        <Terminal className="hidden sm:block w-8 h-8 text-indigo-500 shrink-0" />
                         My Implementation Blocks
                     </h1>
                     <p className="text-sm font-medium text-slate-500 italic">

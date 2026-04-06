@@ -35,6 +35,8 @@ import {
     RESOLUTION_TYPES
 } from "../constants/conflicts";
 import { ROLES } from "../constants/roles";
+import { getSocket } from "../lib/socket";
+import { useEffect } from "react";
 
 export default function ConflictResolution() {
     const { id } = useParams();
@@ -112,6 +114,35 @@ export default function ConflictResolution() {
         }
     });
 
+    // Real-time Socket Listeners
+    useEffect(() => {
+        const socket = getSocket();
+        if (!socket || !conflict?.projectId) return;
+
+        const projectId = conflict.projectId;
+        socket.emit("join:project", projectId);
+
+        const handleNewComment = (data) => {
+            if (data.conflictId === id) {
+                queryClient.invalidateQueries(["conflict", id]);
+            }
+        };
+
+        const handleNewProposal = (data) => {
+            if (data.conflictId === id) {
+                queryClient.invalidateQueries(["conflict", id]);
+            }
+        };
+
+        socket.on("conflict:comment", handleNewComment);
+        socket.on("conflict:proposal", handleNewProposal);
+
+        return () => {
+            socket.off("conflict:comment", handleNewComment);
+            socket.off("conflict:proposal", handleNewProposal);
+        };
+    }, [id, conflict?.projectId, queryClient]);
+
     if (!id) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px] gap-6 p-8 bg-white/40 dark:bg-[#0f1115]/60 backdrop-blur-xl rounded-[2.5rem] border border-white/20 dark:border-slate-800 shadow-xl">
@@ -145,6 +176,7 @@ export default function ConflictResolution() {
         : null;
 
     const handleSendComment = (e) => {
+        if (e && e.preventDefault) e.preventDefault();
         if (!comment.trim() && selectedFiles.length === 0) return;
         const formData = new FormData();
         formData.append("message", comment);
@@ -152,8 +184,8 @@ export default function ConflictResolution() {
         commentMutation.mutate(formData);
     };
 
-    const handleSumbitProposal = (e) => {
-        e.preventDefault();
+    const handleSubmitProposal = (e) => {
+        if (e && e.preventDefault) e.preventDefault();
         if (!proposalText.trim()) return;
         const formData = new FormData();
         formData.append("text", proposalText);
@@ -171,21 +203,21 @@ export default function ConflictResolution() {
     };
 
     return (
-        <div className="flex flex-col h-full xl:flex-row gap-8 overflow-hidden">
+        <div className="flex flex-col lg:h-[calc(100vh-120px)] lg:flex-row gap-8">
             {/* Main Discussion Area */}
-            <div className="flex-1 flex flex-col bg-white/50 dark:bg-[#0f1115]/50 backdrop-blur-md rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
+            <div className="flex-1 flex flex-col bg-white/50 dark:bg-[#0f1115]/50 backdrop-blur-md rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden min-h-[600px] lg:min-h-0">
                 {/* Discussion Header */}
-                <div className="p-8 border-b border-slate-200 dark:border-slate-800 sticky top-0 bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md z-20">
+                <div className="p-6 md:p-8 border-b border-slate-200 dark:border-slate-800 sticky top-0 bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md z-20">
                     <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 hover:text-indigo-500 transition-colors">
                         <ArrowLeft className="w-3 h-3" />
-                        Back
+                        <span className="hidden sm:inline">Back</span>
                     </button>
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                         <div className="space-y-2">
-                            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                            <h1 className="text-xl md:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
                                 {conflict.conflictType}
                             </h1>
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-4 flex-wrap">
                                 <div className={cn(
                                     "flex items-center gap-2 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border",
                                     CONFLICT_STATUS_VARIANT[conflict.status] || CONFLICT_STATUS_VARIANT.default
@@ -194,7 +226,7 @@ export default function ConflictResolution() {
                                     {conflict.status}
                                 </div>
                                 <span className="text-xs font-bold text-slate-400 tracking-tight italic">
-                                    Severity Score: {conflict.severityScore} ({conflict.severityColor})
+                                    Score: {conflict.severityScore} ({conflict.severityColor})
                                 </span>
                             </div>
                         </div>
@@ -203,21 +235,21 @@ export default function ConflictResolution() {
                             {conflict.status !== 'resolved' && (
                                 <button
                                     onClick={() => setIsProposing(true)}
-                                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-black px-6 py-3 rounded-2xl shadow-xl shadow-indigo-600/20 flex items-center gap-2 active:scale-95 transition-all text-[11px] uppercase tracking-widest whitespace-nowrap"
+                                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-black px-6 py-3 rounded-2xl shadow-xl shadow-indigo-600/20 flex items-center justify-center gap-2 active:scale-95 transition-all text-[11px] uppercase tracking-widest whitespace-nowrap w-full lg:w-auto"
                                 >
                                     <Zap className="w-4 h-4" />
                                     Propose Solution
                                 </button>
                             )}
                             {conflict.status === 'resolved' && (
-                                <div className="flex items-center gap-4 bg-emerald-500/10 border border-emerald-500/20 px-6 py-3 rounded-2xl animate-in fade-in slide-in-from-top-4 duration-500 text-right">
-                                    <div className="text-right">
-                                        <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest leading-none mb-1 text-right">Resolution Active</p>
+                                <div className="flex items-center gap-4 bg-emerald-500/10 border border-emerald-500/20 px-4 md:px-6 py-3 rounded-2xl animate-in fade-in slide-in-from-top-4 duration-500 w-full lg:w-auto">
+                                    <div className="text-right flex-1 lg:flex-initial">
+                                        <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest leading-none mb-1">Resolution Active</p>
                                         <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
                                             Locked on {new Date(conflict.pmResolution?.confirmedAt).toLocaleDateString()}
                                         </p>
                                     </div>
-                                    <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+                                    <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 shrink-0">
                                         <CheckCircle className="w-5 h-5" />
                                     </div>
                                 </div>
@@ -227,7 +259,7 @@ export default function ConflictResolution() {
                 </div>
 
                 {/* Messages Thread */}
-                <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-10 custom-scrollbar">
                     {conflict.discussions?.map((msg, i) => (
                         <div key={i} className="flex gap-6 group">
                             <div className="shrink-0 flex flex-col items-center gap-2">
@@ -322,7 +354,7 @@ export default function ConflictResolution() {
             </div>
 
             {/* Right Sidebar */}
-            <aside className="w-full xl:w-85 flex flex-col gap-6 shrink-0 h-full overflow-y-auto custom-scrollbar pb-6">
+            <aside className="w-full xl:w-85 xl:h-full flex flex-col gap-6 shrink-0 xl:overflow-y-auto custom-scrollbar pb-6">
                 {/* Community Consensus Engine */}
                 {conflict.proposals?.length > 0 && (
                     <div className="bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
@@ -533,7 +565,7 @@ export default function ConflictResolution() {
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
-                        <form onSubmit={handleSumbitProposal} className="p-8 space-y-6">
+                        <form onSubmit={handleSubmitProposal} className="p-8 space-y-6">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">TECHNICAL CONTEXT & RATIONALE</label>
                                 <textarea

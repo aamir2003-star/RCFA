@@ -28,15 +28,60 @@ const useNotificationStore = create((set, get) => ({
         try {
             const response = await api.patch(`/notifications/${id}/read`);
             if (response.data.success) {
-                set((state) => ({
-                    notifications: state.notifications.map((n) =>
-                        n._id === id ? { ...n, isRead: true } : n
-                    ),
-                    unreadCount: Math.max(0, state.unreadCount - 1)
-                }));
+                set((state) => {
+                    const notification = state.notifications.find(n => n._id === id);
+                    if (notification && notification.isRead) return state; // Already read
+
+                    return {
+                        notifications: state.notifications.map((n) =>
+                            n._id === id ? { ...n, isRead: true } : n
+                        ),
+                        unreadCount: Math.max(0, state.unreadCount - 1)
+                    };
+                });
             }
         } catch (error) {
             console.error("Failed to mark notification as read:", error);
+        }
+    },
+
+    markAsUnread: async (id) => {
+        try {
+            const response = await api.patch(`/notifications/${id}/unread`);
+            if (response.data.success) {
+                set((state) => {
+                    const notification = state.notifications.find(n => n._id === id);
+                    if (notification && !notification.isRead) return state; // Already unread
+
+                    return {
+                        notifications: state.notifications.map((n) =>
+                            n._id === id ? { ...n, isRead: false } : n
+                        ),
+                        unreadCount: (state.unreadCount || 0) + 1
+                    };
+                });
+            }
+        } catch (error) {
+            console.error("Failed to mark notification as unread:", error);
+        }
+    },
+
+    deleteNotification: async (id) => {
+        try {
+            const response = await api.delete(`/notifications/${id}`);
+            if (response.data.success) {
+                set((state) => {
+                    const notification = state.notifications.find(n => n._id === id);
+                    const wasUnread = notification && !notification.isRead;
+
+                    return {
+                        notifications: state.notifications.filter((n) => n._id !== id),
+                        unreadCount: wasUnread ? Math.max(0, state.unreadCount - 1) : state.unreadCount
+                    };
+                });
+            }
+        } catch (error) {
+            console.error("Failed to delete notification:", error);
         }
     },
 

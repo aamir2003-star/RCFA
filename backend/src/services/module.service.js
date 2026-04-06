@@ -20,12 +20,16 @@ export const createModule = async (moduleData) => {
     );
   }
 
-  // If a developer is assigned, ensure they are in the project team
-  if (moduleData.assignedTo && moduleData.projectId) {
-    await ProjectModel.findByIdAndUpdate(
-      moduleData.projectId,
-      { $addToSet: { team: moduleData.assignedTo } }
-    );
+  // Notify the developer if assigned
+  if (moduleDoc.assignedTo) {
+    const project = await ProjectModel.findById(moduleDoc.projectId);
+    await createNotification({
+      recipient: moduleDoc.assignedTo,
+      title: "New Module Assignment",
+      message: `You have been assigned as the lead for "${moduleDoc.name}" in project "${project?.name || 'Unknown'}".`,
+      type: "info",
+      link: `/dev/modules`
+    });
   }
 
   return moduleDoc;
@@ -109,10 +113,11 @@ export const assignDeveloperToModule = async (moduleId, developerId) => {
   );
 
   // Notify the developer
+  const project = await ProjectModel.findById(moduleDoc.projectId);
   await createNotification({
     recipient: developerId,
-    title: "New Module Assigned",
-    message: `You have been assigned as the lead for module: ${moduleDoc.name}`,
+    title: "New Module Assignment",
+    message: `You have been assigned as the lead for "${moduleDoc.name}" in project "${project?.name || 'Unknown'}".`,
     type: "info",
     link: `/dev/modules`
   });

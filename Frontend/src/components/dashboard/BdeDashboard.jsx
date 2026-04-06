@@ -54,10 +54,10 @@ export default function BdeDashboard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900 dark:text-white">
-            Business Dashboard {loading && <span className="text-xs font-normal animate-pulse">(Syncing...)</span>}
+          <h1 className="text-2xl md:text-[28px] font-extrabold tracking-tight text-slate-900 dark:text-white">
+            Business Dashboard {loading && <span className="text-[10px] font-normal animate-pulse">(Syncing...)</span>}
           </h1>
-          <p className="text-sm text-slate-500 mt-1 font-medium">
+          <p className="text-xs md:text-sm text-slate-500 mt-1 font-medium">
             Overview of your project portfolio and client engagements.
           </p>
         </div>

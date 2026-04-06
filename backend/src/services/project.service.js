@@ -3,9 +3,24 @@ import { ProjectModel } from "../models/project/project.model.js";
 import { RequirementModel } from "../models/requirements/requirement.model.js";
 import { ConflictModel } from "../models/conflict/conflict.model.js";
 
+import { createNotification } from "./notification.service.js";
+
 // CREATE
 export const createProject = async (data) => {
-  return await ProjectModel.create(data);
+  const project = await ProjectModel.create(data);
+
+  // Notify PM if assigned
+  if (project.projectManager) {
+    await createNotification({
+      recipient: project.projectManager,
+      title: "New Project Assignment",
+      message: `You have been assigned as PM for "${project.name}" by BDE.`,
+      type: "info",
+      link: `/pm/dashboard?projectId=${project._id}`
+    });
+  }
+
+  return project;
 };
 
 // GET ALL with Pagination & Counts

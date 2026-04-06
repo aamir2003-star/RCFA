@@ -124,7 +124,7 @@ export default function CreateProject() {
   return (
     <div className="flex flex-col gap-6 w-full pb-10">
       {/* Page Title */}
-      <h1 className="text-2xl font-bold text-[#1e2532] dark:text-white">Create New Project</h1>
+      <h1 className="text-xl md:text-2xl font-bold text-[#1e2532] dark:text-white">Create New Project</h1>
 
       {/* Full-width layout */}
       <div className="flex flex-col gap-6 items-start">

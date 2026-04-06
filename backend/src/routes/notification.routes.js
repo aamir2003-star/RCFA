@@ -9,5 +9,7 @@ router.use(authenticate); // All notification routes require authentication
 router.get("/", notificationController.getNotifications);
 router.patch("/read-all", notificationController.markAllRead);
 router.patch("/:id/read", notificationController.markRead);
+router.patch("/:id/unread", notificationController.markUnread);
+router.delete("/:id", notificationController.deleteNotification);
 
 export default router;
