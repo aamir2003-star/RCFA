@@ -45,7 +45,7 @@ export function Sidebar({ role, isOpen, onClose }) {
         return cn(
           "flex items-center justify-between px-4 py-3 rounded-full text-[15px] font-medium transition-all duration-300 cursor-pointer border border-transparent mb-1",
           active
-            ? "bg-black text-white shadow-pill scale-[1.01]"
+            ? "bg-black dark:bg-white text-white dark:text-black shadow-pill scale-[1.01]"
             : "text-muted-foreground hover:bg-secondary hover:text-foreground hover:translate-x-0.5",
         );
       }}

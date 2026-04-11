@@ -38,7 +38,7 @@ export function TeamSidebar() {
                                 <div className="flex items-center gap-4">
                                     <div className="relative">
                                         <img
-                                            src={member.avatar}
+                                            src={getAvatarUrl(member.avatar)}
                                             alt={member.name}
                                             className="w-10 h-10 rounded-xl object-cover shadow-premium group-hover:scale-105 transition-transform"
                                         />

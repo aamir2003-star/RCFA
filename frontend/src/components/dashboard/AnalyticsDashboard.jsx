@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Download, FileText, Rocket, AlertTriangle, CheckCircle2, AlertCircle, Clock, BarChart, ArrowLeft } from 'lucide-react';
+import { Calendar, Download, FileText, Rocket, AlertTriangle, CheckCircle2, AlertCircle, Clock, BarChart, ArrowLeft, Shield } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import useProjectStore from '../../stores/useProjectStore';
 import ProjectSelector from '../shared/ProjectSelector';
@@ -10,6 +10,7 @@ import {
   ANALYTICS_STATS_TEMPLATE,
   SEVERITY_BREAKDOWN_TEMPLATE
 } from '../../constants/analytics';
+import { cn } from '../../lib/utils';
 
 const IconMap = {
   Calendar,

@@ -1,15 +1,56 @@
 import React from "react";
 import { User, Mail, Shield, Briefcase, Calendar, MapPin, Edit3, Camera, Activity, CheckCircle2 } from "lucide-react";
 import useAuthStore from "../stores/useAuthStore";
-import { cn } from "../lib/utils";
+import { cn, getAvatarUrl } from "../lib/utils";
+import { toast } from "react-hot-toast";
 
 export default function ProfilePage() {
-    const { user } = useAuthStore();
+    const { user, updateAvatar, updateCover } = useAuthStore();
+    const fileInputRef = React.useRef(null);
+    const coverInputRef = React.useRef(null);
+    const [uploading, setUploading] = React.useState(false);
+    const [uploadingCover, setUploadingCover] = React.useState(false);
 
     const profileName = user?.name || "Alexander Wright";
     const profileRole = user?.role?.toUpperCase() || "SENIOR PRODUCT MANAGER";
     const profileEmail = user?.email || "alex.wright@spectra.ai";
     const profileInitials = profileName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || "AW";
+    const profileAvatar = getAvatarUrl(user?.avatar);
+    const profileCover = user?.coverImage?.url;
+
+    const handleFileChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setUploading(true);
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        const result = await updateAvatar(formData);
+        if (result.success) {
+            toast.success('Avatar updated successfully');
+        } else {
+            toast.error(result.message || 'Failed to update avatar');
+        }
+        setUploading(false);
+    };
+
+    const handleCoverChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setUploadingCover(true);
+        const formData = new FormData();
+        formData.append('cover', file);
+
+        const result = await updateCover(formData);
+        if (result.success) {
+            toast.success('Cover image updated successfully');
+        } else {
+            toast.error(result.message || 'Failed to update cover image');
+        }
+        setUploadingCover(false);
+    };
 
     const InfoCard = ({ icon: Icon, label, value }) => (
         <div className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm transition-all hover:shadow-md">
@@ -27,12 +68,26 @@ export default function ProfilePage() {
         <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Profile Header */}
             <div className="relative h-48 md:h-64 rounded-[2.5rem] overflow-hidden bg-linear-to-br from-indigo-600 via-blue-600 to-violet-700 shadow-2xl shadow-indigo-500/20">
+                {profileCover && (
+                    <img src={profileCover} alt="Cover" className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700" />
+                )}
                 <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
                 <div className="absolute top-6 right-8">
-                    <button className="bg-white/10 hover:bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-white text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border border-white/20 transition-all active:scale-95">
-                        <Edit3 className="w-4 h-4" />
-                        Edit Cover
+                    <button
+                        onClick={() => coverInputRef.current?.click()}
+                        disabled={uploadingCover}
+                        className="bg-white/10 hover:bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-white text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border border-white/20 transition-all active:scale-95 disabled:opacity-50"
+                    >
+                        <Camera className="w-4 h-4" />
+                        {uploadingCover ? "Uploading..." : "Edit Cover"}
                     </button>
+                    <input
+                        type="file"
+                        ref={coverInputRef}
+                        onChange={handleCoverChange}
+                        className="hidden"
+                        accept="image/*"
+                    />
                 </div>
             </div>
 
@@ -41,11 +96,29 @@ export default function ProfilePage() {
                 <div className="flex flex-col md:flex-row items-end gap-6 mb-8">
                     <div className="group relative">
                         <div className="w-32 h-32 md:w-40 md:h-40 rounded-[2.5rem] bg-white dark:bg-[#0f1115] p-2 shadow-2xl shadow-black/10">
-                            <div className="w-full h-full rounded-[2.2rem] bg-linear-to-tr from-indigo-500 to-blue-600 flex items-center justify-center text-white text-4xl md:text-5xl font-black tracking-tighter border-4 border-white dark:border-[#0f1115]">
-                                {profileInitials}
+                            <div className="w-full h-full rounded-[2.2rem] bg-linear-to-tr from-indigo-500 to-blue-600 flex items-center justify-center text-white text-4xl md:text-5xl font-black tracking-tighter border-4 border-white dark:border-[#0f1115] overflow-hidden">
+                                {profileAvatar ? (
+                                    <img src={profileAvatar} alt={profileName} className="w-full h-full object-cover" crossOrigin="anonymous" />
+                                ) : (
+                                    profileInitials
+                                )}
                             </div>
                         </div>
-                        <button className="absolute bottom-2 right-2 w-10 h-10 bg-white dark:bg-slate-800 rounded-full shadow-lg border-4 border-white dark:border-[#0f1115] flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-indigo-600 transition-all active:scale-90">
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            accept="image/*"
+                            className="hidden"
+                        />
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={uploading}
+                            className={cn(
+                                "absolute bottom-2 right-2 w-10 h-10 bg-white dark:bg-slate-800 rounded-full shadow-lg border-4 border-white dark:border-[#0f1115] flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-indigo-600 transition-all active:scale-90",
+                                uploading && "animate-pulse opacity-50 cursor-not-allowed"
+                            )}
+                        >
                             <Camera className="w-4 h-4" />
                         </button>
                     </div>

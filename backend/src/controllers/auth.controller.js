@@ -139,36 +139,3 @@ export const updateProfile = async (req, res, next) => {
     next(new AppError(err.message, 400));
   }
 };
-
-// ─── Update Avatar ───────────────────────────────────────────────────────────
-export const updateAvatar = async (req, res, next) => {
-  try {
-    if (!req.file) {
-      return next(new AppError('Please upload an image', 400));
-    }
-
-    const userId = req.user._id;
-    // Store relative path for frontend to serve
-    const avatarPath = `/uploads/avatars/${req.file.filename}`;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return next(new AppError('User not found', 404));
-    }
-
-    user.avatar = avatarPath;
-    await user.save();
-
-    const safeUser = user.toObject();
-    delete safeUser.password;
-    safeUser.id = user._id.toString();
-
-    res.json({
-      message: 'Avatar updated successfully',
-      user: safeUser,
-    });
-  } catch (err) {
-    next(new AppError(err.message, 400));
-  }
-};
-

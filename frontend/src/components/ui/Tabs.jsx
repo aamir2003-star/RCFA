@@ -27,7 +27,7 @@ export function TabsTrigger({ value, children, className }) {
     <button
       className={cn(
         "inline-flex w-full items-center justify-center whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold transition-all focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
-        isActive ? "bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-slate-100" : "hover:text-slate-900 dark:hover:text-slate-100",
+        isActive ? "bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white" : "hover:text-slate-900 dark:hover:text-slate-100",
         className
       )}
       onClick={() => setActiveTab(value)}

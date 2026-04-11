@@ -1,22 +1,8 @@
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
+import { storage } from '../config/cloudinary.js';
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const uploadPath = 'uploads/avatars';
-        if (!fs.existsSync(uploadPath)) {
-            fs.mkdirSync(uploadPath, { recursive: true });
-        }
-        cb(null, uploadPath);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-    }
-});
-
-const fileFilter = (req, file, cb) => {
+// Image only filter for avatars
+const imageFilter = (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
         cb(null, true);
     } else {
@@ -24,31 +10,35 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
+// General filter for chat (images + documents)
+const chatFilter = (req, file, cb) => {
+    const allowedTypes = ['image/', 'application/pdf', 'text/csv', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (allowedTypes.some(type => file.mimetype.startsWith(type))) {
+        cb(null, true);
+    } else {
+        cb(new Error('Unsupported file type!'), false);
+    }
+};
+
 export const uploadAvatar = multer({
     storage: storage,
-    fileFilter: fileFilter,
+    fileFilter: imageFilter,
     limits: {
         fileSize: 1024 * 1024 * 5 // 5MB limit
     }
 });
 
-const conflictStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const uploadPath = 'uploads/conflicts';
-        if (!fs.existsSync(uploadPath)) {
-            fs.mkdirSync(uploadPath, { recursive: true });
-        }
-        cb(null, uploadPath);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, 'conflict-' + uniqueSuffix + path.extname(file.originalname));
+export const uploadConflict = multer({
+    storage: storage,
+    fileFilter: chatFilter,
+    limits: {
+        fileSize: 1024 * 1024 * 10 // 10MB limit
     }
 });
 
-export const uploadConflict = multer({
-    storage: conflictStorage,
+export const uploadOthers = multer({
+    storage: storage,
     limits: {
-        fileSize: 1024 * 1024 * 10 // 10MB limit
+        fileSize: 1024 * 1024 * 20 // 20MB limit
     }
 });

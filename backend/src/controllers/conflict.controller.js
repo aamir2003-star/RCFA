@@ -247,7 +247,10 @@ export const addConflictComment = async (req, res) => {
     try {
         const { id } = req.params;
         const { message } = req.body;
-        const attachments = req.files ? req.files.map(f => `/uploads/conflicts/${f.filename}`) : [];
+        const attachments = req.files ? req.files.map(f => ({
+            url: f.path, // Cloudinary URL
+            public_id: f.filename // Cloudinary public_id
+        })) : [];
 
         if (!message) {
             return res.status(400).json({ success: false, message: 'Message is required' });
@@ -313,7 +316,10 @@ export const addConflictProposal = async (req, res) => {
     try {
         const { id } = req.params;
         const { text } = req.body;
-        const attachments = req.files ? req.files.map(f => `/uploads/conflicts/${f.filename}`) : [];
+        const attachments = req.files ? req.files.map(f => ({
+            url: f.path,
+            public_id: f.filename
+        })) : [];
 
         if (!text) {
             return res.status(400).json({ success: false, message: 'Proposal text is required' });

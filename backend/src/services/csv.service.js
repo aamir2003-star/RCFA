@@ -1,16 +1,30 @@
+import axios from 'axios';
 import fs from 'fs';
 import csv from 'csv-parser';
 
 /**
- * Parses a CSV file and returns an array of objects mapping to Requirement fields.
+ * Parses a CSV file (local path or URL) and returns an array of objects mapping to Requirement fields.
  * Expected CSV Headers: Title, Description, Priority, Module
- * @param {string} filePath 
+ * @param {string} filePath Or URL
  * @returns {Promise<Array>}
  */
-export const parseRequirementsCSV = (filePath) => {
-    return new Promise((resolve, reject) => {
+export const parseRequirementsCSV = async (filePath) => {
+    return new Promise(async (resolve, reject) => {
         const results = [];
-        fs.createReadStream(filePath)
+        let stream;
+
+        try {
+            if (filePath.startsWith('http')) {
+                const response = await axios.get(filePath, { responseType: 'stream' });
+                stream = response.data;
+            } else {
+                stream = fs.createReadStream(filePath);
+            }
+        } catch (err) {
+            return reject(new Error("Failed to access file: " + err.message));
+        }
+
+        stream
             .pipe(csv({
                 mapHeaders: ({ header }) => header.trim().toLowerCase()
             }))

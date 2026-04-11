@@ -95,11 +95,7 @@ const useAuthStore = create((set) => ({
 
     updateAvatar: async (formData) => {
         try {
-            const response = await api.post("/auth/avatar", formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
+            const response = await api.post("/uploads/avatar", formData);
             const { user } = response.data;
             localStorage.setItem("spectra-ai-user", JSON.stringify(user));
             set({ user });
@@ -110,8 +106,22 @@ const useAuthStore = create((set) => ({
                 message: error.response?.data?.message || "Avatar update failed"
             };
         }
+    },
+
+    updateCover: async (formData) => {
+        try {
+            const response = await api.post("/uploads/cover", formData);
+            const { user } = response.data;
+            localStorage.setItem("spectra-ai-user", JSON.stringify(user));
+            set({ user });
+            return { success: true };
+        } catch (error) {
+            return {
+                success: false,
+                message: error.response?.data?.message || "Cover update failed"
+            };
+        }
     }
 }));
-
 
 export default useAuthStore;

@@ -14,7 +14,15 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
-    avatar: String,
+    avatar: {
+      url: { type: String, default: "" },
+      public_id: { type: String, default: "" }
+    },
+
+    coverImage: {
+      url: { type: String, default: "" },
+      public_id: { type: String, default: "" }
+    },
 
 
     refreshToken: String,

@@ -104,7 +104,10 @@ const conflictSchema = new mongoose.Schema(
       {
         user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
         message: { type: String, required: true },
-        attachments: [{ type: String }], // URL-to-file
+        attachments: [{
+          url: { type: String },
+          public_id: { type: String }
+        }], // Cloudinary attachments
         timestamp: { type: Date, default: Date.now }
       }
     ],
@@ -114,7 +117,10 @@ const conflictSchema = new mongoose.Schema(
       {
         user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
         text: { type: String, required: true },
-        attachments: [{ type: String }],
+        attachments: [{
+          url: { type: String },
+          public_id: { type: String }
+        }],
         votes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Those who liked it
         timestamp: { type: Date, default: Date.now }
       }

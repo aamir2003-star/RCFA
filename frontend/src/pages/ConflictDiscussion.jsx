@@ -23,7 +23,7 @@ import {
 import api from "../lib/api";
 import useAuthStore from "../stores/useAuthStore";
 import useProjectStore from "../stores/useProjectStore";
-import { cn } from "../lib/utils";
+import { cn, getAvatarUrl } from "../lib/utils";
 import { toast } from "react-hot-toast";
 import { getSocket } from "../lib/socket";
 
@@ -36,7 +36,26 @@ export default function ConflictDiscussion() {
     const [isProposing, setIsProposing] = useState(false);
     const [proposalText, setProposalText] = useState("");
     const [selectedFiles, setSelectedFiles] = useState([]);
+    const [filePreviews, setFilePreviews] = useState([]);
     const fileInputRef = useRef(null);
+
+    const handleFileSelect = (e) => {
+        const files = Array.from(e.target.files);
+        setSelectedFiles(prev => [...prev, ...files]);
+
+        const previews = files.map(file => ({
+            name: file.name,
+            type: file.type,
+            size: (file.size / 1024).toFixed(1) + ' KB',
+            isImage: file.type.startsWith('image/')
+        }));
+        setFilePreviews(prev => [...prev, ...previews]);
+    };
+
+    const removeFile = (index) => {
+        setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+        setFilePreviews(prev => prev.filter((_, i) => i !== index));
+    };
 
     const { data: conflict, isLoading, error } = useQuery({
         queryKey: ["conflict", id],
@@ -63,21 +82,51 @@ export default function ConflictDiscussion() {
     }, [id, conflict?.projectId, queryClient]);
 
     const commentMutation = useMutation({
-        mutationFn: (formData) => api.post(`/conflicts/${id}/comment`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        }),
-        onSuccess: () => {
-            queryClient.invalidateQueries(["conflict", id]);
+        mutationFn: (formData) => api.post(`/conflicts/${id}/comment`, formData),
+        onMutate: async (newFormData) => {
+            await queryClient.cancelQueries({ queryKey: ["conflict", id] });
+            const previousConflict = queryClient.getQueryData(["conflict", id]);
+
+            if (previousConflict) {
+                const optimisticComment = {
+                    user: user,
+                    message: newFormData.get("message"),
+                    attachments: selectedFiles.map(file => ({
+                        url: URL.createObjectURL(file),
+                        isOptimistic: true,
+                        isImage: file.type.startsWith('image/')
+                    })),
+                    timestamp: new Date().toISOString(),
+                    isOptimistic: true
+                };
+
+                queryClient.setQueryData(["conflict", id], {
+                    ...previousConflict,
+                    discussions: [...(previousConflict.discussions || []), optimisticComment]
+                });
+            }
+
             setMessage("");
             setSelectedFiles([]);
+            setFilePreviews([]);
+            return { previousConflict };
+        },
+        onError: (err, newFormData, context) => {
+            if (context?.previousConflict) {
+                queryClient.setQueryData(["conflict", id], context.previousConflict);
+            }
+            toast.error("Transmission failed");
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ["conflict", id] });
+        },
+        onSuccess: () => {
             toast.success("Synchronized");
         }
     });
 
     const proposalMutation = useMutation({
-        mutationFn: (formData) => api.post(`/conflicts/${id}/propose`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        }),
+        mutationFn: (formData) => api.post(`/conflicts/${id}/propose`, formData),
         onSuccess: () => {
             queryClient.invalidateQueries(["conflict", id]);
             setProposalText("");
@@ -129,9 +178,17 @@ export default function ConflictDiscussion() {
                                 <span className="text-[11px] font-bold text-muted uppercase tracking-[0.25em]">Severity {conflict.severityScore}</span>
                             </div>
                         </div>
-                        <button onClick={() => setIsProposing(true)} className="pill-button bg-black text-white text-[11px] uppercase tracking-[0.2em] py-5 px-10 shadow-pill">
-                            <Zap className="w-4 h-4 mr-2 inline" />
-                            Propose Solution
+                        <button
+                            onClick={() => setIsProposing(true)}
+                            disabled={proposalMutation.isPending}
+                            className="pill-button bg-black text-white text-[11px] uppercase tracking-[0.2em] py-5 px-10 shadow-pill disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                            {proposalMutation.isPending ? (
+                                <Activity className="w-4 h-4 animate-spin" />
+                            ) : (
+                                <Zap className="w-4 h-4" />
+                            )}
+                            {proposalMutation.isPending ? "Validating..." : "Propose Solution"}
                         </button>
                     </div>
                 </div>
@@ -144,8 +201,12 @@ export default function ConflictDiscussion() {
                     <div className="p-8 md:p-12 space-y-12 max-h-[600px] overflow-y-auto custom-scrollbar">
                         {conflict.discussions?.map((msg, i) => (
                             <div key={i} className="flex gap-8 group">
-                                <div className="w-14 h-14 rounded-[20px] bg-secondary flex items-center justify-center text-muted font-display font-[500] text-xl shrink-0 border border-border/10">
-                                    {msg.user?.name?.[0]}
+                                <div className="w-14 h-14 rounded-[20px] bg-secondary flex items-center justify-center text-muted font-display font-[500] text-xl shrink-0 border border-border/10 overflow-hidden">
+                                    {msg.user?.avatar ? (
+                                        <img src={getAvatarUrl(msg.user.avatar)} alt={msg.user.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        msg.user?.name?.[0]
+                                    )}
                                 </div>
                                 <div className="flex-1 space-y-3">
                                     <div className="flex items-center justify-between">
@@ -156,6 +217,41 @@ export default function ConflictDiscussion() {
                                         </span>
                                     </div>
                                     <p className="text-muted-foreground text-[16px] leading-relaxed tracking-wide">{msg.message}</p>
+
+                                     {msg.isOptimistic && (
+                                         <div className="flex items-center gap-2 text-[10px] font-bold text-indigo-500 uppercase tracking-widest mt-2">
+                                             <Activity className="w-3 h-3 animate-spin" />
+                                             Encrypting & Streaming...
+                                         </div>
+                                     )}
+
+                                    {msg.attachments && msg.attachments.length > 0 && (
+                                        <div className="flex flex-wrap gap-4 mt-4">
+                                            {msg.attachments.map((at, idx) => (
+                                                <a
+                                                    key={idx}
+                                                    href={at.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="group/file relative flex items-center gap-3 p-3 rounded-xl bg-secondary/10 border border-border/10 hover:bg-secondary/20 transition-all overflow-hidden"
+                                                >
+                                                    {at.url.match(/\.(jpg|jpeg|png|gif|webp)$|^data:image/) ? (
+                                                        <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0">
+                                                            <img src={at.url} alt="attachment" className="w-full h-full object-cover" />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="w-12 h-12 rounded-lg bg-indigo-500/10 flex items-center justify-center shrink-0">
+                                                            <FileText className="w-6 h-6 text-indigo-500" />
+                                                        </div>
+                                                    )}
+                                                    <div className={cn("pr-4", at.isOptimistic && "opacity-50")}>
+                                                        <p className="text-[10px] font-bold text-foreground">{at.isOptimistic ? "Uploading..." : "View Attachment"}</p>
+                                                        <p className="text-[9px] text-muted uppercase tracking-tighter">{at.isOptimistic ? "Syncing to Cloud" : "Verified Resource"}</p>
+                                                    </div>
+                                                </a>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -169,22 +265,49 @@ export default function ConflictDiscussion() {
                                 placeholder="Add technical rationale..."
                                 className="w-full bg-transparent border-none focus:ring-0 text-[16px] min-h-[100px] resize-none"
                             />
-                            <div className="flex items-center justify-between pt-6 mt-4 border-t border-border/10">
-                                <button onClick={() => fileInputRef.current.click()} className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center text-muted hover:text-foreground hover:shadow-premium transition-all">
-                                    <Paperclip className="w-5 h-5" />
-                                </button>
-                                <input type="file" multiple ref={fileInputRef} className="hidden" />
-                                <button
-                                    onClick={() => {
-                                        const fd = new FormData();
-                                        fd.append("message", message);
-                                        commentMutation.mutate(fd);
-                                    }}
-                                    disabled={!message.trim()}
-                                    className="pill-button bg-black text-white text-[11px] uppercase tracking-[0.2em] py-4 px-10 shadow-pill"
-                                >
-                                    Synchronize
-                                </button>
+                            <div className="flex flex-col gap-4 pt-6 mt-4 border-t border-border/10">
+                                {filePreviews.length > 0 && (
+                                    <div className="flex flex-wrap gap-3 mb-4">
+                                        {filePreviews.map((f, i) => (
+                                            <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/20 border border-border/10 text-[10px] font-bold">
+                                                <span className="truncate max-w-[120px]">{f.name}</span>
+                                                <button onClick={() => removeFile(i)} className="hover:text-red-500 transition-colors">
+                                                    <X className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                <div className="flex items-center justify-between">
+                                    <button onClick={() => fileInputRef.current.click()} className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center text-muted hover:text-foreground hover:shadow-premium transition-all">
+                                        <Paperclip className="w-5 h-5" />
+                                    </button>
+                                    <input
+                                        type="file"
+                                        multiple
+                                        ref={fileInputRef}
+                                        onChange={handleFileSelect}
+                                        className="hidden"
+                                    />
+                                    <button
+                                        onClick={() => {
+                                            if (commentMutation.isPending) return;
+                                            const fd = new FormData();
+                                            fd.append("message", message);
+                                            selectedFiles.forEach(file => fd.append("attachments", file));
+                                            commentMutation.mutate(fd);
+                                        }}
+                                        disabled={commentMutation.isPending || (!message.trim() && selectedFiles.length === 0)}
+                                        className="pill-button bg-black text-white text-[11px] uppercase tracking-[0.2em] py-4 px-10 shadow-pill disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3"
+                                    >
+                                        {commentMutation.isPending ? (
+                                            <Activity className="w-4 h-4 animate-spin text-indigo-400" />
+                                        ) : (
+                                            <Send className="w-4 h-4" />
+                                        )}
+                                        {commentMutation.isPending ? "Transmitting..." : "Synchronize"}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -202,7 +325,13 @@ export default function ConflictDiscussion() {
                             <div key={prop._id} className="p-6 rounded-3xl bg-secondary/20 border border-border/10 space-y-4">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold">{prop.user?.name?.[0]}</div>
+                                        <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold overflow-hidden">
+                                            {prop.user?.avatar ? (
+                                                <img src={getAvatarUrl(prop.user.avatar)} alt={prop.user.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                prop.user?.name?.[0]
+                                            )}
+                                        </div>
                                         <span className="text-[10px] font-bold uppercase tracking-widest">{prop.user?.name}</span>
                                     </div>
                                     <button onClick={() => voteMutation.mutate(prop._id)} className="flex items-center gap-1.5 p-2 rounded-xl hover:bg-white/50 transition-all">
@@ -248,10 +377,10 @@ export default function ConflictDiscussion() {
                                         fd.append("text", proposalText);
                                         proposalMutation.mutate(fd);
                                     }}
-                                    disabled={!proposalText.trim()}
-                                    className="flex-1 pill-button bg-black text-white text-[11px] uppercase tracking-[0.2em] py-5 shadow-pill"
+                                    disabled={proposalMutation.isPending || !proposalText.trim()}
+                                    className="flex-1 flex items-center justify-center gap-2 pill-button bg-black text-white text-[11px] uppercase tracking-[0.2em] py-5 shadow-pill"
                                 >
-                                    Push to Stream
+                                    {proposalMutation.isPending && <Activity className="w-4 h-4 animate-spin text-indigo-400" />}{proposalMutation.isPending ? "Publishing..." : "Push to Stream"}
                                 </button>
                             </div>
                         </div>

@@ -1,7 +1,8 @@
 import React from "react";
 import { useTheme } from "../../contexts/ThemeContext";
-import { Bell, Search, Sun, Moon, HelpCircle, Settings, Menu, LogOut, User } from "lucide-react";
-import { Avatar, AvatarFallback } from "../ui/Avatar";
+import { Bell, Search, Sun, Moon, HelpCircle, Settings, Menu, LogOut, User as UserIcon } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/Avatar";
+import { cn, getAvatarUrl } from "../../lib/utils";
 import ThemeToggle from "../ThemeToggle";
 import useAuthStore from "../../stores/useAuthStore";
 import { Dropdown } from "../ui/Dropdown";
@@ -77,13 +78,10 @@ export function TopHeader({ role, onMenuClick }) {
           trigger={
             <div className="flex items-center gap-4 pl-2 select-none cursor-pointer group warm-pill">
               <Avatar className="w-8 h-8 rounded-full border border-background shadow-premium overflow-hidden">
-                {user?.avatar ? (
-                  <img src={`http://localhost:3000${user.avatar}`} alt={profileName} className="w-full h-full object-cover" />
-                ) : (
-                  <AvatarFallback className="bg-black text-white font-bold text-[10px] uppercase">
-                    {profileInitials}
-                  </AvatarFallback>
-                )}
+                <AvatarImage src={getAvatarUrl(user?.avatar)} alt={profileName} />
+                <AvatarFallback className="bg-black text-white font-bold text-[10px] uppercase">
+                  {profileInitials}
+                </AvatarFallback>
               </Avatar>
               <div className="text-left hidden sm:block">
                 <div className="text-[13px] font-bold text-foreground leading-none mb-0.5">{profileName}</div>
@@ -99,7 +97,7 @@ export function TopHeader({ role, onMenuClick }) {
           </div>
 
           <button onClick={handleProfileClick} className="w-full flex items-center gap-3 px-4 py-3 text-[13px] font-medium text-muted hover:text-foreground hover:bg-secondary rounded-xl transition-all">
-            <User className="w-4 h-4" />
+            <UserIcon className="w-4 h-4" />
             Profile Overview
           </button>
 

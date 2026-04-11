@@ -16,6 +16,7 @@ import reportRoutes from './routes/report.routes.js';
 import voteRoutes from './routes/vote.routes.js';
 import userRoutes from './routes/user.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
+import uploadRoutes from './routes/upload.routes.js';
 
 // ─── Middleware ──────────────────────────────────────────────────────────────
 import { errorHandler } from './middleware/errorHandler.js';
@@ -44,6 +45,7 @@ app.use('/api/v1/reports', reportRoutes);
 app.use('/api/v1/votes', voteRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
+app.use('/api/v1/uploads', uploadRoutes);
 
 // ─── Root ────────────────────────────────────────────────────────────────────
 app.get('/', (req, res) => {

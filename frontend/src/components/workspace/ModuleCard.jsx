@@ -1,6 +1,6 @@
 import React from "react";
 import { FileText, GripVertical, CheckCircle } from "lucide-react";
-import { cn } from "../../lib/utils";
+import { cn, getAvatarUrl } from "../../lib/utils";
 
 export function ModuleCard({ module }) {
     const { title, desc, icon: Icon, iconBg, developer, reqCount, status, statusColor } = module;
@@ -32,7 +32,7 @@ export function ModuleCard({ module }) {
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full overflow-hidden border border-border/20 shadow-premium">
                                 <img
-                                    src={developer.avatar}
+                                    src={getAvatarUrl(developer.avatar)}
                                     alt={developer.name}
                                     className="w-full h-full object-cover"
                                 />
