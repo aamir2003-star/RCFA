@@ -7,6 +7,10 @@ import { AppError } from '../utils/AppError.js';
 // ─── Register ────────────────────────────────────────────────────────────────
 export const register = async (req, res, next) => {
   try {
+    // Map fullName to name if needed
+    if (!req.body.name && req.body.fullName) {
+      req.body.name = req.body.fullName;
+    }
     const { user, accessToken, refreshToken } = await registerUser(req.body);
     const { password, ...safeUser } = user.toObject();
 
@@ -104,5 +108,34 @@ export const logout = async (req, res, next) => {
     res.json({ message: 'Logged out successfully' });
   } catch (err) {
     next(new AppError(err.message, 500));
+  }
+};
+
+// ─── Update Profile ──────────────────────────────────────────────────────────
+export const updateProfile = async (req, res, next) => {
+  try {
+    const { name, email } = req.body;
+    const userId = req.user._id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return next(new AppError('User not found', 404));
+    }
+
+    if (name) user.name = name;
+    if (email) user.email = email;
+
+    await user.save();
+
+    const safeUser = user.toObject();
+    delete safeUser.password;
+    safeUser.id = user._id.toString();
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: safeUser,
+    });
+  } catch (err) {
+    next(new AppError(err.message, 400));
   }
 };

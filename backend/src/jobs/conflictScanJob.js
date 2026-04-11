@@ -3,6 +3,11 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { runConflictDetection } from '../engine/conflictDetector.js';
+import { createNotification } from '../services/notification.service.js';
+import { ProjectModel } from '../models/project/project.model.js';
+import { ConflictModel } from '../models/conflict/conflict.model.js';
+import { ModuleModel } from '../models/module/module.model.js';
+import { RequirementModel } from '../models/requirements/requirement.model.js';
 
 /**
  * In-memory job store: Map<jobId, JobStatus>
@@ -25,9 +30,10 @@ const estimateTime = (reqCount) => {
 /**
  * Start a new conflict detection job asynchronously.
  * @param {string} projectId
+ * @param {string} userId
  * @returns {{ jobId: string, estimatedTime: number }}
  */
-export const startJob = (projectId) => {
+export const startJob = (projectId, userId) => {
     const jobId = uuidv4();
 
     // Initialize job state
@@ -38,6 +44,8 @@ export const startJob = (projectId) => {
         result: null,
         error: null,
         startedAt: new Date(),
+        userId,
+        projectId
     });
 
     // Run async — don't await
@@ -70,6 +78,57 @@ export const startJob = (projectId) => {
                 result,
                 completedAt: new Date(),
             });
+
+            // Notify the user (PM)
+            const project = await ProjectModel.findById(projectId).select('name createdBy');
+            await createNotification({
+                recipient: userId,
+                title: "Conflict Analysis Complete",
+                message: `The scan for project "${project?.name || 'Project'}" is finished. ${result.totalConflicts} conflicts identified.`,
+                type: "success",
+                link: `/pm/conflicts?projectId=${projectId}`
+            });
+
+            // Notify the BDE (Project Creator) if they are not the one who started the job
+            if (project?.createdBy && project.createdBy.toString() !== userId) {
+                await createNotification({
+                    recipient: project.createdBy.toString(),
+                    title: "Project Maturity Update",
+                    message: `Conflict analysis for "${project?.name || 'Project'}" has been completed by PM. Project is moving towards technical readiness.`,
+                    type: "system",
+                    link: `/bde/dashboard`
+                });
+            }
+
+            // ─── NEW: Notify Developers of their specific conflicts ──────────────────
+            if (result.totalConflicts > 0) {
+                // Fetch all unique modules in this project
+                const projectModules = await ModuleModel.find({ projectId }).populate('assignedTo');
+
+                // For each assigned developer, check if any of their modules' requirements have new conflicts
+                for (const mod of projectModules) {
+                    if (mod.assignedTo) {
+                        // Count conflicts involving requirements linked to this module
+                        const affectedConflictCount = await ConflictModel.countDocuments({
+                            projectId,
+                            $or: [
+                                { requirementA: { $in: mod.requirements } },
+                                { requirementB: { $in: mod.requirements } }
+                            ]
+                        });
+
+                        if (affectedConflictCount > 0) {
+                            await createNotification({
+                                recipient: mod.assignedTo._id.toString(),
+                                title: "Conflicts in Your Module",
+                                message: `Automated scan found ${affectedConflictCount} conflicts affecting your module "${mod.name}" in project "${project?.name || 'Project'}".`,
+                                type: "warning",
+                                link: `/dev/modules`
+                            });
+                        }
+                    }
+                }
+            }
         } catch (err) {
             console.error(`❌ Job ${jobId} failed:`, err.message);
             jobStore.set(jobId, {

@@ -1,0 +1,212 @@
+import React, { useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import {
+    AlertTriangle,
+    Search,
+    Filter,
+    ChevronRight,
+    AlertOctagon,
+    Clock,
+    ArrowRight,
+    BrainCircuit,
+    Loader2
+} from "lucide-react";
+import useConflictStore from "../stores/useConflictStore";
+
+export default function ConflictListPage() {
+    const [searchParams] = useSearchParams();
+    const projectId = searchParams.get("projectId");
+    const { conflicts, loading, fetchAllPmConflicts, startAnalysis, analysisProgress, subscribeToConflicts, unsubscribeFromConflicts } = useConflictStore();
+
+    useEffect(() => {
+        if (projectId) {
+            subscribeToConflicts(projectId);
+        }
+        return () => {
+            if (projectId) {
+                unsubscribeFromConflicts(projectId);
+            }
+        };
+    }, [projectId, subscribeToConflicts, unsubscribeFromConflicts]);
+
+    useEffect(() => {
+        fetchAllPmConflicts();
+    }, [fetchAllPmConflicts]);
+
+    const filteredConflicts = projectId
+        ? conflicts.filter(c => c.projectId?._id === projectId || c.projectId === projectId)
+        : conflicts;
+
+    const currentProjectName = projectId && filteredConflicts.length > 0
+        ? (filteredConflicts[0].projectId?.name || "Selected Project")
+        : null;
+
+    if (loading && conflicts.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+                <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
+                <p className="text-slate-500 font-medium">Fetching active conflicts...</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex flex-col gap-8 pb-10">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                    <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+                        <AlertTriangle className="w-8 h-8 text-red-500" />
+                        {projectId ? "Project Triage" : "Conflict Triage"}
+                    </h1>
+                    <div className="flex flex-col md:flex-row md:items-center gap-4 mt-1">
+                        <p className="text-slate-500 dark:text-slate-400 font-medium">
+                            {projectId ? (
+                                <span className="flex items-center gap-2">
+                                    <span className="text-indigo-600 font-bold underline decoration-indigo-500/30 underline-offset-4">{currentProjectName}</span>
+                                    <button
+                                        onClick={() => setSearchParams({})}
+                                        className="ml-2 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-[9px] font-black uppercase tracking-widest rounded-md hover:bg-slate-200 transition-all"
+                                    >
+                                        Clear Filter
+                                    </button>
+                                </span>
+                            ) : "Review and resolve logical contradictions across all your project requirements."}
+                        </p>
+                        {projectId && (
+                            <button
+                                onClick={() => startAnalysis(projectId)}
+                                disabled={analysisProgress.status === 'running'}
+                                className="flex items-center gap-2 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-200 dark:shadow-none transition-all hover:scale-105 active:scale-95"
+                            >
+                                {analysisProgress.status === 'running' ? (
+                                    <>
+                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                        Analyzing {analysisProgress.percent}%
+                                    </>
+                                ) : (
+                                    <>
+                                        <BrainCircuit className="w-3 h-3" />
+                                        Re-scan for Conflicts
+                                    </>
+                                )}
+                            </button>
+                        )}
+                    </div>
+                </div>
+                <div className="flex items-center gap-3">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <input
+                            type="text"
+                            placeholder="Search conflicts..."
+                            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm w-64 focus:ring-2 focus:ring-indigo-500/20 transition-all outline-none"
+                        />
+                    </div>
+                    <button className="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-500 hover:text-indigo-500 transition-all">
+                        <Filter className="w-5 h-5" />
+                    </button>
+                </div>
+            </div>
+
+            {/* Conflict Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                    { label: "Active Conflicts", val: filteredConflicts.filter(c => c.status === 'open').length, color: "text-red-500", bg: "bg-red-50 dark:bg-red-500/10" },
+                    { label: "High Impact", val: filteredConflicts.filter(c => c.severityScore >= 7).length, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-500/10" },
+                    { label: "Resolved", val: filteredConflicts.filter(c => c.status === 'resolved').length, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
+                ].map((stat, i) => (
+                    <div key={i} className="bg-white/50 dark:bg-[#0f1115]/50 backdrop-blur-md rounded-3xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col gap-1 items-center md:items-start">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{stat.label}</span>
+                        <div className="flex items-baseline gap-2">
+                            <span className={`text-3xl font-black ${stat.color}`}>{stat.val}</span>
+                            <span className="text-xs font-bold text-slate-400">/ {filteredConflicts.length} {projectId ? 'Project' : 'Total'}</span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Conflict List Content */}
+            <div className="space-y-4">
+                {filteredConflicts.length === 0 ? (
+                    <div className="bg-white dark:bg-[#0f1115] border border-slate-200 dark:border-slate-800 rounded-[2rem] p-12 text-center flex flex-col items-center gap-4">
+                        <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                            <BrainCircuit className="w-8 h-8" />
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white">No Conflicts Detected</h3>
+                        <p className="text-slate-500 max-w-sm">All requirements are logically synchronized. Your project's semantic health is optimal.</p>
+                    </div>
+                ) : (
+                    filteredConflicts.map((conflict) => (
+                        <Link
+                            key={conflict._id}
+                            to={`/pm/conflicts/${conflict._id}`}
+                            className="block group"
+                        >
+                            <div className="bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-[2rem] p-6 md:p-8 transition-all hover:border-indigo-500/50 hover:shadow-2xl hover:shadow-indigo-500/5 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+                                <div className="flex items-center gap-6 relative z-10">
+                                    <div className={`p-4 rounded-2xl ${conflict.severityScore >= 8 ? 'bg-red-50 dark:bg-red-500/10 text-red-500' :
+                                        conflict.severityScore >= 5 ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-500' :
+                                            'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500'
+                                        } group-hover:scale-110 transition-transform duration-500`}>
+                                        {conflict.severityScore >= 8 ? <AlertOctagon className="w-7 h-7" /> : <AlertTriangle className="w-7 h-7" />}
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center gap-3 mb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                            <span className="text-indigo-500">{conflict._id.substring(0, 8)}</span>
+                                            <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                                            <span>{conflict.conflictType || 'Logic Conflict'}</span>
+                                            {conflict.projectId?.name && (
+                                                <>
+                                                    <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                                                    <span className="text-emerald-500">{conflict.projectId.name}</span>
+                                                </>
+                                            )}
+                                        </div>
+                                        <h3 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-indigo-500 transition-colors">
+                                            {conflict.explanation || "Requirement Contradiction"}
+                                        </h3>
+                                        <div className="flex items-center gap-4 mt-3">
+                                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                                                <BrainCircuit className="w-3.5 h-3.5" />
+                                                {conflict.requirementA?.title} vs {conflict.requirementB?.title}
+                                            </div>
+                                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                                                <Clock className="w-3.5 h-3.5" />
+                                                {new Date(conflict.createdAt).toLocaleDateString()}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-8 relative z-10">
+                                    <div className="hidden lg:block text-right">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Impact Level</p>
+                                        <p className={`font-black uppercase tracking-tighter ${conflict.severityScore >= 8 ? 'text-red-500' :
+                                            conflict.severityScore >= 5 ? 'text-amber-500' :
+                                                'text-emerald-500'
+                                            }`}>{conflict.severityScore >= 8 ? 'High' : conflict.severityScore >= 5 ? 'Medium' : 'Low'}</p>
+                                    </div>
+                                    <div className="hidden lg:block text-right">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Status</p>
+                                        <div className="flex items-center gap-1.5 justify-end">
+                                            <span className={`text-xs font-bold uppercase ${conflict.status === 'resolved' ? 'text-emerald-500' : 'text-slate-500'}`}>
+                                                {conflict.status}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center justify-center text-slate-400 group-hover:bg-indigo-600 group-hover:text-white group-hover:border-transparent transition-all group-hover:rotate-45">
+                                        <ArrowRight className="w-6 h-6 -rotate-45 group-hover:rotate-0 transition-transform" />
+                                    </div>
+                                </div>
+
+                                {/* Hover Glow */}
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -mr-32 -mt-32 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            </div>
+                        </Link>
+                    ))
+                )}
+            </div>
+        </div>
+    );
+}

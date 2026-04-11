@@ -45,6 +45,11 @@ export const eeaVsGlobalReplication = (reqA, reqB) => {
             flagged: true,
             conflictType: 'EEA vs Global Replication',
             ruleConfidence: crossConflict ? 0.95 : 0.78,
+            explanation: `Legal compliance conflict: Data residency requirements (GDPR/EEA) in ${reqAHasEEA ? reqA.title : reqB.title} directly contradict the global mirroring/replication strategy in ${reqAHasGlobal ? reqA.title : reqB.title}.`,
+            resolutions: [
+                { title: 'Regional Sharding', description: 'Partition the database so that EEA user data remains on EU servers while other data is replicated globally.', strategyType: 'Alternative' },
+                { title: 'Anonymized Mirroring', description: 'Only replicate non-PII or anonymized data to the global mirror.', strategyType: 'Hybrid' }
+            ]
         };
     }
 

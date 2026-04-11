@@ -1,4 +1,6 @@
 import * as requirementService from "../services/requirement.service.js";
+import { parseRequirementsCSV } from "../services/csv.service.js";
+import fs from 'fs';
 
 export const createRequirement = async (req, res, next) => {
     try {
@@ -14,10 +16,10 @@ export const createRequirement = async (req, res, next) => {
 
 export const getRequirements = async (req, res, next) => {
     try {
-        const { projectId } = req.query;
+        const { projectId, page, limit, sort } = req.query;
         const filter = projectId ? { projectId } : {};
-        const requirements = await requirementService.getAllRequirements(filter);
-        res.json(requirements);
+        const result = await requirementService.getAllRequirements(filter, { page, limit, sort });
+        res.json(result);
     } catch (error) {
         next(error);
     }
@@ -61,3 +63,56 @@ export const deleteRequirement = async (req, res, next) => {
         next(error);
     }
 };
+
+export const uploadRequirements = async (req, res, next) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: "No CSV file uploaded" });
+        }
+
+        const { projectId } = req.body;
+        if (!projectId) {
+            return res.status(400).json({ message: "Project ID is required" });
+        }
+
+        const requirements = await parseRequirementsCSV(req.file.path);
+        const docs = await requirementService.bulkCreateRequirements(
+            requirements,
+            projectId,
+            req.user?._id
+        );
+
+        res.status(201).json({
+            message: `Successfully imported ${docs.length} requirements`,
+            count: docs.length,
+            requirements: docs,
+            filePath: req.file.path // Return path for reference
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const generateRequirements = async (req, res, next) => {
+    try {
+        const { projectId, teams } = req.body;
+        if (!projectId) {
+            return res.status(400).json({ message: "Project ID is required" });
+        }
+
+        const requirements = await requirementService.generateAiRequirements(
+            projectId,
+            teams || ['Developer', 'Legal'],
+            req.user?._id
+        );
+
+        res.status(201).json({
+            message: `Successfully generated ${requirements.length} AI requirements for review`,
+            count: requirements.length,
+            requirements
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+

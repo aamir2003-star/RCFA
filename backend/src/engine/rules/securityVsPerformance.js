@@ -15,6 +15,11 @@ export const securityVsPerformance = (reqA, reqB) => {
             flagged: true,
             conflictType: 'Security vs Performance',
             ruleConfidence: 0.85,
+            explanation: `Contradiction between ${reqA.category === 'Security' ? reqA.title : reqB.title} (High-Security) and ${reqA.category === 'Performance' ? reqA.title : reqB.title} (High-Performance). Security overhead (encryption/auth) may impact latency targets.`,
+            resolutions: [
+                { title: 'Asymmetric Offloading', description: 'Move encryption tasks to hardware accelerators to maintain latency.', strategyType: 'Hybrid' },
+                { title: 'Tiered Security', description: 'Apply high-security only to PII data, relaxing for public metadata.', strategyType: 'Compromise' }
+            ]
         };
     }
 

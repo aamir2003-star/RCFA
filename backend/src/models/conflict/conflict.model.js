@@ -95,18 +95,66 @@ const conflictSchema = new mongoose.Schema(
     // Resolution status
     status: {
       type: String,
-      enum: ["open", "resolved", "ignored"],
-      default: "open"
+      enum: ["open", "resolved", "ignored", "pending_confirmation"],
+      default: "open",
+      index: true
     },
 
+    discussions: [
+      {
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+        message: { type: String, required: true },
+        attachments: [{
+          url: { type: String },
+          public_id: { type: String }
+        }], // Cloudinary attachments
+        timestamp: { type: Date, default: Date.now }
+      }
+    ],
+
+    // User-proposed resolution ideas
+    proposals: [
+      {
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+        text: { type: String, required: true },
+        attachments: [{
+          url: { type: String },
+          public_id: { type: String }
+        }],
+        votes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Those who liked it
+        timestamp: { type: Date, default: Date.now }
+      }
+    ],
+
     aiSuggestion: String,
+
+    resolutions: [
+      {
+        title: { type: String, required: true },
+        description: { type: String, required: true },
+        strategyType: {
+          type: String,
+          enum: ["Compromise", "Strict", "Alternative", "Hybrid"],
+          default: "Compromise"
+        }
+      }
+    ],
 
     resolvedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User"
+    },
+
+    pmResolution: {
+      resolutionId: { type: String }, // Reference to resolution _id (string because subdoc ids can be tricky)
+      type: { type: String, enum: ["ai_resolution", "developer_proposal"], default: "ai_resolution" },
+      confirmedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      confirmedAt: { type: Date }
     }
   },
   { timestamps: true }
 );
+
+conflictSchema.index({ projectId: 1, status: 1 });
 
 export const ConflictModel = mongoose.model("Conflict", conflictSchema);

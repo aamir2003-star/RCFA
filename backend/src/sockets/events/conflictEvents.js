@@ -64,3 +64,44 @@ export const emitConflictResolved = (projectId, conflictId) => {
         // Silent fallback
     }
 };
+/**
+ * Emit a conflict:comment event.
+ * @param {string} projectId
+ * @param {string} conflictId
+ * @param {Object} comment - the new comment object
+ */
+export const emitConflictComment = (projectId, conflictId, comment) => {
+    try {
+        const io = getIO();
+        io.to(`project:${projectId}`).emit('conflict:comment', {
+            projectId,
+            conflictId,
+            comment,
+            timestamp: new Date().toISOString(),
+        });
+        console.debug(`📡 Emitted conflict:comment for ${conflictId}`);
+    } catch {
+        // Silent fallback
+    }
+};
+
+/**
+ * Emit a conflict:proposal event.
+ * @param {string} projectId
+ * @param {string} conflictId
+ * @param {Object} proposal - the new proposal object
+ */
+export const emitConflictProposal = (projectId, conflictId, proposal) => {
+    try {
+        const io = getIO();
+        io.to(`project:${projectId}`).emit('conflict:proposal', {
+            projectId,
+            conflictId,
+            proposal,
+            timestamp: new Date().toISOString(),
+        });
+        console.debug(`📡 Emitted conflict:proposal for ${conflictId}`);
+    } catch {
+        // Silent fallback
+    }
+};
