@@ -122,27 +122,34 @@ export default function CreateProject() {
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full pb-10">
-      {/* Page Title */}
-      <h1 className="text-xl md:text-2xl font-bold text-[#1e2532] dark:text-white">Create New Project</h1>
+    <div className="space-y-16 pb-24 max-w-5xl mx-auto px-4 md:px-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+      {/* Page Header */}
+      <div className="space-y-4 border-b border-border/20 pb-12">
+        <h1 className="text-5xl text-foreground font-display font-[300]">
+          Initiate New Project
+        </h1>
+        <p className="text-muted-foreground text-xl leading-relaxed max-w-2xl font-sans tracking-[0.18px]">
+          Define architectural objectives and ingest requirements for AI-driven conflict analysis.
+        </p>
+      </div>
 
       {/* Full-width layout */}
       <div className="flex flex-col gap-6 items-start">
 
         {/* ── Project Details Form ── */}
-        <div className="w-full bg-white dark:bg-[#0f1115]/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-sm">
-          <div className="flex items-center gap-2 mb-6">
-            <svg className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h8" />
-            </svg>
-            <h2 className="text-lg font-semibold text-[#1e2532] dark:text-white">Project Details</h2>
+        <div className="premium-card p-10 space-y-12">
+          <div className="flex items-center gap-4 border-b border-border/10 pb-6">
+            <div className="w-10 h-10 bg-black dark:bg-white rounded-xl flex items-center justify-center shadow-premium">
+              <Zap className="text-white dark:text-black w-5 h-5" />
+            </div>
+            <h2 className="text-2xl font-display font-[300] text-foreground">Project Specification</h2>
           </div>
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Row 1: Project Name + Client Name */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                <label className="text-[11px] font-bold text-muted uppercase tracking-[0.2em]">
                   Project Name <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -151,11 +158,11 @@ export default function CreateProject() {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="e.g. Infrastructure Modernization"
-                  className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-[#1e2532] dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all font-medium"
+                  className="w-full bg-secondary/30 border border-border/20 rounded-2xl px-5 py-4 text-[15px] text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all font-sans"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                <label className="text-[11px] font-bold text-muted uppercase tracking-[0.2em]">
                   Client Name <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -163,15 +170,15 @@ export default function CreateProject() {
                   name="clientName"
                   value={formData.clientName}
                   onChange={handleChange}
-                  placeholder="Search or select client"
-                  className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-[#1e2532] dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all font-medium"
+                  placeholder="e.g. Acme Architectures"
+                  className="w-full bg-secondary/30 border border-border/20 rounded-2xl px-5 py-4 text-[15px] text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all font-sans"
                 />
               </div>
             </div>
 
             {/* Project Overview */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-1">
+            <div className="space-y-4">
+              <label className="text-[11px] font-bold text-muted uppercase tracking-[0.2em]">
                 Project Overview <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -180,14 +187,14 @@ export default function CreateProject() {
                 value={formData.description}
                 onChange={handleChange}
                 placeholder="Describe the project scope, objectives, and any potential conflict zones..."
-                className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-[#1e2532] dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all resize-none font-medium leading-relaxed"
+                className="w-full bg-secondary/30 border border-border/20 rounded-3xl px-6 py-5 text-[15px] text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all resize-none font-sans leading-relaxed"
               />
             </div>
 
             {/* Row 2: Timeline + Budget */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                <label className="text-[11px] font-bold text-muted uppercase tracking-[0.2em]">
                   Expected Timeline (Duration) <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -195,22 +202,22 @@ export default function CreateProject() {
                   name="timeline"
                   value={formData.timeline}
                   onChange={handleChange}
-                  className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all font-medium"
+                  className="w-full bg-secondary/30 border border-border/20 rounded-2xl px-5 py-4 text-[15px] text-foreground focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all font-sans"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                <label className="text-[11px] font-bold text-muted uppercase tracking-[0.2em]">
                   Budget ($) <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-400 font-bold">$</span>
+                  <span className="absolute left-5 top-1/2 -translate-y-1/2 text-[15px] text-muted font-bold">$</span>
                   <input
                     type="number"
                     name="budget"
                     value={formData.budget}
                     onChange={handleChange}
                     placeholder="50,000"
-                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-4 py-3 text-sm text-[#1e2532] dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all font-medium"
+                    className="w-full bg-secondary/30 border border-border/20 rounded-2xl pl-10 pr-5 py-4 text-[15px] text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all font-sans"
                   />
                 </div>
               </div>
@@ -220,7 +227,7 @@ export default function CreateProject() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {/* PM Selection */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                <label className="text-[11px] font-bold text-muted uppercase tracking-[0.2em]">
                   Assign Project Manager <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -228,7 +235,7 @@ export default function CreateProject() {
                     name="projectManager"
                     value={formData.projectManager}
                     onChange={handleChange}
-                    className="w-full appearance-none bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all cursor-pointer font-medium"
+                    className="w-full appearance-none bg-secondary/30 border border-border/20 rounded-2xl px-5 py-4 text-[15px] text-foreground focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all cursor-pointer font-sans"
                   >
                     <option value="">Select a Project Manager</option>
                     {projectManagers.map(pm => (
@@ -237,13 +244,13 @@ export default function CreateProject() {
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted pointer-events-none" />
                 </div>
               </div>
 
               {/* Requirement Upload */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                <label className="text-[11px] font-bold text-muted uppercase tracking-[0.2em]">
                   Requirement CSV <span className="text-red-500">*</span>
                 </label>
                 <div className="relative group">
@@ -251,31 +258,25 @@ export default function CreateProject() {
                     type="file"
                     accept=".csv"
                     onChange={handleFileChange}
-                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all cursor-pointer file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 transition-all"
+                    className="w-full shadow-inset-subtle bg-secondary/30 border border-border/20 rounded-2xl px-5 py-3 text-sm text-muted focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all cursor-pointer file:mr-4 file:py-1.5 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-bold file:uppercase file:tracking-[0.2em] file:bg-black dark:file:bg-white file:text-white dark:file:text-black hover:file:opacity-80 transition-all"
                   />
                 </div>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex items-center gap-4 pt-8 border-t border-border/10">
               <button
                 type="submit"
                 disabled={loading}
-                className="flex items-center gap-2 bg-[#1e2532] dark:bg-white text-white dark:text-[#1e2532] font-semibold px-6 py-2.5 rounded-xl hover:opacity-90 transition-all text-sm disabled:opacity-50"
+                className="pill-button bg-black dark:bg-white text-white dark:text-black text-[11px] uppercase tracking-[0.2em] py-4 px-10 hover:shadow-pill transition-all disabled:opacity-40"
               >
-                {loading ? "Generating..." : "Generate Project"}
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3l14 9-14 9V3z" />
-                </svg>
+                {loading ? "Initializing..." : "Generate Project Architecture"}
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  sessionStorage.removeItem("spectra-create-project-form");
-                  navigate(-1);
-                }}
-                className="px-6 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-all"
+                onClick={() => navigate(-1)}
+                className="pill-button bg-transparent border border-border/30 text-muted text-[11px] uppercase tracking-[0.2em] py-4 px-10 hover:bg-secondary transition-all"
               >
                 Cancel
               </button>

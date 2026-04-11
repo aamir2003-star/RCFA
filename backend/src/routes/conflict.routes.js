@@ -7,6 +7,7 @@ import {
     checkConflictStatus,
     getProjectConflicts,
     getAllPmConflicts,
+    getAllDevConflicts,
     getConflictById,
     addConflictComment,
     addConflictProposal,
@@ -32,12 +33,13 @@ router.post('/analyze/:projectId', authenticate, analyzeConflicts);
  */
 router.get('/status/:projectId', authenticate, checkConflictStatus);
 
-/**
- * GET /api/v1/conflicts/pm/all
- * Get all conflicts across all of the PM's projects.
- * Must be BEFORE /:projectId to avoid route collision.
- */
 router.get('/pm/all', authenticate, getAllPmConflicts);
+
+/**
+ * GET /api/v1/conflicts/dev/all
+ * Get all conflicts across all projects the Dev has modules in.
+ */
+router.get('/dev/all', authenticate, getAllDevConflicts);
 
 /**
  * GET /api/v1/conflicts/:projectId

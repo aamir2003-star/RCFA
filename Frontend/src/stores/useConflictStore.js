@@ -39,6 +39,19 @@ const useConflictStore = create((set, get) => ({
         }
     },
 
+    fetchAllDevConflicts: async () => {
+        set({ loading: true });
+        try {
+            const response = await api.get('/conflicts/dev/all');
+            set({
+                conflicts: response.data.conflicts || [],
+                loading: false
+            });
+        } catch (error) {
+            set({ error: error.message, loading: false });
+        }
+    },
+
     startAnalysis: async (projectId) => {
         set({ analysisProgress: { status: 'running', percent: 0, message: 'Initializing engine...' } });
         try {
@@ -111,7 +124,9 @@ const useConflictStore = create((set, get) => ({
         socket.on("conflict:new", (data) => {
             if (data.projectId === projectId) {
                 set((state) => ({
-                    conflicts: [data.conflict, ...state.conflicts]
+                    conflicts: state.conflicts.some(c => c._id === data.conflict._id)
+                        ? state.conflicts
+                        : [data.conflict, ...state.conflicts]
                 }));
             }
         });
@@ -150,6 +165,23 @@ const useConflictStore = create((set, get) => ({
         socket.off("conflict:resolved");
         socket.off("conflict:comment");
         socket.off("conflict:proposal");
+    },
+
+    initSocket: (projectId, userId) => {
+        if (!userId) return;
+        const socket = getSocket();
+        if (!socket) return;
+
+        socket.emit("join:user", userId);
+        if (projectId) {
+            get().subscribeToConflicts(projectId);
+        }
+
+        return () => {
+            if (projectId) {
+                get().unsubscribeFromConflicts(projectId);
+            }
+        };
     }
 }));
 

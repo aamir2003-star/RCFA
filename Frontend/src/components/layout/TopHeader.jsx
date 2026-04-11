@@ -16,21 +16,16 @@ export function TopHeader({ role, onMenuClick }) {
 
   let searchPlaceholder = "Search...";
   if (role === "bde") searchPlaceholder = "Search projects...";
-  if (role === "pm")
-    searchPlaceholder = "Search projects, requirements or conflicts...";
-  if (role === "dev") searchPlaceholder = "Search modules or conflicts...";
+  if (role === "pm") searchPlaceholder = "Search project workspace...";
+  if (role === "dev") searchPlaceholder = "Search technical modules...";
 
   const profileName = user?.name || "User";
   const profileRole = user?.role?.toUpperCase() || role?.toUpperCase() || "USER";
   const profileInitials = user?.name?.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || "U";
 
-  const handleProfileClick = () => {
-    navigate(`/${role}/profile`);
-  };
-
-  const handleSettingsClick = () => {
-    navigate(`/${role}/settings`);
-  };
+  const handleProfileClick = () => navigate(`/${role}/profile`);
+  const handleSettingsClick = () => navigate(`/${role}/settings`);
+  const handleNotificationsClick = () => navigate(`/${role}/notifications`);
 
   const { unreadCount, fetchNotifications, initSocket } = useNotificationStore();
 
@@ -43,104 +38,81 @@ export function TopHeader({ role, onMenuClick }) {
     }
   }, [user?._id, user?.id, fetchNotifications, initSocket]);
 
-  const handleNotificationsClick = () => {
-    navigate(`/${role}/notifications`);
-  };
-
   return (
-    <header className="h-16 bg-white/70 dark:bg-[#0f1115]/70 backdrop-blur-md flex items-center justify-between px-4 md:px-6 shrink-0 z-50 shadow-sm border-b border-slate-200/50 dark:border-slate-800/50 sticky top-0 transition-colors duration-300">
-      <div className="flex-1 flex items-center gap-3 md:gap-4">
+    <header className="h-[72px] bg-white/80 dark:bg-[#080b11]/80 backdrop-blur-xl flex items-center justify-between px-8 shrink-0 z-50 sticky top-0 border-b border-border/30 transition-all">
+      <div className="flex-1 flex items-center gap-6">
         <button
           onClick={onMenuClick}
-          className="lg:hidden p-2 -ml-2 text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-          aria-label="Toggle Menu"
+          className="lg:hidden p-2.5 rounded-xl hover:bg-secondary transition-colors"
         >
-          <Menu className="w-6 h-6" />
+          <Menu className="w-5 h-5 text-foreground" />
         </button>
-        {role === "bde" && (
-          <div className="text-sm text-muted-foreground flex items-center gap-2">
-            <span>Dashboard</span>
-            <span>›</span>
-            <span className="font-medium text-foreground">
-              Projects Overview
-            </span>
-          </div>
-        )}
+
+        <div className="hidden md:flex items-center gap-3 px-5 py-2.5 bg-secondary/40 rounded-full border border-border/20 max-w-md w-full shadow-inset-subtle">
+          <Search className="w-4 h-4 text-muted" />
+          <input
+            type="text"
+            placeholder={searchPlaceholder}
+            className="bg-transparent border-none outline-none text-[13px] font-medium w-full placeholder:text-muted/60"
+          />
+        </div>
       </div>
 
-
-      <div className="flex-1 flex items-center justify-end gap-5">
-        <button
-          onClick={handleNotificationsClick}
-          className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 relative hover:scale-110 active:scale-95 transition-all"
-        >
-          <Bell className="w-5 h-5" />
-          {unreadCount > 0 && (
-            <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-white dark:border-[#0f1115] -mt-1.5 -mr-1.5 animate-in zoom-in duration-300">
-              {unreadCount > 9 ? '9+' : unreadCount}
-            </span>
-          )}
-        </button>
-
-        <button
-          onClick={handleSettingsClick}
-          className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:scale-110 active:scale-95 transition-all"
-        >
-          <Settings className="w-5 h-5" />
-        </button>
-
-        <ThemeToggle />
+      <div className="flex items-center gap-4">
+        {/* Global Actions */}
+        <div className="flex items-center gap-2 pr-4 border-r border-border/30">
+          <button
+            onClick={handleNotificationsClick}
+            className="p-3 text-muted hover:text-foreground relative hover:scale-105 active:scale-95 transition-all"
+          >
+            <Bell className="w-5 h-5" />
+            {unreadCount > 0 && (
+              <span className="absolute top-2 right-2 w-2 h-2 bg-black dark:bg-white rounded-full border-2 border-white dark:border-[#080b11]"></span>
+            )}
+          </button>
+          <ThemeToggle />
+        </div>
 
         <Dropdown
           trigger={
-            <div className="flex items-center gap-3 select-none cursor-pointer group">
-              <div className="text-right hidden sm:block">
-                <div className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{profileName}</div>
-                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{profileRole}</div>
-              </div>
-              <Avatar className="w-9 h-9 border-2 border-transparent group-hover:border-indigo-500 transition-all shadow-sm overflow-hidden">
+            <div className="flex items-center gap-4 pl-2 select-none cursor-pointer group warm-pill">
+              <Avatar className="w-8 h-8 rounded-full border border-background shadow-premium overflow-hidden">
                 {user?.avatar ? (
-                  <img
-                    src={`http://localhost:3000${user.avatar}`}
-                    alt={profileName}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={`http://localhost:3000${user.avatar}`} alt={profileName} className="w-full h-full object-cover" />
                 ) : (
-                  <AvatarFallback className="bg-linear-to-tr from-indigo-500 to-blue-500 text-white font-black text-xs uppercase">
+                  <AvatarFallback className="bg-black text-white font-bold text-[10px] uppercase">
                     {profileInitials}
                   </AvatarFallback>
                 )}
               </Avatar>
-
+              <div className="text-left hidden sm:block">
+                <div className="text-[13px] font-bold text-foreground leading-none mb-0.5">{profileName}</div>
+                <div className="text-[9px] font-bold text-muted uppercase tracking-[0.15em]">{profileRole}</div>
+              </div>
             </div>
           }
-          className="w-48 mt-4 p-2 rounded-2xl border border-slate-200 dark:border-slate-800"
+          className="w-56 mt-4 p-3 rounded-2xl border border-border/50 bg-white dark:bg-[#0f1219] shadow-premium"
         >
-          <div className="px-3 py-2 mb-2 border-b border-slate-100 dark:border-slate-800/50 sm:hidden">
-            <p className="text-sm font-bold text-slate-900 dark:text-white">{profileName}</p>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{profileRole}</p>
+          <div className="px-4 py-3 mb-2 border-b border-border/30 sm:hidden">
+            <p className="text-sm font-bold text-foreground">{profileName}</p>
+            <p className="text-[10px] font-bold text-muted uppercase tracking-widest">{profileRole}</p>
           </div>
-          <button
-            onClick={handleProfileClick}
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-xl transition-all"
-          >
+
+          <button onClick={handleProfileClick} className="w-full flex items-center gap-3 px-4 py-3 text-[13px] font-medium text-muted hover:text-foreground hover:bg-secondary rounded-xl transition-all">
             <User className="w-4 h-4" />
-            My Profile
+            Profile Overview
           </button>
-          <button
-            onClick={handleSettingsClick}
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-xl transition-all"
-          >
+
+          <button onClick={handleSettingsClick} className="w-full flex items-center gap-3 px-4 py-3 text-[13px] font-medium text-muted hover:text-foreground hover:bg-secondary rounded-xl transition-all">
             <Settings className="w-4 h-4" />
-            Account Settings
+            System Settings
           </button>
-          <div className="my-2 border-t border-slate-100 dark:border-slate-800/50"></div>
-          <button
-            onClick={logout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all"
-          >
+
+          <div className="my-2 border-t border-border/30"></div>
+
+          <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-3 text-[13px] font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all">
             <LogOut className="w-4 h-4" />
-            Logout Session
+            End Session
           </button>
         </Dropdown>
       </div>

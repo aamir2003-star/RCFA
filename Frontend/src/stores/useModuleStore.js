@@ -89,7 +89,7 @@ const useModuleStore = create((set, get) => ({
         }
     },
 
-    fetchMyModules: async (userId) => {
+    fetchUserModules: async (userId) => {
         set({ loading: true });
         try {
             const response = await api.get(`/modules`, { params: { assignedTo: userId } });

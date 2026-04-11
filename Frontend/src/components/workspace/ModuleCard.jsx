@@ -6,70 +6,72 @@ export function ModuleCard({ module }) {
     const { title, desc, icon: Icon, iconBg, developer, reqCount, status, statusColor } = module;
 
     return (
-        <div className="bg-white dark:bg-[#0f1115] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-500/30 transition-all duration-300 group overflow-hidden">
-            <div className="p-6">
-                <div className="flex items-start justify-between mb-5">
-                    <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110", iconBg)}>
-                        <Icon className="w-6 h-6" />
-                    </div>
-                    <GripVertical className="w-5 h-5 text-slate-300 group-hover:text-slate-400 cursor-grab active:cursor-grabbing transition-colors" />
+        <div className="premium-card p-8 group transition-all duration-500 hover:shadow-pill">
+            <div className="flex items-start justify-between mb-8">
+                <div className={cn(
+                    "w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-inset-subtle border border-border/20",
+                    iconBg
+                )}>
+                    <Icon className="w-6 h-6" />
                 </div>
+                <GripVertical className="w-5 h-5 text-muted opacity-20 group-hover:opacity-100 cursor-grab active:cursor-grabbing transition-opacity" />
+            </div>
 
-                <h3 className="font-bold text-[17px] text-slate-900 dark:text-white mb-1.5 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+            <div className="space-y-4">
+                <h3 className="text-2xl font-display font-[300] text-foreground tracking-tight leading-tight group-hover:text-black dark:group-hover:text-white transition-colors">
                     {title}
                 </h3>
-                <p className="text-sm text-slate-500 font-medium mb-5 line-clamp-2 leading-relaxed">
+                <p className="text-muted-foreground text-[14px] leading-relaxed line-clamp-2 font-sans opacity-80">
                     {desc}
                 </p>
+            </div>
 
-                <div className="flex items-center justify-between py-4 border-t border-slate-100 dark:border-slate-800/50">
-                    <div className="flex items-center gap-2.5">
-                        {developer ? (
-                            <>
-                                <div className="w-7 h-7 rounded-full overflow-hidden border-2 border-white dark:border-slate-900 shadow-sm">
-                                    <img
-                                        src={developer.avatar}
-                                        alt={developer.name}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                                    {developer.name}
-                                </span>
-                            </>
-                        ) : (
-                            <div className="flex items-center gap-2 text-slate-400 italic">
-                                <div className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center border border-dashed border-slate-300 dark:border-slate-700">
-                                    <span className="text-[10px] font-bold">+</span>
-                                </div>
-                                <span className="text-xs font-semibold">Unassigned</span>
+            <div className="mt-8 pt-6 border-t border-border/10 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    {developer ? (
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full overflow-hidden border border-border/20 shadow-premium">
+                                <img
+                                    src={developer.avatar}
+                                    alt={developer.name}
+                                    className="w-full h-full object-cover"
+                                />
                             </div>
-                        )}
-                    </div>
-                    <div className="flex items-center gap-1.5 text-slate-400 group-hover:text-indigo-500 transition-colors">
-                        <FileText className="w-4 h-4" />
-                        <span className="text-[11px] font-extrabold tracking-tight">
-                            {reqCount} Requirements
-                        </span>
-                    </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800/50">
-                    <span className={cn("px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider", statusColor)}>
-                        {status}
-                    </span>
-                    {status === "Completed" ? (
-                        <CheckCircle className="w-5 h-5 text-emerald-500 drop-shadow-sm" />
-                    ) : !developer ? (
-                        <button className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-3.5 py-1.5 rounded-lg text-[10px] font-black hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-400 transition-all duration-300 shadow-sm">
-                            Assign
-                        </button>
+                            <span className="text-[11px] font-bold text-foreground uppercase tracking-wider">
+                                {developer.name}
+                            </span>
+                        </div>
                     ) : (
-                        <button className="text-indigo-600 dark:text-indigo-400 text-xs font-bold hover:underline underline-offset-4 decoration-2">
-                            Edit
-                        </button>
+                        <div className="flex items-center gap-2 group-hover:text-foreground transition-colors">
+                            <div className="w-8 h-8 rounded-full bg-secondary/30 border border-dashed border-border/40 flex items-center justify-center">
+                                <span className="text-[10px] font-bold text-muted">+</span>
+                            </div>
+                            <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Unassigned</span>
+                        </div>
                     )}
                 </div>
+                <div className="flex items-center gap-2 text-muted">
+                    <FileText className="w-4 h-4" />
+                    <span className="text-[11px] font-bold uppercase tracking-widest">{reqCount} REQS</span>
+                </div>
+            </div>
+
+            <div className="mt-6 flex items-center justify-between">
+                <span className={cn(
+                    "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-inset-subtle border border-border/10",
+                    statusColor
+                )}>
+                    {status}
+                </span>
+                {!developer ? (
+                    <button className="pill-button bg-black dark:bg-white text-white dark:text-black text-[10px] uppercase tracking-[0.2em] px-5 py-2 hover:shadow-pill transition-all">
+                        Assign
+                    </button>
+                ) : (
+                    <button className="text-[11px] font-bold text-muted uppercase tracking-[0.2em] hover:text-foreground transition-colors">
+                        Modify
+                    </button>
+                )}
             </div>
         </div>
     );

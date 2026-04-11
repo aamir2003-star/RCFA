@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "../ui/Button.jsx";
 import {
   ChevronRight,
   TrendingUp,
@@ -13,7 +12,9 @@ import {
   Shield,
   BarChart,
   ArrowUpRight,
-  AlertTriangle
+  AlertTriangle,
+  Activity,
+  Plus
 } from "lucide-react";
 import {
   PM_STATS_TEMPLATE,
@@ -34,8 +35,7 @@ export default function PmDashboard() {
     fetchProjects,
     pmStats,
     fetchPmStats,
-    loading,
-    error: storeError
+    loading
   } = useProjectStore();
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
@@ -52,252 +52,133 @@ export default function PmDashboard() {
     value: pmStats?.[template.key] || "0"
   }));
 
-  const quickActions = PM_QUICK_ACTIONS_TEMPLATE;
-
   if (isInitialLoading) {
     return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-slate-500 font-bold animate-pulse">Initializing PM Intelligence...</p>
-        </div>
+      <div className="p-20 text-center flex flex-col items-center justify-center gap-4">
+        <Activity className="w-10 h-10 animate-spin text-muted/40" />
+        <span className="font-display font-[300] text-2xl text-muted italic">Calibrating Manager Intelligence...</span>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-8 w-full max-w-full pb-10 animate-in fade-in duration-700">
+    <div className="space-y-16 max-w-7xl mx-auto pb-24 px-4 md:px-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-[28px] font-extrabold tracking-tight text-[#1e2532] dark:text-white">
-            Welcome back, {user?.name?.split(' ')[0] || 'Manager'}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <div className="space-y-4">
+          <h1 className="text-6xl text-foreground font-display font-[300] tracking-tight">
+            Portfolio <span className="italic">Overview</span>
           </h1>
-          <p className="text-xs md:text-sm font-medium text-slate-500 mt-1">
-            Status for your {pmStats?.totalProjects || 0} active projects.
+          <p className="text-[12px] font-bold text-muted uppercase tracking-[0.25em]">
+            Managing {pmStats?.totalProjects || 0} Architectural Units
           </p>
         </div>
         <button
           onClick={() => navigate('/pm/analytics')}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white dark:bg-[#0f1115] border border-slate-200 dark:border-slate-800 text-sm font-bold text-slate-600 dark:text-slate-400 hover:border-indigo-500/40 hover:text-indigo-600 transition-all shadow-sm"
+          className="pill-button bg-black text-white text-[11px] uppercase tracking-[0.2em] py-5 px-10 shadow-pill"
         >
-          <BarChart className="w-4 h-4" />
-          View Analytics
-          <ArrowUpRight className="w-3.5 h-3.5" />
+          <BarChart className="w-4 h-4 mr-2 inline" />
+          Detailed Analytics
         </button>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, i) => (
-          <div
-            key={i}
-            className={`bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md rounded-2xl p-5 shadow-lg shadow-slate-200/20 dark:shadow-none border border-slate-200 dark:border-slate-800 relative overflow-hidden hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-500/30 transition-all duration-300 ${stat.borderLeft || ""
-              }`}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div
-                className={`w-8 h-8 rounded-lg flex items-center justify-center ${stat.bg} ${stat.iconColor}`}
-              >
-                <stat.icon className="w-4.5 h-4.5" />
+          <div key={i} className="premium-card p-10 space-y-8 group hover:border-foreground/10 transition-all">
+            <div className="flex items-center justify-between">
+              <div className="w-12 h-12 rounded-[18px] bg-secondary flex items-center justify-center text-muted group-hover:text-foreground group-hover:bg-secondary/80 transition-all shadow-inset-subtle border border-border/10">
+                <stat.icon className="w-5 h-5" />
               </div>
-              <div
-                className={`text-xs font-bold flex items-center ${stat.trendUp ? "text-emerald-500" : "text-red-500"
-                  }`}
-              >
-                {stat.trendUp ? (
-                  <TrendingUp className="w-3.5 h-3.5 mr-1" />
-                ) : (
-                  <TrendingDown className="w-3.5 h-3.5 mr-1" />
-                )}
+              <div className={cn("text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border border-border/10", stat.trendUp ? "text-emerald-600 bg-emerald-50/50" : "text-amber-600 bg-amber-50/50")}>
                 {stat.trend}
               </div>
             </div>
             <div>
-              <h3 className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">
-                {stat.title}
-              </h3>
-              <div className="text-3xl font-extrabold text-[#1e2532] dark:text-white leading-none">
-                {stat.value}
-              </div>
+              <p className="text-[11px] font-bold text-muted uppercase tracking-[0.2em] mb-2 px-1 opacity-70">{stat.title}</p>
+              <p className="text-5xl font-display font-[300] px-1">{stat.value}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 leading-normal">
-        {/* Main Content (Left, 2 columns wide) */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-lg font-bold text-[#1e2532] dark:text-white">
-              Active Projects
-            </h2>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
+        {/* Project Feed */}
+        <div className="lg:col-span-2 space-y-10">
+          <div className="flex items-center justify-between px-2">
+            <h2 className="text-[11px] font-bold text-muted uppercase tracking-[0.25em]">Active Trajectories</h2>
+            <button onClick={() => navigate('/pm/workspace')} className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest hover:text-indigo-500 transition-colors">Create Project +</button>
           </div>
 
-          <div className="space-y-4">
-            {projects.length > 0 ? (
-              projects.map((proj, i) => (
-                <div
-                  key={proj._id}
-                  onClick={() => navigate(`/pm/editor?projectId=${proj._id}`)}
-                  className="group bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4 shadow-lg shadow-slate-200/20 dark:shadow-none hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-500/40 dark:hover:border-indigo-500/40 hover:-translate-y-1 transition-all duration-300 cursor-pointer"
-                >
-                  <div
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center text-white shrink-0 shadow-sm ${i % 4 === 0 ? 'bg-indigo-500' : i % 4 === 1 ? 'bg-blue-500' : i % 4 === 2 ? 'bg-purple-500' : 'bg-emerald-500'}`}
-                  >
-                    {i % 4 === 0 ? <Shield className="w-5 h-5" /> : i % 4 === 1 ? <CreditCard className="w-5 h-5" /> : i % 4 === 2 ? <ShoppingCart className="w-5 h-5" /> : <Layout className="w-5 h-5" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-1">
-                      <h3 className="font-bold text-[15px] text-[#1e2532] dark:text-white truncate">
-                        {proj.name}
-                      </h3>
-                      <span
-                        className={cn(
-                          "text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full font-bold",
-                          PROJECT_STATUS_COLORS[proj.status] || PROJECT_STATUS_COLORS.default
-                        )}
-                      >
-                        {proj.status?.toUpperCase()}
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-500 font-semibold truncate">
-                      {proj.requirementCount || 0} Requirements • {proj.conflictCount || 0} Conflicts
-                    </p>
-                  </div>
-                  <div className="flex items-center justify-between sm:justify-end gap-6 sm:gap-10 mt-4 sm:mt-0 shrink-0">
-                    {/* Project Shortcuts */}
-                    <div className="hidden group-hover:flex items-center gap-2 transform translate-x-2 group-hover:translate-x-0 transition-all">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/pm/analytics?projectId=${proj._id}`);
-                        }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest border border-indigo-500/20 hover:bg-indigo-500 hover:text-white transition-all shadow-sm"
-                      >
-                        <BarChart className="w-3.5 h-3.5" />
-                        Analytics
-                      </button>
-
-                      {proj.conflictCount > 0 && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/pm/conflicts?projectId=${proj._id}`);
-                          }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[10px] font-black uppercase tracking-widest border border-rose-500/20 hover:bg-rose-500 hover:text-white transition-all shadow-sm"
-                        >
-                          <AlertTriangle className="w-3.5 h-3.5" />
-                          Triage
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Avatars */}
-                    <div className="flex -space-x-2">
-                      <div className="w-8 h-8 rounded-full bg-indigo-500 text-white border-2 border-white dark:border-slate-900 z-30 shadow-sm flex items-center justify-center text-[10px] font-bold">
-                        {proj.projectManager?.name?.charAt(0) || 'P'}
-                      </div>
-                      {proj.team?.slice(0, 2).map((member, idx) => (
-                        <div key={idx} className="w-8 h-8 rounded-full bg-slate-200 border-2 border-white dark:border-slate-900 z-20 shadow-sm flex items-center justify-center text-[10px] font-bold">
-                          {member.name?.charAt(0) || 'D'}
-                        </div>
-                      ))}
-                      {proj.team?.length > 2 && (
-                        <div className="w-8 h-8 rounded-full bg-[#1e2532] text-white border-2 border-white dark:border-slate-900 z-10 flex items-center justify-center text-[11px] font-bold shadow-sm">
-                          +{proj.team.length - 2}
-                        </div>
-                      )}
-                    </div>
-                    {/* Progress indicator */}
-                    <div className="w-24 sm:w-32 flex flex-col gap-1.5">
-                      <div className="flex justify-end text-[11px] font-bold text-[#1e2532] dark:text-slate-300">
-                        {proj.conflictCount === 0 ? '100%' : 'Analyzed'}
-                      </div>
-                      <div className="w-full h-[6px] bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full rounded-full ${proj.conflictCount === 0 ? 'bg-emerald-500' : 'bg-indigo-500'}`}
-                          style={{ width: proj.conflictCount === 0 ? '100%' : '75%' }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
+          <div className="space-y-6">
+            {projects.map((proj, i) => (
+              <div
+                key={proj._id}
+                onClick={() => navigate(`/pm/editor?projectId=${proj._id}`)}
+                className="premium-card p-8 flex flex-col md:flex-row md:items-center gap-10 hover:shadow-premium group cursor-pointer transition-all border-border/10 hover:border-foreground/10"
+              >
+                <div className="w-16 h-16 rounded-[22px] bg-black text-white flex items-center justify-center shrink-0 shadow-premium group-hover:scale-105 transition-transform duration-500">
+                  <Shield className="w-6 h-6" />
                 </div>
-              ))
-            ) : (
-              <div className="py-20 text-center bg-white/50 dark:bg-slate-900/50 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800">
-                <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Layout className="w-8 h-8 text-slate-300" />
+                <div className="flex-1 space-y-1">
+                  <h3 className="text-2xl font-display font-[300] group-hover:italic transition-all">{proj.name}</h3>
+                  <p className="text-[10px] font-bold text-muted uppercase tracking-widest opacity-60">
+                    {proj.requirementCount || 0} Requirements / {proj.conflictCount || 0} Conflicts
+                  </p>
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">No Assigned Projects</h3>
-                <p className="text-sm text-slate-500">You don't have any projects assigned to you yet.</p>
+                <div className="flex items-center gap-12 shrink-0">
+                  <div className="hidden md:flex -space-x-3 opacity-60 group-hover:opacity-100 transition-all">
+                    {[1, 2, 3].map(v => (
+                      <div key={v} className="w-10 h-10 rounded-full bg-secondary border-2 border-white flex items-center justify-center text-[10px] font-bold">
+                        {proj.team?.[v - 1]?.name?.[0] || 'D'}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="space-y-2 w-32">
+                    <div className="flex justify-between text-[9px] font-bold uppercase tracking-widest text-muted">Progress <span className="text-foreground">75%</span></div>
+                    <div className="h-1 bg-secondary rounded-full overflow-hidden">
+                      <div className="h-full bg-black/80 rounded-full" style={{ width: '75%' }} />
+                    </div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-muted group-hover:text-foreground transition-all group-hover:translate-x-1" />
+                </div>
               </div>
-            )}
+            ))}
           </div>
         </div>
 
-        {/* Right Sidebar (1 column wide) */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-bold text-[#1e2532] dark:text-white px-1">
-            Quick Actions
-          </h2>
-
-          <div className="space-y-3">
-            {quickActions.map((action, i) => (
+        {/* Tactical Actions */}
+        <div className="space-y-10">
+          <h2 className="text-[11px] font-bold text-muted uppercase tracking-[0.25em] px-2">Manager Console</h2>
+          <div className="space-y-4">
+            {PM_QUICK_ACTIONS_TEMPLATE.map((action, i) => (
               <button
                 key={i}
                 onClick={() => navigate(action.route)}
-                className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-indigo-500/5 hover:-translate-y-0.5 group/action ${action.bg}`}
+                className="w-full premium-card p-6 flex items-center gap-5 hover:bg-secondary/10 transition-all border-border/10 group text-left"
               >
-                <div
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${action.iconBg
-                    } ${action.isDark
-                      ? "text-white"
-                      : "text-slate-600 dark:text-slate-300"
-                    }`}
-                >
+                <div className="w-12 h-12 rounded-[18px] bg-secondary flex items-center justify-center text-muted group-hover:text-foreground transition-all">
                   <action.icon className="w-5 h-5" />
                 </div>
-                <div className="text-left flex-1 min-w-0">
-                  <div
-                    className={`font-bold text-sm ${action.isDark
-                      ? "text-white"
-                      : "text-[#1e2532] dark:text-white"
-                      } truncate`}
-                  >
-                    {action.title}
-                  </div>
-                  <div
-                    className={`text-xs mt-0.5 truncate font-semibold ${action.isDark ? "text-slate-400" : "text-slate-500"
-                      }`}
-                  >
-                    {action.desc}
-                  </div>
+                <div className="flex-1">
+                  <p className="text-[13px] font-display font-[500]">{action.title}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1 opacity-60">{action.desc}</p>
                 </div>
-                <ChevronRight
-                  className={`w-4 h-4 shrink-0 transition-transform group-hover/action:translate-x-1 ${action.isDark ? "text-slate-400" : "text-slate-300"
-                    }`}
-                />
               </button>
             ))}
           </div>
 
-          {/* Team Overview Mini Card */}
-          <div className="bg-gradient-to-br from-[#1e2532] to-slate-900 rounded-2xl p-5 border border-indigo-500/10 shadow-xl shadow-indigo-500/5 mt-2">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-                <Users className="w-4.5 h-4.5 text-indigo-400" />
-              </div>
-              <div>
-                <p className="text-white font-bold text-sm">Team Overview</p>
-                <p className="text-[11px] text-slate-400 font-semibold">{pmStats?.teamCount || 0} members assigned</p>
-              </div>
+          <div className="premium-card p-8 bg-black text-white space-y-6">
+            <div className="flex items-center gap-3">
+              <Users className="w-5 h-5 text-indigo-400" />
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.25em]">Human Capital</h3>
             </div>
+            <p className="text-[12px] opacity-60 leading-relaxed font-sans">Orchestrate your multidisciplinary team across {pmStats?.totalProjects} specialized nodes.</p>
             <button
               onClick={() => navigate('/pm/team')}
-              className="w-full mt-2 py-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 text-xs font-bold uppercase tracking-wider hover:bg-indigo-500/20 transition-all"
+              className="w-full py-4 rounded-2xl bg-white text-black text-[10px] font-bold uppercase tracking-widest hover:shadow-premium transition-all"
             >
-              Manage Team →
+              Management Console
             </button>
           </div>
         </div>

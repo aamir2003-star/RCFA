@@ -169,6 +169,46 @@ export const getAllPmConflicts = async (req, res) => {
 };
 
 /**
+ * GET /api/v1/conflicts/dev/all
+ * Returns all conflicts for projects where the authenticated developer has assigned modules.
+ */
+export const getAllDevConflicts = async (req, res) => {
+    try {
+        const devId = req.user._id;
+
+        // 1. Find all project IDs where the developer has modules
+        const devProjectIds = await ModuleModel.find({ assignedTo: devId }).distinct('projectId');
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 50;
+        const skip = (page - 1) * limit;
+
+        const [conflicts, total] = await Promise.all([
+            ConflictModel.find({ projectId: { $in: devProjectIds } })
+                .populate('requirementA', 'title description')
+                .populate('requirementB', 'title description')
+                .populate('projectId', 'name')
+                .sort({ severityScore: -1, createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+            ConflictModel.countDocuments({ projectId: { $in: devProjectIds } })
+        ]);
+
+        return res.json({
+            success: true,
+            total,
+            page,
+            pages: Math.ceil(total / limit),
+            conflicts
+        });
+    } catch (err) {
+        console.error('getAllDevConflicts error:', err);
+        return res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+/**
  * PATCH /api/v1/conflicts/:id/resolve
  * Marks a conflict as resolved and emits a socket event.
  */
@@ -241,7 +281,13 @@ export const addConflictComment = async (req, res) => {
                 title: "New Comment on Conflict",
                 message: `${req.user.name} commented on conflict: ${populatedConflict.requirementA?.title} vs ${populatedConflict.requirementB?.title}`,
                 type: "discussion",
-                link: `/pm/conflicts/detail/${id}`
+                link: `/pm/conflicts/${id}/discussion`,
+                metadata: {
+                    senderName: req.user.name,
+                    commentSnippet: message.substring(0, 100),
+                    attachmentCount: attachments.length,
+                    attachments: attachments
+                }
             });
         }
 
@@ -301,7 +347,13 @@ export const addConflictProposal = async (req, res) => {
                 title: "New Resolution Proposal",
                 message: `${req.user.name} submitted a new proposal for a conflict in "${project.name}".`,
                 type: "ai",
-                link: `/pm/conflicts/detail/${id}`
+                link: `/pm/conflicts/${id}/discussion`,
+                metadata: {
+                    senderName: req.user.name,
+                    proposalSnippet: text.substring(0, 100),
+                    attachmentCount: attachments.length,
+                    attachments: attachments
+                }
             });
         }
 
@@ -421,7 +473,11 @@ export const confirmConflictResolution = async (req, res) => {
                     title: "Conflict Resolved",
                     message: `A conflict affecting your module "${mod.name}" has been resolved by PM.`,
                     type: "success",
-                    link: `/dev/modules`
+                    link: `/dev/modules`,
+                    metadata: {
+                        resolverName: req.user.name,
+                        resolutionSummary: resolutionText.substring(0, 150)
+                    }
                 });
             }
         }

@@ -3,7 +3,7 @@
 import React from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Layers, X as CloseIcon, Activity } from "lucide-react";
-import { cn } from "../../lib/utils.js";
+import { cn } from "../../lib/utils";
 import { NAV_ITEMS } from "../../constants/navigation";
 import useAuthStore from "../../stores/useAuthStore";
 import useProjectStore from "../../stores/useProjectStore";
@@ -15,12 +15,12 @@ export function Sidebar({ role, isOpen, onClose }) {
   const navigate = useNavigate();
 
   let title = currentProject?.name || "Spectra AI";
-  let subtitle = currentProject ? "ACTIVE PROJECT" : "";
+  let subtitle = currentProject ? "Project Active" : "";
 
   if (role === "bde") {
-    subtitle = "BDE DASHBOARD";
+    subtitle = "Business Dashboard";
   } else if (role === "pm") {
-    subtitle = subtitle || "PREMIUM SAAS";
+    subtitle = subtitle || "Operations Hub";
   }
 
   const handleHeaderClick = () => {
@@ -30,7 +30,6 @@ export function Sidebar({ role, isOpen, onClose }) {
     }
   };
 
-  // NavLink renderer component block
   const SidebarLink = ({ to, icon: Icon, label, badge, activePaths = [], matchSubPath }) => (
     <NavLink
       to={to}
@@ -38,25 +37,25 @@ export function Sidebar({ role, isOpen, onClose }) {
       onClick={onClose}
       className={({ isActive }) => {
         const isManuallyActive = activePaths.some(
-          (p) =>
-            location.pathname === p || location.pathname.startsWith(`${p}/`),
+          (p) => location.pathname === p || location.pathname.startsWith(`${p}/`),
         );
         const isSubPathActive = matchSubPath && location.pathname.includes(matchSubPath);
         const active = isActive || isManuallyActive || isSubPathActive;
+
         return cn(
-          "flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 cursor-pointer border border-transparent",
+          "flex items-center justify-between px-4 py-3 rounded-full text-[15px] font-medium transition-all duration-300 cursor-pointer border border-transparent mb-1",
           active
-            ? "bg-linear-to-r from-indigo-500 to-blue-600 text-white shadow-lg shadow-indigo-500/25 scale-[1.02]"
-            : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white hover:translate-x-1",
+            ? "bg-black text-white shadow-pill scale-[1.01]"
+            : "text-muted-foreground hover:bg-secondary hover:text-foreground hover:translate-x-0.5",
         );
       }}
     >
       <div className="flex items-center gap-3">
-        <Icon className="w-5 h-5" />
+        <Icon className="w-[18px] h-[18px]" />
         {label}
       </div>
       {badge && (
-        <span className="bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 py-0.5 px-2 rounded-full text-xs font-bold">
+        <span className="bg-secondary text-foreground py-0.5 px-2.5 rounded-full text-[11px] font-bold shadow-inset-subtle">
           {badge}
         </span>
       )}
@@ -65,39 +64,41 @@ export function Sidebar({ role, isOpen, onClose }) {
 
   return (
     <div className={cn(
-      "fixed lg:static top-16 lg:top-0 bottom-0 left-0 w-64 bg-white/90 dark:bg-[#080b11]/90 backdrop-blur-xl flex flex-col h-[calc(100vh-64px)] lg:h-full shrink-0 shadow-2xl shadow-indigo-500/5 dark:shadow-none border-r border-slate-200/50 dark:border-slate-800/50 z-50 transition-all duration-300 transform",
+      "fixed lg:static top-16 lg:top-0 bottom-0 left-0 w-[280px] bg-white dark:bg-[#080b11] flex flex-col h-[calc(100vh-64px)] lg:h-full shrink-0 z-50 transition-all duration-300 transform border-r border-border/40",
       isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
     )}>
-      <div className="p-6 flex flex-col gap-1 relative border-b border-slate-100 dark:border-slate-800/50 mb-4">
+      <div className="p-8 flex flex-col gap-1 relative mb-4">
         <button
           onClick={onClose}
-          className="lg:hidden absolute top-6 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+          className="lg:hidden absolute top-8 right-6 p-2 text-muted-foreground hover:text-foreground"
         >
           <CloseIcon className="w-5 h-5" />
         </button>
         <div
           onClick={handleHeaderClick}
           className={cn(
-            "flex items-center gap-3 font-extrabold text-lg tracking-tight text-slate-900 dark:text-white group",
+            "flex items-center gap-4 group",
             currentProject ? "cursor-pointer hover:opacity-80 transition-opacity" : "cursor-default"
           )}
         >
-          <div className="w-8 h-8 bg-linear-to-tr from-indigo-600 to-blue-500 rounded-lg flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 group-active:scale-95 transition-all duration-300">
-            <Layers className="text-white w-5 h-5" />
+          <div className="w-10 h-10 bg-black dark:bg-white rounded-xl flex items-center justify-center shadow-premium group-hover:scale-105 transition-all duration-300">
+            <Layers className="text-white dark:text-black w-6 h-6" />
           </div>
-          <span className="truncate" title={title}>{title}</span>
+          <div className="flex flex-col min-w-0">
+            <span className="text-xl font-display font-[300] text-foreground truncate" title={title}>{title}</span>
+            {subtitle && (
+              <span className="text-[10px] font-bold text-muted uppercase tracking-[0.2em]">
+                {subtitle}
+              </span>
+            )}
+          </div>
         </div>
-        {subtitle && (
-          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-11">
-            {subtitle}
-          </div>
-        )}
       </div>
 
-      <nav className="flex-1 px-4 py-2 flex flex-col gap-2 overflow-y-auto custom-scrollbar">
+      <nav className="flex-1 px-6 py-2 flex flex-col gap-1 overflow-y-auto custom-scrollbar">
         {NAV_ITEMS[role]?.map((item, index) => (
           item.type === 'separator' ? (
-            <div key={index} className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-6 mb-2 px-3">
+            <div key={index} className="text-[11px] font-bold text-muted uppercase tracking-[0.2em] mt-8 mb-4 px-4 opacity-60">
               {item.label}
             </div>
           ) : (
@@ -113,14 +114,14 @@ export function Sidebar({ role, isOpen, onClose }) {
         ))}
       </nav>
 
-      {/* Status indicators bottom */}
-      <div className="p-4 mt-auto space-y-4 border-t border-slate-100 dark:border-slate-800/50">
-        <div className="flex items-center justify-between px-2">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">System Online</span>
+      {/* System Status */}
+      <div className="p-6 mt-auto border-t border-border/30">
+        <div className="flex items-center justify-between px-3 py-4 rounded-2xl bg-secondary/30">
+          <div className="flex items-center gap-3">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+            <span className="text-[11px] font-bold text-muted tracking-wider uppercase">Pipeline Ready</span>
           </div>
-          <Activity className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600" />
+          <Activity className="w-4 h-4 text-muted/40" />
         </div>
       </div>
     </div>

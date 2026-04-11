@@ -6,75 +6,106 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --font-display: "Inter", sans-serif;
+  --font-display: "Outfit", sans-serif;
   --font-sans: "Inter", sans-serif;
-  --radius-custom: 8px;
+
+  /* ElevenLabs Shadow System */
+  --shadow-premium: rgba(0, 0, 0, 0.06) 0px 0px 0px 1px, rgba(0, 0, 0, 0.04) 0px 1px 2px, rgba(0, 0, 0, 0.04) 0px 2px 4px;
+  --shadow-warm: rgba(78, 50, 23, 0.04) 0px 6px 16px;
+  --shadow-pill: rgba(0, 0, 0, 0.4) 0px 0px 1px, rgba(0, 0, 0, 0.04) 0px 4px 4px;
+  --shadow-inset-subtle: rgba(0, 0, 0, 0.075) 0px 0px 0px 0.5px inset;
 }
 
 @layer base {
   :root {
-    --background: #f6f7f7;
-    --foreground: #0f172a;
+    --background: #ffffff;
+    --foreground: #000000;
     --card: #ffffff;
-    --card-foreground: #0f172a;
-    --popover: #ffffff;
-    --popover-foreground: #0f172a;
-    --primary: #1d283a;
+    --card-foreground: #000000;
+    --primary: #000000;
     --primary-foreground: #ffffff;
-    --secondary: #f1f5f9;
-    --secondary-foreground: #1e293b;
-    --muted: #f1f5f9;
-    --muted-foreground: #64748b;
-    --accent: #f1f5f9;
-    --accent-foreground: #0f172a;
-    --destructive: #ef4444;
-    --destructive-foreground: #ffffff;
-    --border: #e2e8f0;
-    --input: #e2e8f0;
-    --ring: #94a3b8;
+    --secondary: #f5f5f5;
+    --muted: #777169;
+    --muted-foreground: #4e4e4e;
+    --border: #e5e5e5;
+    --input: #e5e5e5;
+    --ring: rgb(147 197 253 / 0.5);
+
+    /* Warm stone signature */
+    --warm-stone: rgba(245, 242, 239, 0.8);
   }
 
   .dark {
-    --background: #0f1115;
-    --foreground: #f8fafc;
-    --card: #16181c;
-    --card-foreground: #f8fafc;
-    --popover: #16181c;
-    --popover-foreground: #f8fafc;
-    --primary: #f8fafc;
-    --primary-foreground: #1d283a;
-    --secondary: #1e293b;
-    --secondary-foreground: #f8fafc;
-    --muted: #1e293b;
-    --muted-foreground: #94a3b8;
-    --accent: #1e293b;
-    --accent-foreground: #f8fafc;
-    --destructive: #7f1d1d;
-    --destructive-foreground: #f8fafc;
-    --border: #1e293b;
-    --input: #1e293b;
-    --ring: #cbd5e1;
+    --background: #080b11;
+    --foreground: #fcfcfc;
+    --card: #121620;
+    --card-foreground: #fcfcfc;
+    --primary: #fcfcfc;
+    --primary-foreground: #000000;
+    --secondary: #1a1f2e;
+    --muted: #888277;
+    --muted-foreground: #a1a1aa;
+    --border: #242d3d;
+    --input: #242d3d;
+    --ring: rgb(147 197 253 / 0.3);
+
+    --warm-stone: rgba(35, 38, 48, 0.8);
   }
 
   body {
     background-color: var(--background);
     color: var(--foreground);
-    @apply font-sans antialiased;
+    @apply font-sans antialiased tracking-[0.16px];
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-display font-[300] tracking-tight;
+  }
+}
+
+@layer components {
+  .pill-button {
+    @apply rounded-full px-6 py-2.5 font-sans font-medium transition-all duration-300 active:scale-95;
+    box-shadow: var(--shadow-premium);
+  }
+
+  .pill-button:hover {
+    box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px;
+  }
+
+  .warm-pill {
+    background-color: var(--warm-stone);
+    box-shadow: var(--shadow-warm);
+    @apply rounded-[30px] px-5 py-3 font-sans font-medium transition-all duration-300 active:scale-95;
+  }
+
+  .warm-pill:hover {
+    @apply bg-secondary/80 translate-y-[-1px];
+  }
+
+  .premium-card {
+    @apply bg-white dark:bg-[#121620]/80 backdrop-blur-xl rounded-[30px] border border-border/10 transition-all duration-500;
+    box-shadow: var(--shadow-premium);
+  }
+
+  .premium-card:hover {
+    @apply border-border/30;
+    box-shadow: var(--shadow-warm), var(--shadow-premium);
+  }
+
+  .active-tab-glow {
+    @apply relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-black dark:after:bg-white after:rounded-full after:shadow-[0_0_8px_rgba(0, 0, 0, 0.5)] dark:after:shadow-[0_0_8px_rgba(255, 255, 255, 0.5)];
   }
 }

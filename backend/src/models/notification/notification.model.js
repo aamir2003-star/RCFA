@@ -28,6 +28,10 @@ const notificationSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
             index: true
+        },
+        metadata: {
+            type: mongoose.Schema.Types.Mixed,
+            default: {}
         }
     },
     { timestamps: true }

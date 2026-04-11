@@ -18,7 +18,7 @@ export const NAV_ITEMS = {
         { to: "/dev/dashboard", icon: LayoutDashboard, label: "Dashboard" },
         { to: "/dev/modules", icon: Box, label: "Modules" },
         { to: "/dev/conflicts/discussion", icon: MessageSquare, label: "Discussions", matchSubPath: "/discussion" },
-        { to: "/dev/conflicts", icon: AlertTriangle, label: "Conflicts", badge: 4 }
+        { to: "/dev/conflicts", icon: AlertTriangle, label: "Conflicts" }
     ],
     pm: [
         { to: "/pm/dashboard", icon: LayoutDashboard, label: "Dashboard" },
