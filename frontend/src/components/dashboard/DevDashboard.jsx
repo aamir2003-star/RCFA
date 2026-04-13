@@ -76,9 +76,6 @@ export default function DevDashboard() {
             <h2 className="text-4xl font-display font-[300] text-foreground italic tracking-tight">Assigned Contradictions</h2>
             <p className="text-[10px] text-muted font-black uppercase tracking-[0.3em]">Critical Specification Alignment Required</p>
           </div>
-          <button className="pill-button bg-black text-white text-[10px] uppercase tracking-[0.3em] py-5 px-12 hover:shadow-premium transition-all">
-            Export Manifest
-          </button>
         </div>
 
         <div className="divide-y divide-border/5">

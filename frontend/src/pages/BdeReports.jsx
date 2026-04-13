@@ -18,6 +18,7 @@ import useProjectStore from "../stores/useProjectStore";
 import { Button } from "../components/ui/Button";
 import { cn } from "../lib/utils";
 import { REPORTS_STATS_TEMPLATE, TIMELINE_VELOCITY_TEMPLATE } from "../constants/dashboard";
+import { downloadCSV, formatProjectBrief, calculateProgress } from "../lib/exportUtils";
 
 export default function BdeReports() {
     const navigate = useNavigate();
@@ -34,9 +35,11 @@ export default function BdeReports() {
         fetchBdeStats();
     }, [fetchProjects, fetchBdeStats]);
 
-    const stats = REPORTS_STATS_TEMPLATE.map(stat => ({
+    const statsConfig = REPORTS_STATS_TEMPLATE.map(stat => ({
         ...stat,
-        value: stat.isPercentage ? `${bdeStats?.[stat.key] || 0}%` : (bdeStats?.[stat.key] || 0)
+        value: stat.key === 'completedProjects'
+            ? (bdeStats?.totalProjects > 0 ? Math.round((bdeStats?.completedProjects / bdeStats?.totalProjects) * 100) : 0)
+            : (bdeStats?.[stat.key] || 0)
     }));
 
     return (
@@ -53,11 +56,17 @@ export default function BdeReports() {
                     <p className="text-base text-muted font-sans tracking-wide">Autonomous portfolio insights and project health synthesis</p>
                 </div>
                 <div className="flex items-center gap-4">
-                    <button className="group flex items-center gap-3 px-6 py-3 bg-secondary/30 border border-border/10 rounded-2xl text-[11px] font-black text-muted uppercase tracking-[0.2em] hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-500">
+                    <button
+                        onClick={() => downloadCSV(projects.map(formatProjectBrief), "Portfolio_Audit")}
+                        className="group flex items-center gap-3 px-6 py-3 bg-secondary/30 border border-border/10 rounded-2xl text-[11px] font-black text-muted uppercase tracking-[0.2em] hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-500"
+                    >
                         <Download className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
                         Export Audit
                     </button>
-                    <Button className="font-black bg-black dark:bg-white text-white dark:text-black rounded-2xl px-8 h-12 shadow-pill hover:scale-[1.02] active:scale-95 transition-all">
+                    <Button
+                        onClick={() => navigate("/bde/analytics")}
+                        className="font-black bg-black dark:bg-white text-white dark:text-black rounded-2xl px-8 h-12 shadow-pill hover:scale-[1.02] active:scale-95 transition-all"
+                    >
                         Live Analytics
                     </Button>
                 </div>
@@ -65,7 +74,7 @@ export default function BdeReports() {
 
             {/* KPI Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                {stats.map((stat) => (
+                {statsConfig.map((stat) => (
                     <div key={stat.label} className="premium-card p-8 group transition-all duration-500 hover:scale-[1.01]">
                         <div className="flex justify-between items-start mb-6">
                             <div className={cn("p-3 rounded-2xl shadow-premium transition-transform duration-500 group-hover:scale-110", stat.color)}>
@@ -157,16 +166,20 @@ export default function BdeReports() {
                                                     <div
                                                         className={cn(
                                                             "h-full rounded-full transition-all duration-1500 ease-out",
-                                                            (project.conflictCount || 0) > 5 ? "bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)]" : (project.conflictCount || 0) > 0 ? "bg-amber-500" : "bg-emerald-500"
+                                                            calculateProgress(project) > 80 ? "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]" :
+                                                                calculateProgress(project) > 40 ? "bg-amber-500" : "bg-rose-500"
                                                         )}
-                                                        style={{ width: `${Math.min(100, (project.conflictCount || 1) * 10)}%` }}
+                                                        style={{ width: `${calculateProgress(project)}%` }}
                                                     ></div>
                                                 </div>
+                                                <span className="text-[10px] font-bold text-muted w-8 tabular-nums">
+                                                    {calculateProgress(project)}%
+                                                </span>
                                             </div>
                                         </td>
                                         <td className="px-8 py-6 text-right">
                                             <button
-                                                onClick={() => navigate(`/bde/editor?projectId=${project._id}`)}
+                                                onClick={() => navigate(`/bde/project-details?projectId=${project._id}`)}
                                                 className="w-10 h-10 bg-secondary/20 border border-border/10 rounded-2xl flex items-center justify-center transition-all duration-300 hover:bg-black dark:hover:bg-white text-muted hover:text-white dark:hover:text-black hover:scale-105 active:scale-95 shadow-sm"
                                             >
                                                 <ChevronRight className="w-5 h-5" />

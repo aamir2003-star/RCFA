@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { ProjectModel } from "../models/project/project.model.js";
 import { RequirementModel } from "../models/requirements/requirement.model.js";
 import { ConflictModel } from "../models/conflict/conflict.model.js";
+import { ModuleModel } from "../models/module/module.model.js";
 
 import { createNotification } from "./notification.service.js";
 
@@ -46,11 +47,21 @@ export const getAllProjects = async (options = {}) => {
 
   // Append counts
   const projectsWithCounts = await Promise.all(projectsResult.map(async (project) => {
-    const [reqCount, conCount] = await Promise.all([
+    const [reqCount, conTotal, conResolved, modTotal, modCompleted] = await Promise.all([
       RequirementModel.countDocuments({ projectId: project._id }),
-      ConflictModel.countDocuments({ projectId: project._id })
+      ConflictModel.countDocuments({ projectId: project._id }),
+      ConflictModel.countDocuments({ projectId: project._id, status: "resolved" }),
+      ModuleModel.countDocuments({ projectId: project._id }),
+      ModuleModel.countDocuments({ projectId: project._id, status: "completed" })
     ]);
-    return { ...project, requirementCount: reqCount, conflictCount: conCount };
+    return {
+      ...project,
+      requirementCount: reqCount,
+      conflictCount: conTotal,
+      resolvedConflictCount: conResolved,
+      totalModuleCount: modTotal,
+      completedModuleCount: modCompleted
+    };
   }));
 
   return {
@@ -92,7 +103,7 @@ export const getProjectStats = async (projectId, timeframe = 'WEEKLY') => {
       break;
   }
 
-  const [reqStatsRaw, conflictStatsRaw, timelineData, recentActivity] = await Promise.all([
+  const [reqStatsRaw, conflictStatsRaw, moduleStatsRaw, timelineData, recentActivity] = await Promise.all([
     // Requirement breakdown
     RequirementModel.aggregate([
       { $match: { projectId: pId } },
@@ -102,6 +113,11 @@ export const getProjectStats = async (projectId, timeframe = 'WEEKLY') => {
     ConflictModel.aggregate([
       { $match: { projectId: pId } },
       { $group: { _id: "$severityColor", count: { $sum: 1 } } }
+    ]),
+    // Module breakdown
+    ModuleModel.aggregate([
+      { $match: { projectId: pId } },
+      { $group: { _id: "$status", count: { $sum: 1 } } }
     ]),
     // Timeline: conflicts in the selected timeframe
     ConflictModel.aggregate([
@@ -138,6 +154,15 @@ export const getProjectStats = async (projectId, timeframe = 'WEEKLY') => {
   // Process Conflict Stats
   const rawConflictStats = conflictStatsRaw.reduce((acc, curr) => ({ ...acc, [curr._id]: curr.count }), {});
   const totalConflicts = Object.values(rawConflictStats).reduce((a, b) => a + b, 0);
+  const resolvedConflicts = await ConflictModel.countDocuments({ projectId: pId, status: "resolved" });
+
+  // Process Module Stats
+  const rawModuleStats = moduleStatsRaw.reduce((acc, curr) => ({ ...acc, [curr._id]: curr.count }), {
+    pending: 0,
+    "in-progress": 0,
+    completed: 0
+  });
+  const totalModules = Object.values(rawModuleStats).reduce((a, b) => a + b, 0);
 
   // Logical Readiness Score: (Approved Reqs / Total Reqs) - (Total Conflicts * 0.05 weighting)
   // Base 100%, subtract for drafts and conflicts.
@@ -153,9 +178,16 @@ export const getProjectStats = async (projectId, timeframe = 'WEEKLY') => {
     },
     conflicts: {
       total: totalConflicts,
+      resolved: resolvedConflicts,
       high: rawConflictStats.Red || 0,
       medium: (rawConflictStats.Orange || 0) + (rawConflictStats.Yellow || 0),
       low: rawConflictStats.Green || 0,
+    },
+    modules: {
+      total: totalModules,
+      completed: rawModuleStats.completed,
+      active: rawModuleStats["in-progress"],
+      pending: rawModuleStats.pending
     },
     readiness: readinessValue,
     timeline: timelineData,
@@ -264,10 +296,38 @@ export const getBdeStats = async (userId) => {
       // Cumulative Requirements count
       RequirementModel.countDocuments({
         projectId: { $in: bdeProjectIds }
-      })
+      }),
+
+      // Total Resolved Conflicts
+      ConflictModel.countDocuments({
+        projectId: { $in: bdeProjectIds },
+        status: "resolved"
+      }),
+
+      // Total Modules and Completed Modules
+      ModuleModel.aggregate([
+        { $match: { projectId: { $in: bdeProjectIds } } },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: 1 },
+            completed: {
+              $sum: { $cond: [{ $eq: ["$status", "completed"] }, 1, 0] }
+            }
+          }
+        }
+      ])
     ]);
 
-    const [totalProjects, totalConflicts, statusBreakdown, uniqueClients, totalRequirements] = stats;
+    const [
+      totalProjects,
+      totalConflicts,
+      statusBreakdown,
+      uniqueClients,
+      totalRequirements,
+      resolvedConflicts,
+      moduleStats
+    ] = stats;
 
     const statusMap = statusBreakdown.reduce((acc, curr) => ({ ...acc, [curr._id]: curr.count }), {
       planning: 0,
@@ -275,13 +335,19 @@ export const getBdeStats = async (userId) => {
       completed: 0
     });
 
+    const totalModules = moduleStats[0]?.total || 0;
+    const completedModules = moduleStats[0]?.completed || 0;
+
     return {
       totalProjects,
       activeProjects: statusMap.active,
       totalConflicts,
+      resolvedConflicts,
       completedProjects: statusMap.completed,
       activeClients: uniqueClients.length,
-      totalRequirements
+      totalRequirements,
+      totalModules,
+      completedModules
     };
   } catch (error) {
     console.error("Error in getBdeStats service:", error);
