@@ -26,6 +26,7 @@ const userSchema = new mongoose.Schema(
 
 
     refreshToken: String,
+    isOnline: { type: Boolean, default: false },
     resetToken: String,
     resetTokenExpiry: Date,
   },

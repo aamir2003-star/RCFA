@@ -80,10 +80,6 @@ export default function BdeReports() {
                             <div className={cn("p-3 rounded-2xl shadow-premium transition-transform duration-500 group-hover:scale-110", stat.color)}>
                                 <stat.icon className="w-5 h-5" />
                             </div>
-                            <div className="text-[10px] font-black text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
-                                <ArrowUpRight className="w-3.5 h-3.5" />
-                                12.4%
-                            </div>
                         </div>
                         <p className="text-[11px] font-black text-muted uppercase tracking-[0.25em] mb-2">{stat.label}</p>
                         <h3 className="text-4xl font-display font-[300] text-foreground tracking-tight mb-3">{stat.value}</h3>

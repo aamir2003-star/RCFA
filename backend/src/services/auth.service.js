@@ -21,8 +21,9 @@ export const registerUser = async ({ name, email, password, role }) => {
   const accessToken = generateAccessToken(user);
   const refreshToken = generateRefreshToken(user);
 
-  // Save refresh token
+  // Save refresh token and set online status
   user.refreshToken = refreshToken;
+  user.isOnline = true;
   await user.save();
 
   return { user, accessToken, refreshToken };
@@ -40,6 +41,7 @@ export const loginUser = async ({ email, password }) => {
   const refreshToken = generateRefreshToken(user);
 
   user.refreshToken = refreshToken;
+  user.isOnline = true;
   await user.save();
 
   return { user, accessToken, refreshToken };
