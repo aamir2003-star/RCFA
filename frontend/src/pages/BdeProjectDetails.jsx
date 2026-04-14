@@ -65,27 +65,21 @@ export default function BdeProjectDetails() {
         return calculateProgress(currentProject);
     }, [currentProject]);
 
-    const handleExport = () => {
+    const handleExportCSV = () => {
         if (!currentProject) return;
-
-        // Prepare detailed data for export
-        const projectData = formatProjectBrief(currentProject);
-
-        // Add module summaries to the export if needed, 
-        // but for now brief report is enough as requested.
-        downloadCSV([projectData], `${currentProject.name}_Report`);
+        downloadCSV([formatProjectBrief(currentProject)], `${currentProject.name}_Report`);
     };
 
     if (!currentProject) return null;
 
     return (
-        <div className="w-full max-w-7xl mx-auto pb-20 animate-in fade-in duration-700">
+        <div id="project-details-container" className="w-full max-w-7xl mx-auto pb-20 animate-in fade-in duration-700 p-8 bg-background">
             {/* Header */}
             <div className="flex flex-col lg:flex-row justify-between items-end border-b border-border/20 pb-12 mb-12 gap-8">
                 <div className="flex items-center gap-8">
                     <button
                         onClick={() => navigate(-1)}
-                        className="group w-14 h-14 rounded-full border border-border/20 flex items-center justify-center hover:bg-black dark:hover:bg-white transition-all duration-500"
+                        className="group w-14 h-14 rounded-full border border-border/20 flex items-center justify-center hover:bg-black dark:hover:bg-white transition-all duration-500 no-print"
                     >
                         <ArrowLeft className="w-6 h-6 text-muted group-hover:text-white dark:group-hover:text-black transition-colors" />
                     </button>
@@ -102,17 +96,17 @@ export default function BdeProjectDetails() {
                     </div>
                 </div>
 
-                <div className="flex gap-4">
+                <div className="flex gap-4 no-print">
                     <button
-                        onClick={handleExport}
-                        className="group flex items-center gap-3 px-8 py-4 bg-secondary/30 border border-border/10 rounded-2xl text-[11px] font-black text-muted uppercase tracking-[0.2em] hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-500 shadow-sm"
+                        onClick={handleExportCSV}
+                        className="group flex items-center gap-3 px-8 py-4 bg-secondary/40 border border-border/10 rounded-2xl text-[11px] font-black text-foreground uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all duration-300 shadow-premium"
                     >
-                        <Download className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
-                        Export Full Report
+                        <Download className="w-4 h-4" />
+                        Export CSV
                     </button>
                     <Button
                         onClick={() => navigate(`/bde/analytics?projectId=${projectId}`)}
-                        className="h-14 px-10 rounded-2xl font-black bg-black dark:bg-white text-white dark:text-black hover:scale-105 active:scale-95 transition-all"
+                        className="h-14 px-10 rounded-2xl font-black bg-indigo-600 text-white hover:scale-105 active:scale-95 transition-all"
                     >
                         Real-time Analytics
                     </Button>

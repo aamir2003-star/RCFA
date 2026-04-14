@@ -6,11 +6,11 @@ import {
     AlertCircle,
     CheckCircle2,
     Clock,
-    FileText,
     ChevronRight,
     ArrowUpRight,
     Search,
     Filter,
+    FileText,
     Download
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -35,18 +35,25 @@ export default function BdeReports() {
         fetchBdeStats();
     }, [fetchProjects, fetchBdeStats]);
 
-    const statsConfig = REPORTS_STATS_TEMPLATE.map(stat => ({
-        ...stat,
-        value: stat.key === 'completedProjects'
-            ? (bdeStats?.totalProjects > 0 ? Math.round((bdeStats?.completedProjects / bdeStats?.totalProjects) * 100) : 0)
-            : (bdeStats?.[stat.key] || 0)
-    }));
+    const handleExportCSV = () => {
+        const rows = projects.map(p => formatProjectBrief(p));
+        downloadCSV(rows, 'BDE_Portfolio_Report');
+    };
+
+    const statsConfig = REPORTS_STATS_TEMPLATE
+        .filter(stat => stat.key !== 'totalProjects')
+        .map(stat => ({
+            ...stat,
+            value: stat.key === 'completedProjects'
+                ? (bdeStats?.totalProjects > 0 ? Math.round((bdeStats?.completedProjects / bdeStats?.totalProjects) * 100) : 0)
+                : (bdeStats?.[stat.key] || 0)
+        }));
 
     return (
-        <div className="space-y-12 p-1">
+        <div id="report-engine-container" className="space-y-12 p-8 bg-background min-h-screen">
             {/* Header */}
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between border-b border-border/20 pb-12 mb-16 gap-8">
-                <div className="space-y-3">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between border-b border-border/20 pb-12 mb-16 gap-8 no-print">
+                <div className="space-y-3 text-left">
                     <div className="flex items-center gap-3">
                         <div className="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-black text-indigo-600 uppercase tracking-[0.25em] shadow-premium">
                             Operational Ledger
@@ -55,17 +62,17 @@ export default function BdeReports() {
                     <h1 className="text-5xl font-display font-[300] tracking-tight text-foreground">Reporting Engine</h1>
                     <p className="text-base text-muted font-sans tracking-wide">Autonomous portfolio insights and project health synthesis</p>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                     <button
-                        onClick={() => downloadCSV(projects.map(formatProjectBrief), "Portfolio_Audit")}
-                        className="group flex items-center gap-3 px-6 py-3 bg-secondary/30 border border-border/10 rounded-2xl text-[11px] font-black text-muted uppercase tracking-[0.2em] hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-500"
+                        onClick={handleExportCSV}
+                        className="group flex items-center gap-3 px-6 py-3 bg-secondary/40 border border-border/10 rounded-2xl text-[11px] font-black text-foreground uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all duration-300 shadow-premium"
                     >
-                        <Download className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
-                        Export Audit
+                        <Download className="w-4 h-4" />
+                        Export CSV
                     </button>
                     <Button
                         onClick={() => navigate("/bde/analytics")}
-                        className="font-black bg-black dark:bg-white text-white dark:text-black rounded-2xl px-8 h-12 shadow-pill hover:scale-[1.02] active:scale-95 transition-all"
+                        className="font-black bg-indigo-600 text-white rounded-2xl px-8 h-12 shadow-pill hover:scale-[1.02] active:scale-95 transition-all"
                     >
                         Live Analytics
                     </Button>
@@ -102,7 +109,7 @@ export default function BdeReports() {
                                 <p className="text-[12px] text-muted font-sans tracking-wide">Real-time vector analysis across portfolio</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 no-print">
                             <div className="relative group/search w-full sm:w-64">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted group-focus-within/search:text-foreground transition-colors" />
                                 <input
@@ -122,7 +129,7 @@ export default function BdeReports() {
                                     <th className="px-8 py-5 text-[11px] font-black text-muted uppercase tracking-[0.2em] opacity-60 text-center">Load</th>
                                     <th className="px-8 py-5 text-[11px] font-black text-muted uppercase tracking-[0.2em] opacity-60 text-center">Signals</th>
                                     <th className="px-8 py-5 text-[11px] font-black text-muted uppercase tracking-[0.2em] opacity-60">Risk Vector</th>
-                                    <th className="px-8 py-5 text-[11px] font-black text-muted uppercase tracking-[0.2em] opacity-60 text-right">Access</th>
+                                    <th className="px-8 py-5 text-[11px] font-black text-muted uppercase tracking-[0.2em] opacity-60 text-right no-print">Access</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border/5">
@@ -173,7 +180,7 @@ export default function BdeReports() {
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="px-8 py-6 text-right">
+                                        <td className="px-8 py-6 text-right no-print">
                                             <button
                                                 onClick={() => navigate(`/bde/project-details?projectId=${project._id}`)}
                                                 className="w-10 h-10 bg-secondary/20 border border-border/10 rounded-2xl flex items-center justify-center transition-all duration-300 hover:bg-black dark:hover:bg-white text-muted hover:text-white dark:hover:text-black hover:scale-105 active:scale-95 shadow-sm"
