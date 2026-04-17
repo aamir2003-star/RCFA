@@ -100,17 +100,23 @@ export const getProjectConflicts = async (req, res) => {
         const { projectId } = req.params;
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 20;
+        const status = req.query.status; // Optional status filter
         const skip = (page - 1) * limit;
 
+        const query = { projectId };
+        if (status && status !== 'all') {
+            query.status = status;
+        }
+
         const [conflicts, total] = await Promise.all([
-            ConflictModel.find({ projectId })
+            ConflictModel.find(query)
                 .populate('requirementA', 'title description category priority')
                 .populate('requirementB', 'title description category priority')
                 .sort({ severityScore: -1 }) // highest severity first
                 .skip(skip)
                 .limit(limit)
                 .lean(),
-            ConflictModel.countDocuments({ projectId }),
+            ConflictModel.countDocuments(query),
         ]);
 
         return res.json({
@@ -141,10 +147,16 @@ export const getAllPmConflicts = async (req, res) => {
 
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 50;
+        const status = req.query.status;
         const skip = (page - 1) * limit;
 
+        const query = { projectId: { $in: pmProjectIds } };
+        if (status && status !== 'all') {
+            query.status = status;
+        }
+
         const [conflicts, total] = await Promise.all([
-            ConflictModel.find({ projectId: { $in: pmProjectIds } })
+            ConflictModel.find(query)
                 .populate('requirementA', 'title description')
                 .populate('requirementB', 'title description')
                 .populate('projectId', 'name')
@@ -152,7 +164,7 @@ export const getAllPmConflicts = async (req, res) => {
                 .skip(skip)
                 .limit(limit)
                 .lean(),
-            ConflictModel.countDocuments({ projectId: { $in: pmProjectIds } })
+            ConflictModel.countDocuments(query)
         ]);
 
         return res.json({
@@ -181,10 +193,16 @@ export const getAllDevConflicts = async (req, res) => {
 
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 50;
+        const status = req.query.status;
         const skip = (page - 1) * limit;
 
+        const query = { projectId: { $in: devProjectIds } };
+        if (status && status !== 'all') {
+            query.status = status;
+        }
+
         const [conflicts, total] = await Promise.all([
-            ConflictModel.find({ projectId: { $in: devProjectIds } })
+            ConflictModel.find(query)
                 .populate('requirementA', 'title description')
                 .populate('requirementB', 'title description')
                 .populate('projectId', 'name')
@@ -192,7 +210,7 @@ export const getAllDevConflicts = async (req, res) => {
                 .skip(skip)
                 .limit(limit)
                 .lean(),
-            ConflictModel.countDocuments({ projectId: { $in: devProjectIds } })
+            ConflictModel.countDocuments(query)
         ]);
 
         return res.json({

@@ -6,6 +6,13 @@ const useConflictStore = create((set, get) => ({
     conflicts: [],
     loading: false,
     error: null,
+    pagination: {
+        page: 1,
+        pages: 1,
+        total: 0,
+        hasMore: true
+    },
+    filter: 'open',
     analysisProgress: {
         percent: 0,
         message: "",
@@ -13,44 +20,66 @@ const useConflictStore = create((set, get) => ({
         status: "idle" // idle, running, completed, error
     },
 
-    fetchConflicts: async (projectId) => {
-        set({ loading: true });
+    fetchConflicts: async (projectId, page = 1, status = 'open', append = false) => {
+        set({ loading: !append, filter: status });
         try {
-            const response = await api.get(`/conflicts/${projectId}`);
-            set({
-                conflicts: response.data.conflicts || [],
-                loading: false
+            const response = await api.get(`/conflicts/${projectId}`, {
+                params: { page, limit: 10, status }
             });
+            const { conflicts, total, pages } = response.data;
+            
+            set((state) => ({
+                conflicts: append ? [...state.conflicts, ...conflicts] : conflicts,
+                pagination: { page, pages, total, hasMore: page < pages },
+                filter: status,
+                loading: false
+            }));
         } catch (error) {
             set({ error: error.message, loading: false });
         }
     },
 
-    fetchAllPmConflicts: async () => {
-        set({ loading: true });
+    fetchAllPmConflicts: async (page = 1, status = 'open', append = false) => {
+        set({ loading: !append, filter: status });
         try {
-            const response = await api.get('/conflicts/pm/all');
-            set({
-                conflicts: response.data.conflicts || [],
-                loading: false
+            const response = await api.get('/conflicts/pm/all', {
+                params: { page, limit: 10, status }
             });
+            const { conflicts, total, pages } = response.data;
+            set((state) => ({
+                conflicts: append ? [...state.conflicts, ...conflicts] : conflicts,
+                pagination: { page, pages, total, hasMore: page < pages },
+                filter: status,
+                loading: false
+            }));
         } catch (error) {
             set({ error: error.message, loading: false });
         }
     },
 
-    fetchAllDevConflicts: async () => {
-        set({ loading: true });
+    fetchAllDevConflicts: async (page = 1, status = 'open', append = false) => {
+        set({ loading: !append, filter: status });
         try {
-            const response = await api.get('/conflicts/dev/all');
-            set({
-                conflicts: response.data.conflicts || [],
-                loading: false
+            const response = await api.get('/conflicts/dev/all', {
+                params: { page, limit: 10, status }
             });
+            const { conflicts, total, pages } = response.data;
+            set((state) => ({
+                conflicts: append ? [...state.conflicts, ...conflicts] : conflicts,
+                pagination: { page, pages, total, hasMore: page < pages },
+                filter: status,
+                loading: false
+            }));
         } catch (error) {
             set({ error: error.message, loading: false });
         }
     },
+
+    setFilter: (status) => set({ filter: status }),
+    resetConflicts: () => set({ 
+        conflicts: [], 
+        pagination: { page: 1, pages: 1, total: 0, hasMore: true } 
+    }),
 
     startAnalysis: async (projectId) => {
         set({ analysisProgress: { status: 'running', percent: 0, message: 'Initializing engine...' } });

@@ -140,7 +140,7 @@ export default function ConflictDiscussion() {
             setSelectedFiles([]);
             setFilePreviews([]);
             setIsProposing(false);
-            setActiveTab("intelligence"); // Auto-switch to see the new proposal
+            setActiveTab("discussion"); // Return to chat so the stream remains visible
             toast.success("Proposal live in community hub");
         }
     });
@@ -204,12 +204,12 @@ export default function ConflictDiscussion() {
                     initial={false}
                     transition={{ type: "spring", stiffness: 500, damping: 40 }}
                     style={{
-                        width: 'calc(33.33% - 2px)',
+                        width: conflict.status === 'resolved' ? '50%' : '33.33%',
                         height: 'calc(100% - 4px)',
-                        left: activeTab === 'discussion' ? '2px' : activeTab === 'intelligence' ? '33.33%' : '66.66%'
+                        left: activeTab === 'discussion' ? '2px' : activeTab === 'intelligence' ? (conflict.status === 'resolved' ? '50%' : '33.33%') : '66.66%'
                     }}
                 />
-                {["discussion", "intelligence", "propose"].map((tab) => (
+                {["discussion", "intelligence", conflict.status !== 'resolved' && "propose"].filter(Boolean).map((tab) => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
@@ -241,9 +241,17 @@ export default function ConflictDiscussion() {
                                         <ArrowLeft className="w-2 h-2 group-hover:-translate-x-1 transition-transform" />
                                         Registry
                                     </button>
-                                    <h1 className="text-base md:text-4xl text-foreground font-display font-[300] tracking-tight leading-none">
-                                        {conflict.conflictType}
-                                    </h1>
+                                    <div className="flex items-center gap-4">
+                                        <h1 className="text-base md:text-4xl text-foreground font-display font-[300] tracking-tight leading-none">
+                                            {conflict.conflictType}
+                                        </h1>
+                                        {conflict.status === 'resolved' && (
+                                            <div className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2">
+                                                <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                                                <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">Protocol Locked</span>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -310,38 +318,91 @@ export default function ConflictDiscussion() {
 
                         {/* Input Area - Fixed */}
                         <div className="px-4 py-4 border-t border-border/10 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl shrink-0">
-                            <div className="relative max-w-3xl mx-auto bg-white dark:bg-zinc-900 rounded-2xl border border-border/20 p-2 flex items-center gap-2">
-                                <button onClick={() => fileInputRef.current.click()} className="p-2 text-muted hover:text-foreground"><Paperclip className="w-5 h-5" /></button>
-                                <input type="file" multiple ref={fileInputRef} onChange={handleFileSelect} className="hidden" />
-                                <input
-                                    value={message}
-                                    onChange={(e) => setMessage(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                            e.preventDefault();
-                                            if (message.trim() || selectedFiles.length > 0) {
-                                                const fd = new FormData();
-                                                fd.append("message", message);
-                                                selectedFiles.forEach(file => fd.append("attachments", file));
-                                                commentMutation.mutate(fd);
+                            <div className="relative max-w-3xl mx-auto space-y-3">
+                                {/* Attachment Previews */}
+                                <AnimatePresence>
+                                    {filePreviews.length > 0 && (
+                                        <motion.div 
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            className="flex flex-wrap gap-2 p-3 bg-secondary/10 rounded-2xl border border-border/10 backdrop-blur-md"
+                                        >
+                                            {filePreviews.map((f, i) => (
+                                                <div key={i} className="group relative flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-zinc-800 rounded-xl border border-border/10 shadow-sm animate-in zoom-in-50 duration-300">
+                                                    <div className="w-5 h-5 rounded-lg bg-indigo-500/10 flex items-center justify-center">
+                                                        {f.isImage ? <Plus className="w-3 h-3 text-indigo-500" /> : <FileText className="w-3 h-3 text-indigo-500" />}
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[10px] font-bold truncate max-w-[120px]">{f.name}</span>
+                                                        <span className="text-[7px] font-black text-muted uppercase tracking-tighter">{f.size}</span>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => removeFile(i)}
+                                                        className="ml-1 p-1 hover:bg-secondary rounded-lg transition-all"
+                                                    >
+                                                        <X className="w-3.5 h-3.5 text-muted hover:text-red-500" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                            <button 
+                                                onClick={() => setFilePreviews([])}
+                                                className="text-[8px] font-black text-muted uppercase tracking-widest hover:text-foreground ml-auto pr-2"
+                                            >
+                                                Clear All
+                                            </button>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                                <div className={cn(
+                                    "relative bg-white dark:bg-zinc-900 rounded-2xl border border-border/20 p-2 flex items-center gap-2 transition-all duration-500",
+                                    commentMutation.isPending && "opacity-50 grayscale pointer-events-none"
+                                )}>
+                                    <button 
+                                        onClick={() => fileInputRef.current.click()} 
+                                        className="p-2 text-muted hover:text-foreground transition-colors"
+                                        disabled={conflict.status === 'resolved'}
+                                    >
+                                        <Paperclip className="w-5 h-5" />
+                                    </button>
+                                    <input type="file" multiple ref={fileInputRef} onChange={handleFileSelect} className="hidden" />
+                                    <input
+                                        value={message}
+                                        onChange={(e) => setMessage(e.target.value)}
+                                        disabled={commentMutation.isPending || conflict.status === 'resolved'}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault();
+                                                if (message.trim() || selectedFiles.length > 0) {
+                                                    const fd = new FormData();
+                                                    fd.append("message", message);
+                                                    selectedFiles.forEach(file => fd.append("attachments", file));
+                                                    commentMutation.mutate(fd);
+                                                }
                                             }
-                                        }
-                                    }}
-                                    placeholder="Transmit..."
-                                    className="flex-1 bg-transparent border-none focus:ring-0 text-[14px]"
-                                />
-                                <button
-                                    onClick={() => {
-                                        const fd = new FormData();
-                                        fd.append("message", message);
-                                        selectedFiles.forEach(file => fd.append("attachments", file));
-                                        commentMutation.mutate(fd);
-                                    }}
-                                    disabled={commentMutation.isPending || (!message.trim() && selectedFiles.length === 0)}
-                                    className="p-2 rounded-xl bg-foreground text-background"
-                                >
-                                    {commentMutation.isPending ? <Activity className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-                                </button>
+                                        }}
+                                        placeholder={conflict.status === 'resolved' ? "Review discussions..." : "Transmit message..."}
+                                        className="flex-1 bg-transparent border-none focus:ring-0 text-[14px]"
+                                    />
+                                    <button
+                                        onClick={() => {
+                                            const fd = new FormData();
+                                            fd.append("message", message);
+                                            selectedFiles.forEach(file => fd.append("attachments", file));
+                                            commentMutation.mutate(fd);
+                                        }}
+                                        disabled={commentMutation.isPending || (!message.trim() && selectedFiles.length === 0)}
+                                        className="p-2 rounded-xl bg-foreground text-background transition-transform active:scale-95 disabled:opacity-50"
+                                    >
+                                        {commentMutation.isPending ? <Activity className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                                    </button>
+                                </div>
+                                {commentMutation.isPending && (
+                                    <div className="flex items-center justify-center gap-2 animate-pulse">
+                                        <span className="text-[8px] font-black text-indigo-500 uppercase tracking-[0.3em]">Synchronizing technical assets...</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </motion.div>
@@ -367,18 +428,32 @@ export default function ConflictDiscussion() {
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-[10px] font-black text-muted uppercase tracking-[0.3em] flex items-center gap-2">
                                         <Sparkles className="w-3.5 h-3.5" />
-                                        AI Resolutions
+                                        Intelligence Hub
                                     </h3>
                                     <div className="h-[1px] flex-1 bg-border/10 ml-4" />
                                 </div>
                                 <div className="space-y-4">
-                                    {conflict.resolutions?.map((res) => (
-                                        <motion.div layout key={res._id} className="p-5 rounded-3xl bg-indigo-500/5 border border-indigo-500/10 space-y-3 group">
+                                    {(conflict.status === 'resolved' && conflict.pmResolution?.type === RESOLUTION_TYPES.AI_RESOLUTION
+                                        ? conflict.resolutions?.filter(r => r._id === conflict.pmResolution.resolutionId)
+                                        : conflict.status === 'resolved' ? [] : conflict.resolutions
+                                    )?.map((res) => (
+                                        <motion.div layout key={res._id} className={cn(
+                                            "p-5 rounded-3xl space-y-3 group",
+                                            conflict.status === 'resolved' ? "bg-emerald-500/5 border border-emerald-500/20" : "bg-indigo-500/5 border border-indigo-500/10"
+                                        )}>
                                             <div className="flex items-center justify-between">
-                                                <span className="text-[9px] font-bold text-indigo-600 uppercase tracking-widest">{res.strategyType}</span>
-                                                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                                                <span className={cn(
+                                                    "text-[9px] font-bold uppercase tracking-widest",
+                                                    conflict.status === 'resolved' ? "text-emerald-500" : "text-indigo-600"
+                                                )}>{res.strategyType}</span>
+                                                <div className={cn(
+                                                    "w-1.5 h-1.5 rounded-full animate-pulse",
+                                                    conflict.status === 'resolved' ? "bg-emerald-500" : "bg-indigo-500"
+                                                )} />
                                             </div>
-                                            <h4 className="text-[14px] font-display font-[500] leading-tight">{res.title}</h4>
+                                            <h4 className="text-[14px] font-display font-[500] leading-tight">
+                                                {conflict.status === 'resolved' ? `Adopted: ${res.title}` : res.title}
+                                            </h4>
                                             <p className="text-[11px] text-muted-foreground leading-relaxed italic">{res.description}</p>
                                             {user?.role === 'PM' && conflict.status !== 'resolved' && (
                                                 <button
@@ -399,20 +474,26 @@ export default function ConflictDiscussion() {
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-[10px] font-black text-muted uppercase tracking-[0.3em] flex items-center gap-2">
                                         <Zap className="w-3.5 h-3.5" />
-                                        Community Hub
+                                        Community Proposals
                                     </h3>
                                     <div className="h-[1px] flex-1 bg-border/10 ml-4" />
                                 </div>
                                 <div className="space-y-4">
                                     <AnimatePresence>
-                                        {sortedProposals.map((prop) => (
+                                        {(conflict.status === 'resolved' && conflict.pmResolution?.type === RESOLUTION_TYPES.DEVELOPER_PROPOSAL
+                                            ? sortedProposals.filter(p => p._id === conflict.pmResolution.resolutionId)
+                                            : conflict.status === 'resolved' ? [] : sortedProposals
+                                        ).map((prop) => (
                                             <motion.div
                                                 layout
                                                 key={prop._id}
                                                 initial={{ opacity: 0, scale: 0.9 }}
                                                 animate={{ opacity: 1, scale: 1 }}
                                                 exit={{ opacity: 0, scale: 0.9 }}
-                                                className="p-5 rounded-3xl bg-secondary/20 border border-border/10 space-y-3"
+                                                className={cn(
+                                                    "p-5 rounded-3xl border space-y-3",
+                                                    conflict.status === 'resolved' ? "bg-emerald-500/5 border-emerald-500/20" : "bg-secondary/20 border-border/10"
+                                                )}
                                             >
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-2">
@@ -421,7 +502,11 @@ export default function ConflictDiscussion() {
                                                         </div>
                                                         <span className="text-[9px] font-bold uppercase tracking-widest leading-none">{prop.user?.name}</span>
                                                     </div>
-                                                    <button onClick={() => voteMutation.mutate(prop._id)} className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-white/50 transition-all">
+                                                    <button 
+                                                        onClick={() => conflict.status !== 'resolved' && voteMutation.mutate(prop._id)} 
+                                                        disabled={conflict.status === 'resolved'}
+                                                        className={cn("flex items-center gap-1.5 p-1.5 rounded-lg transition-all", conflict.status !== 'resolved' && "hover:bg-white/50")}
+                                                    >
                                                         <ThumbsUp className={cn("w-3 h-3", prop.votes?.includes(user?._id) ? "text-indigo-600 fill-indigo-600" : "text-muted")} />
                                                         <span className="text-[9px] font-bold">{prop.votes?.length || 0}</span>
                                                     </button>
@@ -455,6 +540,11 @@ export default function ConflictDiscussion() {
                                             </motion.div>
                                         ))}
                                     </AnimatePresence>
+                                    {conflict.status === 'resolved' && conflict.pmResolution && (
+                                        <div className="p-4 bg-secondary/5 rounded-2xl border border-dashed border-border/10 text-center">
+                                            <span className="text-[8px] font-black text-muted uppercase tracking-[0.2em]">End of Resolution History</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </motion.div>
@@ -464,7 +554,7 @@ export default function ConflictDiscussion() {
 
             {/* Mobile Propose Tab */}
             <AnimatePresence mode="wait">
-                {activeTab === 'propose' && (
+                {activeTab === 'propose' && conflict.status !== 'resolved' && (
                     <motion.div
                         key="propose"
                         initial={{ opacity: 0, x: 20 }}
@@ -592,7 +682,7 @@ export default function ConflictDiscussion() {
             )}
 
             {/* Desktop Propose Dialog */}
-            {isProposing && createPortal(
+            {isProposing && conflict.status !== 'resolved' && createPortal(
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/40 backdrop-blur-md animate-in fade-in duration-500">
                     <div className="premium-card w-full max-w-2xl bg-white overflow-hidden shadow-3xl">
                         <div className="p-10 border-b border-border/20 flex items-center justify-between">
@@ -658,12 +748,14 @@ export default function ConflictDiscussion() {
             )}
 
             {/* Desktop FAB for Proposing */}
-            <button
-                onClick={() => setIsProposing(true)}
-                className="fixed bottom-12 right-12 w-16 h-16 rounded-full bg-foreground text-background shadow-2xl hidden lg:flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-40 group"
-            >
-                <Plus className="w-8 h-8 group-hover:rotate-90 transition-transform duration-500" />
-            </button>
+            {conflict.status !== 'resolved' && (
+                <button
+                    onClick={() => setIsProposing(true)}
+                    className="fixed bottom-12 right-12 w-16 h-16 rounded-full bg-foreground text-background shadow-2xl hidden lg:flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-40 group"
+                >
+                    <Plus className="w-8 h-8 group-hover:rotate-90 transition-transform duration-500" />
+                </button>
+            )}
         </div>
     );
 }

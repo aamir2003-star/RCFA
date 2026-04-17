@@ -26,6 +26,7 @@ import useProjectStore from "../../stores/useProjectStore";
 import useAuthStore from "../../stores/useAuthStore";
 import { toast } from "react-hot-toast";
 import { cn } from "../../lib/utils";
+import { calculateProgress } from "../../lib/exportUtils";
 
 export default function PmDashboard() {
   const navigate = useNavigate();
@@ -107,7 +108,6 @@ export default function PmDashboard() {
         <div className="lg:col-span-2 space-y-10">
           <div className="flex items-center justify-between px-2">
             <h2 className="text-[11px] font-bold text-muted uppercase tracking-[0.25em]">Active Trajectories</h2>
-            <button onClick={() => navigate('/pm/workspace')} className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest hover:text-indigo-500 transition-colors">Create Project +</button>
           </div>
 
           <div className="space-y-6">
@@ -135,9 +135,9 @@ export default function PmDashboard() {
                     ))}
                   </div>
                   <div className="space-y-2 w-32">
-                    <div className="flex justify-between text-[9px] font-bold uppercase tracking-widest text-muted">Progress <span className="text-foreground">75%</span></div>
+                    <div className="flex justify-between text-[9px] font-bold uppercase tracking-widest text-muted">Progress <span className="text-foreground">{calculateProgress(proj)}%</span></div>
                     <div className="h-1 bg-secondary rounded-full overflow-hidden">
-                      <div className="h-full bg-black/80 rounded-full" style={{ width: '75%' }} />
+                      <div className="h-full bg-black/80 rounded-full transition-all duration-1000" style={{ width: `${calculateProgress(proj)}%` }} />
                     </div>
                   </div>
                   <ChevronRight className="w-5 h-5 text-muted group-hover:text-foreground transition-all group-hover:translate-x-1" />
