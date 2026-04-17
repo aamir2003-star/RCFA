@@ -241,7 +241,14 @@ export const getPmStats = async (userId) => {
       ])
     ]);
 
-    const [totalProjects, totalConflicts, totalRequirements, statusBreakdown, teamAgg] = stats;
+    const [totalProjects, totalConflicts, totalRequirements, statusBreakdown, teamAgg, openConflicts] = stats;
+
+    const [realOpenConflicts] = await Promise.all([
+      ConflictModel.countDocuments({
+        projectId: { $in: pmProjectIds },
+        status: "open"
+      })
+    ]);
 
     const statusMap = statusBreakdown.reduce((acc, curr) => ({ ...acc, [curr._id]: curr.count }), {
       planning: 0,
@@ -255,6 +262,7 @@ export const getPmStats = async (userId) => {
       totalProjects,
       activeProjects: statusMap.active,
       totalConflicts,
+      openConflicts: realOpenConflicts,
       totalRequirements,
       completedProjects: statusMap.completed,
       teamCount

@@ -20,11 +20,11 @@ const useConflictStore = create((set, get) => ({
         status: "idle" // idle, running, completed, error
     },
 
-    fetchConflicts: async (projectId, page = 1, status = 'open', append = false) => {
+    fetchConflicts: async (projectId, page = 1, status = 'open', append = false, search = '') => {
         set({ loading: !append, filter: status });
         try {
             const response = await api.get(`/conflicts/${projectId}`, {
-                params: { page, limit: 10, status }
+                params: { page, limit: 10, status, search }
             });
             const { conflicts, total, pages } = response.data;
             
@@ -39,11 +39,11 @@ const useConflictStore = create((set, get) => ({
         }
     },
 
-    fetchAllPmConflicts: async (page = 1, status = 'open', append = false) => {
+    fetchAllPmConflicts: async (page = 1, status = 'open', append = false, search = '') => {
         set({ loading: !append, filter: status });
         try {
             const response = await api.get('/conflicts/pm/all', {
-                params: { page, limit: 10, status }
+                params: { page, limit: 10, status, search }
             });
             const { conflicts, total, pages } = response.data;
             set((state) => ({

@@ -1,4 +1,5 @@
 // Handles HTTP requests for conflict analysis endpoints
+import mongoose from 'mongoose';
 import { createNotification } from '../services/notification.service.js';
 import { ModuleModel } from '../models/module/module.model.js';
 
@@ -99,13 +100,21 @@ export const getProjectConflicts = async (req, res) => {
     try {
         const { projectId } = req.params;
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 20;
-        const status = req.query.status; // Optional status filter
+        const limit = parseInt(req.query.limit) || 10;
+        const status = req.query.status;
+        const search = req.query.search;
         const skip = (page - 1) * limit;
 
         const query = { projectId };
         if (status && status !== 'all') {
             query.status = status;
+        }
+
+        if (search) {
+            query.$or = [
+                { explanation: { $regex: search, $options: 'i' } },
+                { conflictType: { $regex: search, $options: 'i' } }
+            ];
         }
 
         const [conflicts, total] = await Promise.all([
@@ -146,13 +155,22 @@ export const getAllPmConflicts = async (req, res) => {
         const pmProjectIds = await ProjectModel.find({ projectManager: pmId }).distinct('_id');
 
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 50;
+        const limit = parseInt(req.query.limit) || 10;
         const status = req.query.status;
+        const search = req.query.search;
         const skip = (page - 1) * limit;
 
         const query = { projectId: { $in: pmProjectIds } };
         if (status && status !== 'all') {
             query.status = status;
+        }
+
+        if (search) {
+            query.$or = [
+                { explanation: { $regex: search, $options: 'i' } },
+                { conflictType: { $regex: search, $options: 'i' } },
+                { _id: mongoose.isValidObjectId(search) ? search : undefined }
+            ].filter(q => q._id || q.explanation); // Filter out undefined ID if search isn't a valid ObjectId
         }
 
         const [conflicts, total] = await Promise.all([

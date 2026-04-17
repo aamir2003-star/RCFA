@@ -103,16 +103,48 @@ export const getPmActivity = async (req, res) => {
 
     const pmProjectIds = await ProjectModel.find({ projectManager: pmId }).distinct("_id");
 
+    const timeframe = req.query.timeframe || 'all';
+    let dateFilter = { projectId: { $in: pmProjectIds } };
+    let limit = 15; // default for 'recent'
+
+    if (timeframe !== 'all') {
+      const now = new Date();
+      let startDate = new Date();
+      let endDate = null;
+
+      if (timeframe === 'today') {
+        startDate.setHours(0, 0, 0, 0);
+        limit = 30;
+      } else if (timeframe === 'yesterday') {
+        startDate.setDate(now.getDate() - 1);
+        startDate.setHours(0, 0, 0, 0);
+        endDate = new Date(startDate);
+        endDate.setHours(23, 59, 59, 999);
+        limit = 30;
+      } else if (timeframe === 'week') {
+        startDate.setDate(now.getDate() - 7);
+        startDate.setHours(0, 0, 0, 0);
+        limit = 100;
+      } else if (timeframe === 'month') {
+        startDate.setMonth(now.getMonth() - 1);
+        startDate.setHours(0, 0, 0, 0);
+        limit = 200;
+      }
+
+      dateFilter.createdAt = { $gte: startDate };
+      if (endDate) dateFilter.createdAt.$lte = endDate;
+    }
+
     // Fetch recent requirements and conflicts in parallel
     const [recentRequirements, recentConflicts] = await Promise.all([
-      RequirementModel.find({ projectId: { $in: pmProjectIds } })
+      RequirementModel.find(dateFilter)
         .sort({ createdAt: -1 })
-        .limit(15)
+        .limit(limit)
         .populate('projectId', 'name')
         .lean(),
-      ConflictModel.find({ projectId: { $in: pmProjectIds } })
+      ConflictModel.find(dateFilter)
         .sort({ createdAt: -1 })
-        .limit(15)
+        .limit(limit)
         .populate('requirementA', 'title')
         .populate('requirementB', 'title')
         .populate('projectId', 'name')
