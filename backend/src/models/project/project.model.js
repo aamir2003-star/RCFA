@@ -1,26 +1,27 @@
-import mongoose  from "mongoose";
+import mongoose from "mongoose";
 
 const projectSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
+    clientName: { type: String, default: "Internal" },
 
     description: String,
 
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User" // BDE
+      ref: "User", // BDE
     },
 
     projectManager: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User"
+      ref: "User",
     },
 
     team: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
-      }
+        ref: "User",
+      },
     ],
 
     budget: Number,
@@ -29,10 +30,10 @@ const projectSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["planning", "active", "completed"],
-      default: "planning"
-    }
+      default: "planning",
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const ProjectModel = mongoose.model("Project", projectSchema);

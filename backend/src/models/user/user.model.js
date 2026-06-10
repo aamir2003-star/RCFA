@@ -1,4 +1,4 @@
-import mongoose  from "mongoose";
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
@@ -11,9 +11,27 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: ["BDE", "PM", "DEV"],
-      required: true
-    }
+      required: true,
+    },
+
+    avatar: {
+      url: { type: String, default: "" },
+      public_id: { type: String, default: "" }
+    },
+
+    coverImage: {
+      url: { type: String, default: "" },
+      public_id: { type: String, default: "" }
+    },
+
+
+    refreshToken: String,
+    resetToken: String,
+    resetTokenExpiry: Date,
   },
   { timestamps: true }
 );
-export const UserModel = mongoose.model("User", userSchema);
+
+const User = mongoose.model("User", userSchema);
+
+export default User;
