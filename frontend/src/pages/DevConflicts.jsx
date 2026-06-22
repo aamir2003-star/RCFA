@@ -25,15 +25,32 @@ export default function DevConflicts() {
         fetchConflicts,
         fetchAllDevConflicts,
         loading,
+        pagination,
+        filter,
+        resetConflicts,
         initSocket
     } = useConflictStore();
     const { user } = useAuthStore();
+    const observerTarget = React.useRef(null);
 
-    useEffect(() => {
+    // Filter switching logic
+    const handleFilterChange = (newStatus) => {
+        if (newStatus === filter) return;
+        resetConflicts();
         if (currentProject) {
-            fetchConflicts(currentProject._id);
+            fetchConflicts(currentProject._id, 1, newStatus);
         } else {
-            fetchAllDevConflicts();
+            fetchAllDevConflicts(1, newStatus);
+        }
+    };
+
+    // Initial load
+    useEffect(() => {
+        resetConflicts();
+        if (currentProject) {
+            fetchConflicts(currentProject._id, 1, filter);
+        } else {
+            fetchAllDevConflicts(1, filter);
         }
 
         const userId = user?._id || user?.id;
@@ -41,22 +58,36 @@ export default function DevConflicts() {
             const cleanup = initSocket(currentProject?._id, userId);
             return cleanup;
         }
-    }, [currentProject?._id, user?._id, user?.id, fetchConflicts, fetchAllDevConflicts, initSocket]);
+    }, [currentProject?._id, user?._id, user?.id]);
 
-    if (loading) {
-        return (
-            <div className="p-20 text-center flex flex-col items-center justify-center gap-4">
-                <Activity className="w-10 h-10 animate-spin text-muted/40" />
-                <span className="font-display font-[300] text-2xl text-muted italic italic">Synchronizing Team Repository...</span>
-            </div>
+    // Infinite Scroll Observer
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            entries => {
+                if (entries[0].isIntersecting && pagination.hasMore && !loading) {
+                    const nextPage = pagination.page + 1;
+                    if (currentProject) {
+                        fetchConflicts(currentProject._id, nextPage, filter, true);
+                    } else {
+                        fetchAllDevConflicts(nextPage, filter, true);
+                    }
+                }
+            },
+            { threshold: 1.0 }
         );
-    }
+
+        if (observerTarget.current) {
+            observer.observe(observerTarget.current);
+        }
+
+        return () => observer.disconnect();
+    }, [pagination.hasMore, loading, pagination.page, currentProject, filter]);
 
     return (
         <div className="space-y-20 pb-32 max-w-7xl mx-auto px-4 md:px-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
             {/* Page Header */}
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 border-b border-border/10 pb-20">
-                <div className="space-y-6">
+                <div className="space-y-6 text-left">
                     <h1 className="text-6xl text-foreground font-display font-[300] tracking-tight leading-[1.1]">
                         Architectural <span className="italic">Contradictions</span>
                     </h1>
@@ -65,51 +96,48 @@ export default function DevConflicts() {
                             ? `Synthesized anomalies identified within the ${currentProject.name} repository.`
                             : "A collaborative global registry of technical conflicts across all active protocols."}
                     </p>
-                </div>
-                <div className="flex items-center gap-6">
-                    <div className="flex -space-x-4">
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className="w-12 h-12 rounded-full bg-secondary border-2 border-background shadow-premium flex items-center justify-center overflow-hidden">
-                                <span className="text-[10px] font-black text-muted uppercase">D{i}</span>
-                            </div>
+                    
+                    {/* Filter Tabs */}
+                    <div className="flex items-center gap-2 pt-8 no-print">
+                        {['open', 'resolved'].map((status) => (
+                            <button
+                                key={status}
+                                onClick={() => handleFilterChange(status)}
+                                className={cn(
+                                    "px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-300",
+                                    filter === status 
+                                        ? "bg-black text-white dark:bg-white dark:text-black shadow-premium scale-105" 
+                                        : "bg-secondary/40 text-muted hover:bg-secondary/60 hover:text-foreground"
+                                )}
+                            >
+                                {status}
+                            </button>
                         ))}
-                    </div>
-                    <div className="flex flex-col">
-                        <span className="text-[9px] font-black text-muted uppercase tracking-[0.3em] mb-1">Active Reviewers</span>
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                            <span className="text-[12px] font-bold text-foreground tracking-wider">4 Online Now</span>
-                        </div>
                     </div>
                 </div>
             </div>
 
             {/* Conflicts List */}
             <div className="space-y-12">
-                {Array.from(new Map(conflicts.map(c => [c._id, c])).values()).map((conf, i) => (
+                {conflicts.map((conf, i) => (
                     <div key={conf._id} className="premium-card p-12 group transition-all duration-700 relative overflow-hidden active:scale-[0.995]">
                         {/* Status Accents */}
                         <div className={cn(
                             "absolute left-0 top-0 bottom-0 w-1.5 transition-all duration-500",
-                            conf.severityScore >= 8 ? "bg-red-500" : "bg-amber-500"
+                            conf.status === 'resolved' ? "bg-emerald-500" : (conf.severityScore >= 8 ? "bg-red-500" : "bg-amber-500")
                         )} />
 
-                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-12">
+                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-12 text-left">
                             <div className="flex-1 space-y-8">
                                 <div className="flex flex-wrap items-center gap-6">
                                     <div className={cn(
                                         "px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.3em] border",
-                                        conf.severityScore >= 8 ? "bg-red-500/5 text-red-500 border-red-500/10" : "bg-amber-500/5 text-amber-500 border-amber-500/10"
+                                        conf.status === 'resolved' ? "bg-emerald-500/5 text-emerald-500 border-emerald-500/10" :
+                                        (conf.severityScore >= 8 ? "bg-red-500/5 text-red-500 border-red-500/10" : "bg-amber-500/5 text-amber-500 border-amber-500/10")
                                     )}>
-                                        {conf.severityScore >= 8 ? "Critical Protocol Breach" : "Specification Alignment Required"}
+                                        {conf.status === 'resolved' ? 'Resolution Synchronized' : (conf.severityScore >= 8 ? "Critical Protocol Breach" : "Specification Alignment Required")}
                                     </div>
                                     <span className="text-[10px] font-black text-muted uppercase tracking-[0.3em] opacity-40">System ID #{conf._id.slice(-8).toUpperCase()}</span>
-                                    {currentProject && (
-                                        <div className="flex items-center gap-2.5 px-4 py-1 bg-secondary/30 rounded-full border border-border/5">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
-                                            <span className="text-[9px] font-black text-muted uppercase tracking-[0.3em]">Project Context</span>
-                                        </div>
-                                    )}
                                 </div>
 
                                 <h2 className="text-4xl font-display font-[300] text-foreground leading-[1.2] tracking-tight group-hover:text-black dark:group-hover:text-white transition-colors">
@@ -123,7 +151,11 @@ export default function DevConflicts() {
                                         </div>
                                         <div className="flex flex-col">
                                             <span className="text-[8px] font-black text-muted uppercase tracking-[0.3em] mb-1">Impact Radius</span>
-                                            <span className="text-[13px] font-bold text-foreground tracking-widest uppercase">{conf.requirementA?.moduleName || 'M1'} & {conf.requirementB?.moduleName || 'M2'}</span>
+                                            <span className="text-[13px] font-bold text-foreground tracking-widest uppercase">
+                                                {conf.affectedModules?.length > 0 
+                                                    ? conf.affectedModules.join(" & ") 
+                                                    : (conf.requirementA?.moduleName || 'System Core')}
+                                            </span>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-4">
@@ -131,8 +163,10 @@ export default function DevConflicts() {
                                             <Zap className="w-5 h-5" />
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-[8px] font-black text-muted uppercase tracking-[0.3em] mb-1">Analityic Intensity</span>
-                                            <span className="text-[13px] font-bold text-foreground tracking-widest uppercase">{conf.severityScore}.0 / 10.0</span>
+                                            <span className="text-[8px] font-black text-muted uppercase tracking-[0.3em] mb-1">Analytic Intensity</span>
+                                            <span className="text-[13px] font-bold text-foreground tracking-widest uppercase">
+                                                {Math.round((conf.aiConfidence || 0) * 100)}% Confidence • {conf.feasibility?.riskLevel || 'Med'} Risk
+                                            </span>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-4">
@@ -141,7 +175,9 @@ export default function DevConflicts() {
                                         </div>
                                         <div className="flex flex-col">
                                             <span className="text-[8px] font-black text-muted uppercase tracking-[0.3em] mb-1">Collaboration</span>
-                                            <span className="text-[13px] font-bold text-foreground tracking-widest uppercase">12 Thread Responses</span>
+                                            <span className="text-[13px] font-bold text-foreground tracking-widest uppercase">
+                                                {(conf.discussions?.length || 0) + (conf.proposals?.length || 0)} Active Signals
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -160,14 +196,31 @@ export default function DevConflicts() {
                     </div>
                 ))}
 
-                {conflicts.length === 0 && (
+                {/* Sentinel element for Infinite Scroll */}
+                <div ref={observerTarget} className="h-20 flex items-center justify-center">
+                    {loading && (
+                        <div className="flex items-center gap-3">
+                            <Activity className="w-5 h-5 animate-spin text-muted/40" />
+                            <span className="text-[10px] font-black text-muted uppercase tracking-widest">Hydrating Registry...</span>
+                        </div>
+                    )}
+                    {!pagination.hasMore && conflicts.length > 0 && (
+                        <span className="text-[10px] font-black text-muted uppercase tracking-widest opacity-20">— End of Architectural History —</span>
+                    )}
+                </div>
+
+                {conflicts.length === 0 && !loading && (
                     <div className="py-40 px-12 text-center space-y-10 bg-secondary/10 rounded-[40px] border border-dashed border-border/10 relative overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-secondary/5 to-transparent blur-3xl" />
                         <ShieldAlert className="w-16 h-16 text-muted/20 mx-auto relative z-10" />
                         <div className="space-y-4 relative z-10">
-                            <h3 className="text-4xl font-display font-[300] text-foreground tracking-tight italic">Protocol Harmony Intact</h3>
+                            <h3 className="text-4xl font-display font-[300] text-foreground tracking-tight italic">
+                                {filter === 'open' ? 'Protocol Harmony Intact' : 'No Resolved Historical Data'}
+                            </h3>
                             <p className="text-muted text-[17px] font-sans font-[300] max-w-lg mx-auto leading-relaxed tracking-wide opacity-70">
-                                No architectural contradictions identified in current specification manifolds.
+                                {filter === 'open' 
+                                    ? 'No architectural contradictions identified in current specification manifolds.'
+                                    : 'Your project history is clear of past reconciled contradictions.'}
                             </p>
                         </div>
                     </div>

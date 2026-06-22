@@ -1,6 +1,5 @@
 // src/app.js
 // Express app configuration — middleware, routes, seed endpoint
-
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';

@@ -132,9 +132,9 @@ const useProjectStore = create((set, get) => ({
         }
     },
 
-    fetchPmActivity: async () => {
+    fetchPmActivity: async (timeframe = 'all') => {
         try {
-            const response = await api.get("/projects/pm/activity");
+            const response = await api.get(`/projects/pm/activity?timeframe=${timeframe}`);
             set({ pmActivity: response.data.activities || [] });
         } catch (error) {
             console.error("Failed to fetch PM activity:", error);

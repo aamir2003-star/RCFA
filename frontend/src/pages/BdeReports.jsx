@@ -6,11 +6,11 @@ import {
     AlertCircle,
     CheckCircle2,
     Clock,
-    FileText,
     ChevronRight,
     ArrowUpRight,
     Search,
     Filter,
+    FileText,
     Download
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -18,6 +18,7 @@ import useProjectStore from "../stores/useProjectStore";
 import { Button } from "../components/ui/Button";
 import { cn } from "../lib/utils";
 import { REPORTS_STATS_TEMPLATE, TIMELINE_VELOCITY_TEMPLATE } from "../constants/dashboard";
+import { downloadCSV, formatProjectBrief, calculateProgress } from "../lib/exportUtils";
 
 export default function BdeReports() {
     const navigate = useNavigate();
@@ -34,16 +35,25 @@ export default function BdeReports() {
         fetchBdeStats();
     }, [fetchProjects, fetchBdeStats]);
 
-    const stats = REPORTS_STATS_TEMPLATE.map(stat => ({
-        ...stat,
-        value: stat.isPercentage ? `${bdeStats?.[stat.key] || 0}%` : (bdeStats?.[stat.key] || 0)
-    }));
+    const handleExportCSV = () => {
+        const rows = projects.map(p => formatProjectBrief(p));
+        downloadCSV(rows, 'BDE_Portfolio_Report');
+    };
+
+    const statsConfig = REPORTS_STATS_TEMPLATE
+        .filter(stat => stat.key !== 'totalProjects')
+        .map(stat => ({
+            ...stat,
+            value: stat.key === 'completedProjects'
+                ? (bdeStats?.totalProjects > 0 ? Math.round((bdeStats?.completedProjects / bdeStats?.totalProjects) * 100) : 0)
+                : (bdeStats?.[stat.key] || 0)
+        }));
 
     return (
-        <div className="space-y-12 p-1">
+        <div id="report-engine-container" className="space-y-12 p-8 bg-background min-h-screen">
             {/* Header */}
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between border-b border-border/20 pb-12 mb-16 gap-8">
-                <div className="space-y-3">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between border-b border-border/20 pb-12 mb-16 gap-8 no-print">
+                <div className="space-y-3 text-left">
                     <div className="flex items-center gap-3">
                         <div className="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-black text-indigo-600 uppercase tracking-[0.25em] shadow-premium">
                             Operational Ledger
@@ -52,12 +62,18 @@ export default function BdeReports() {
                     <h1 className="text-5xl font-display font-[300] tracking-tight text-foreground">Reporting Engine</h1>
                     <p className="text-base text-muted font-sans tracking-wide">Autonomous portfolio insights and project health synthesis</p>
                 </div>
-                <div className="flex items-center gap-4">
-                    <button className="group flex items-center gap-3 px-6 py-3 bg-secondary/30 border border-border/10 rounded-2xl text-[11px] font-black text-muted uppercase tracking-[0.2em] hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-500">
-                        <Download className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
-                        Export Audit
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={handleExportCSV}
+                        className="group flex items-center gap-3 px-6 py-3 bg-secondary/40 border border-border/10 rounded-2xl text-[11px] font-black text-foreground uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all duration-300 shadow-premium"
+                    >
+                        <Download className="w-4 h-4" />
+                        Export CSV
                     </button>
-                    <Button className="font-black bg-black dark:bg-white text-white dark:text-black rounded-2xl px-8 h-12 shadow-pill hover:scale-[1.02] active:scale-95 transition-all">
+                    <Button
+                        onClick={() => navigate("/bde/analytics")}
+                        className="font-black bg-indigo-600 text-white rounded-2xl px-8 h-12 shadow-pill hover:scale-[1.02] active:scale-95 transition-all"
+                    >
                         Live Analytics
                     </Button>
                 </div>
@@ -65,15 +81,11 @@ export default function BdeReports() {
 
             {/* KPI Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                {stats.map((stat) => (
+                {statsConfig.map((stat) => (
                     <div key={stat.label} className="premium-card p-8 group transition-all duration-500 hover:scale-[1.01]">
                         <div className="flex justify-between items-start mb-6">
                             <div className={cn("p-3 rounded-2xl shadow-premium transition-transform duration-500 group-hover:scale-110", stat.color)}>
                                 <stat.icon className="w-5 h-5" />
-                            </div>
-                            <div className="text-[10px] font-black text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
-                                <ArrowUpRight className="w-3.5 h-3.5" />
-                                12.4%
                             </div>
                         </div>
                         <p className="text-[11px] font-black text-muted uppercase tracking-[0.25em] mb-2">{stat.label}</p>
@@ -97,7 +109,7 @@ export default function BdeReports() {
                                 <p className="text-[12px] text-muted font-sans tracking-wide">Real-time vector analysis across portfolio</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 no-print">
                             <div className="relative group/search w-full sm:w-64">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted group-focus-within/search:text-foreground transition-colors" />
                                 <input
@@ -117,7 +129,7 @@ export default function BdeReports() {
                                     <th className="px-8 py-5 text-[11px] font-black text-muted uppercase tracking-[0.2em] opacity-60 text-center">Load</th>
                                     <th className="px-8 py-5 text-[11px] font-black text-muted uppercase tracking-[0.2em] opacity-60 text-center">Signals</th>
                                     <th className="px-8 py-5 text-[11px] font-black text-muted uppercase tracking-[0.2em] opacity-60">Risk Vector</th>
-                                    <th className="px-8 py-5 text-[11px] font-black text-muted uppercase tracking-[0.2em] opacity-60 text-right">Access</th>
+                                    <th className="px-8 py-5 text-[11px] font-black text-muted uppercase tracking-[0.2em] opacity-60 text-right no-print">Access</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border/5">
@@ -157,16 +169,20 @@ export default function BdeReports() {
                                                     <div
                                                         className={cn(
                                                             "h-full rounded-full transition-all duration-1500 ease-out",
-                                                            (project.conflictCount || 0) > 5 ? "bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)]" : (project.conflictCount || 0) > 0 ? "bg-amber-500" : "bg-emerald-500"
+                                                            calculateProgress(project) > 80 ? "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]" :
+                                                                calculateProgress(project) > 40 ? "bg-amber-500" : "bg-rose-500"
                                                         )}
-                                                        style={{ width: `${Math.min(100, (project.conflictCount || 1) * 10)}%` }}
+                                                        style={{ width: `${calculateProgress(project)}%` }}
                                                     ></div>
                                                 </div>
+                                                <span className="text-[10px] font-bold text-muted w-8 tabular-nums">
+                                                    {calculateProgress(project)}%
+                                                </span>
                                             </div>
                                         </td>
-                                        <td className="px-8 py-6 text-right">
+                                        <td className="px-8 py-6 text-right no-print">
                                             <button
-                                                onClick={() => navigate(`/bde/editor?projectId=${project._id}`)}
+                                                onClick={() => navigate(`/bde/project-details?projectId=${project._id}`)}
                                                 className="w-10 h-10 bg-secondary/20 border border-border/10 rounded-2xl flex items-center justify-center transition-all duration-300 hover:bg-black dark:hover:bg-white text-muted hover:text-white dark:hover:text-black hover:scale-105 active:scale-95 shadow-sm"
                                             >
                                                 <ChevronRight className="w-5 h-5" />

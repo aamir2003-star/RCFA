@@ -1,4 +1,5 @@
 // Handles HTTP requests for conflict analysis endpoints
+import mongoose from 'mongoose';
 import { createNotification } from '../services/notification.service.js';
 import { ModuleModel } from '../models/module/module.model.js';
 
@@ -99,18 +100,32 @@ export const getProjectConflicts = async (req, res) => {
     try {
         const { projectId } = req.params;
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 20;
+        const limit = parseInt(req.query.limit) || 10;
+        const status = req.query.status;
+        const search = req.query.search;
         const skip = (page - 1) * limit;
 
+        const query = { projectId };
+        if (status && status !== 'all') {
+            query.status = status;
+        }
+
+        if (search) {
+            query.$or = [
+                { explanation: { $regex: search, $options: 'i' } },
+                { conflictType: { $regex: search, $options: 'i' } }
+            ];
+        }
+
         const [conflicts, total] = await Promise.all([
-            ConflictModel.find({ projectId })
+            ConflictModel.find(query)
                 .populate('requirementA', 'title description category priority')
                 .populate('requirementB', 'title description category priority')
                 .sort({ severityScore: -1 }) // highest severity first
                 .skip(skip)
                 .limit(limit)
                 .lean(),
-            ConflictModel.countDocuments({ projectId }),
+            ConflictModel.countDocuments(query),
         ]);
 
         return res.json({
@@ -140,11 +155,26 @@ export const getAllPmConflicts = async (req, res) => {
         const pmProjectIds = await ProjectModel.find({ projectManager: pmId }).distinct('_id');
 
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 50;
+        const limit = parseInt(req.query.limit) || 10;
+        const status = req.query.status;
+        const search = req.query.search;
         const skip = (page - 1) * limit;
 
+        const query = { projectId: { $in: pmProjectIds } };
+        if (status && status !== 'all') {
+            query.status = status;
+        }
+
+        if (search) {
+            query.$or = [
+                { explanation: { $regex: search, $options: 'i' } },
+                { conflictType: { $regex: search, $options: 'i' } },
+                { _id: mongoose.isValidObjectId(search) ? search : undefined }
+            ].filter(q => q._id || q.explanation); // Filter out undefined ID if search isn't a valid ObjectId
+        }
+
         const [conflicts, total] = await Promise.all([
-            ConflictModel.find({ projectId: { $in: pmProjectIds } })
+            ConflictModel.find(query)
                 .populate('requirementA', 'title description')
                 .populate('requirementB', 'title description')
                 .populate('projectId', 'name')
@@ -152,7 +182,7 @@ export const getAllPmConflicts = async (req, res) => {
                 .skip(skip)
                 .limit(limit)
                 .lean(),
-            ConflictModel.countDocuments({ projectId: { $in: pmProjectIds } })
+            ConflictModel.countDocuments(query)
         ]);
 
         return res.json({
@@ -181,10 +211,16 @@ export const getAllDevConflicts = async (req, res) => {
 
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 50;
+        const status = req.query.status;
         const skip = (page - 1) * limit;
 
+        const query = { projectId: { $in: devProjectIds } };
+        if (status && status !== 'all') {
+            query.status = status;
+        }
+
         const [conflicts, total] = await Promise.all([
-            ConflictModel.find({ projectId: { $in: devProjectIds } })
+            ConflictModel.find(query)
                 .populate('requirementA', 'title description')
                 .populate('requirementB', 'title description')
                 .populate('projectId', 'name')
@@ -192,7 +228,7 @@ export const getAllDevConflicts = async (req, res) => {
                 .skip(skip)
                 .limit(limit)
                 .lean(),
-            ConflictModel.countDocuments({ projectId: { $in: devProjectIds } })
+            ConflictModel.countDocuments(query)
         ]);
 
         return res.json({

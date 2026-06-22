@@ -102,8 +102,13 @@ export default function BdeTeams() {
                                         <td className="px-8 py-6 font-semibold text-slate-600 dark:text-slate-300">{pm.email}</td>
                                         <td className="px-8 py-6 uppercase text-[10px] font-black tracking-widest text-indigo-600 dark:text-indigo-400">{pm.role}</td>
                                         <td className="px-8 py-6">
-                                            <span className="px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-700/50">
-                                                Online
+                                            <span className={cn(
+                                                "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border transition-colors",
+                                                pm.isOnline
+                                                    ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-700/50"
+                                                    : "bg-slate-50 dark:bg-slate-900/20 text-slate-500 dark:text-slate-500 border-slate-200/50 dark:border-slate-800"
+                                            )}>
+                                                {pm.isOnline ? "Online" : "Offline"}
                                             </span>
                                         </td>
                                         <td className="px-8 py-6 text-right">

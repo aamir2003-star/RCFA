@@ -12,7 +12,7 @@ import PmModules from "../../pages/PmModules";
 import ConflictListPage from "../../pages/ConflictListPage";
 import ConflictDetection from "../../pages/ConflictDetection";
 import ActivityTimeline from "../../pages/ActivityTimeline";
-import ConflictResolution from "../../pages/ConflictResolution";
+import ConflictDiscussion from "../../pages/ConflictDiscussion";
 import TeamManagement from "../../pages/TeamManagement";
 import AnalyticsDashboard from "../../components/dashboard/AnalyticsDashboard";
 import ProfilePage from "../../pages/ProfilePage";
@@ -31,8 +31,8 @@ export default function PmRoutes() {
                     <Route path="conflicts" element={<ConflictListPage />} />
                     <Route path="conflicts/:id" element={<ConflictDetection />} />
                     <Route path="timeline" element={<ActivityTimeline />} />
-                    <Route path="conflicts/:id/discussion" element={<ConflictResolution />} />
-                    <Route path="conflicts/discussion" element={<ConflictResolution />} />
+                    <Route path="conflicts/:id/discussion" element={<ConflictDiscussion />} />
+                    <Route path="conflicts/discussion" element={<ConflictDiscussion />} />
                     <Route path="team" element={<TeamManagement />} />
                     <Route path="analytics" element={<AnalyticsDashboard />} />
                     <Route path="profile" element={<ProfilePage />} />

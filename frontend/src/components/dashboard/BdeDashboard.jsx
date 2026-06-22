@@ -26,7 +26,7 @@ export default function BdeDashboard() {
 
   const handleProjectClick = (project) => {
     setCurrentProject(project);
-    navigate(`/bde/analytics?projectId=${project._id}`);
+    navigate(`/bde/project-details?projectId=${project._id}`);
   };
 
   const handleDeleteProject = async (e, projectId) => {

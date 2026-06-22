@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
     AlertTriangle,
@@ -9,202 +9,344 @@ import {
     Clock,
     ArrowRight,
     BrainCircuit,
-    Loader2
+    Loader2,
+    Layers,
+    Layout
 } from "lucide-react";
 import useConflictStore from "../stores/useConflictStore";
+import useProjectStore from "../stores/useProjectStore";
+import { cn } from "../lib/utils";
 
 export default function ConflictListPage() {
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const projectId = searchParams.get("projectId");
-    const { conflicts, loading, fetchAllPmConflicts, startAnalysis, analysisProgress, subscribeToConflicts, unsubscribeFromConflicts } = useConflictStore();
+    const observerTarget = useRef(null);
+    
+    const [searchQuery, setSearchQuery] = useState("");
+    const debouncedSearch = useRef(null);
+    
+    const { 
+        conflicts, 
+        loading, 
+        fetchAllPmConflicts, 
+        fetchConflicts,
+        pagination,
+        filter,
+        resetConflicts,
+        subscribeToConflicts, 
+        unsubscribeFromConflicts 
+    } = useConflictStore();
 
+    const { projects, fetchProjects } = useProjectStore();
+
+    // Fetch projects on mount for navigation
+    useEffect(() => {
+        fetchProjects();
+    }, [fetchProjects]);
+
+    // Search logic with debouncing
+    const handleSearch = (q) => {
+        setSearchQuery(q);
+        if (debouncedSearch.current) clearTimeout(debouncedSearch.current);
+        
+        debouncedSearch.current = setTimeout(() => {
+            resetConflicts();
+            if (projectId) {
+                fetchConflicts(projectId, 1, filter, false, q);
+            } else {
+                fetchAllPmConflicts(1, filter, false, q);
+            }
+        }, 500);
+    };
+
+    // Filter switching logic
+    const handleFilterChange = (newStatus) => {
+        if (newStatus === filter) return;
+        resetConflicts();
+        if (projectId) {
+            fetchConflicts(projectId, 1, newStatus, false, searchQuery);
+        } else {
+            fetchAllPmConflicts(1, newStatus, false, searchQuery);
+        }
+    };
+
+    // Project switching logic
+    const handleProjectChange = (newPid) => {
+        if (newPid === projectId) return;
+        resetConflicts();
+        setSearchQuery(""); // Clear search on project switch
+        if (newPid) {
+            setSearchParams({ projectId: newPid });
+        } else {
+            setSearchParams({});
+        }
+    };
+
+    // Initial load and socket subscription
     useEffect(() => {
         if (projectId) {
             subscribeToConflicts(projectId);
         }
+        
+        resetConflicts();
+        if (projectId) {
+            fetchConflicts(projectId, 1, filter, false, searchQuery);
+        } else {
+            fetchAllPmConflicts(1, filter, false, searchQuery);
+        }
+
         return () => {
             if (projectId) {
                 unsubscribeFromConflicts(projectId);
             }
         };
-    }, [projectId, subscribeToConflicts, unsubscribeFromConflicts]);
+    }, [projectId, filter, subscribeToConflicts, unsubscribeFromConflicts]);
 
+    // Infinite Scroll Observer
     useEffect(() => {
-        fetchAllPmConflicts();
-    }, [fetchAllPmConflicts]);
+        const observer = new IntersectionObserver(
+            entries => {
+                if (entries[0].isIntersecting && pagination.hasMore && !loading) {
+                    const nextPage = pagination.page + 1;
+                    if (projectId) {
+                        fetchConflicts(projectId, nextPage, filter, true, searchQuery);
+                    } else {
+                        fetchAllPmConflicts(nextPage, filter, true, searchQuery);
+                    }
+                }
+            },
+            { threshold: 1.0 }
+        );
 
-    const filteredConflicts = projectId
-        ? conflicts.filter(c => c.projectId?._id === projectId || c.projectId === projectId)
-        : conflicts;
+        if (observerTarget.current) {
+            observer.observe(observerTarget.current);
+        }
 
-    const currentProjectName = projectId && filteredConflicts.length > 0
-        ? (filteredConflicts[0].projectId?.name || "Selected Project")
+        return () => observer.disconnect();
+    }, [pagination.hasMore, loading, pagination.page, projectId, filter, searchQuery]);
+
+    const currentProjectName = projectId && projects.length > 0
+        ? (projects.find(p => p._id === projectId)?.name || "Selected Project")
         : null;
 
-    if (loading && conflicts.length === 0) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-                <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
-                <p className="text-slate-500 font-medium">Fetching active conflicts...</p>
-            </div>
-        );
-    }
-
     return (
-        <div className="flex flex-col gap-8 pb-10">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div>
-                    <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
-                        <AlertTriangle className="w-8 h-8 text-red-500" />
-                        {projectId ? "Project Triage" : "Conflict Triage"}
-                    </h1>
-                    <div className="flex flex-col md:flex-row md:items-center gap-4 mt-1">
-                        <p className="text-slate-500 dark:text-slate-400 font-medium">
-                            {projectId ? (
-                                <span className="flex items-center gap-2">
-                                    <span className="text-indigo-600 font-bold underline decoration-indigo-500/30 underline-offset-4">{currentProjectName}</span>
-                                    <button
-                                        onClick={() => setSearchParams({})}
-                                        className="ml-2 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-[9px] font-black uppercase tracking-widest rounded-md hover:bg-slate-200 transition-all"
-                                    >
-                                        Clear Filter
-                                    </button>
-                                </span>
-                            ) : "Review and resolve logical contradictions across all your project requirements."}
-                        </p>
-                        {projectId && (
-                            <button
-                                onClick={() => startAnalysis(projectId)}
-                                disabled={analysisProgress.status === 'running'}
-                                className="flex items-center gap-2 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-200 dark:shadow-none transition-all hover:scale-105 active:scale-95"
-                            >
-                                {analysisProgress.status === 'running' ? (
-                                    <>
-                                        <Loader2 className="w-3 h-3 animate-spin" />
-                                        Analyzing {analysisProgress.percent}%
-                                    </>
-                                ) : (
-                                    <>
-                                        <BrainCircuit className="w-3 h-3" />
-                                        Re-scan for Conflicts
-                                    </>
-                                )}
-                            </button>
-                        )}
-                    </div>
-                </div>
-                <div className="flex items-center gap-3">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <input
-                            type="text"
-                            placeholder="Search conflicts..."
-                            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm w-64 focus:ring-2 focus:ring-indigo-500/20 transition-all outline-none"
-                        />
-                    </div>
-                    <button className="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-500 hover:text-indigo-500 transition-all">
-                        <Filter className="w-5 h-5" />
-                    </button>
-                </div>
-            </div>
-
-            {/* Conflict Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[
-                    { label: "Active Conflicts", val: filteredConflicts.filter(c => c.status === 'open').length, color: "text-red-500", bg: "bg-red-50 dark:bg-red-500/10" },
-                    { label: "High Impact", val: filteredConflicts.filter(c => c.severityScore >= 7).length, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-500/10" },
-                    { label: "Resolved", val: filteredConflicts.filter(c => c.status === 'resolved').length, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
-                ].map((stat, i) => (
-                    <div key={i} className="bg-white/50 dark:bg-[#0f1115]/50 backdrop-blur-md rounded-3xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col gap-1 items-center md:items-start">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{stat.label}</span>
-                        <div className="flex items-baseline gap-2">
-                            <span className={`text-3xl font-black ${stat.color}`}>{stat.val}</span>
-                            <span className="text-xs font-bold text-slate-400">/ {filteredConflicts.length} {projectId ? 'Project' : 'Total'}</span>
+        <div className="flex flex-col gap-10 pb-24 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+            {/* Header Area */}
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10">
+                <div className="space-y-6">
+                    <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 rounded-[2rem] bg-indigo-500/10 flex items-center justify-center text-indigo-500 shadow-premium border border-indigo-500/10">
+                            <AlertTriangle className="w-8 h-8" />
+                        </div>
+                        <div>
+                            <h1 className="text-5xl text-foreground font-display font-[300] tracking-tight leading-none">
+                                Conflict <span className="italic">Registry</span>
+                            </h1>
+                            <p className="text-[10px] font-black text-muted uppercase tracking-[0.3em] mt-3">
+                                {projectId ? "Project-Specific Triage" : "Portfolio-Wide Intelligence"}
+                            </p>
                         </div>
                     </div>
-                ))}
+
+                    <div className="flex flex-col md:flex-row md:items-center gap-8 pt-2">
+                        {/* Status Tabs */}
+                        <div className="flex items-center gap-2 bg-secondary/20 p-1 rounded-2xl border border-border/10">
+                            {['open', 'resolved'].map((status) => (
+                                <button
+                                    key={status}
+                                    onClick={() => handleFilterChange(status)}
+                                    className={cn(
+                                        "px-8 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300",
+                                        filter === status 
+                                            ? "bg-black text-white dark:bg-white dark:text-black shadow-premium scale-105" 
+                                            : "text-muted hover:text-foreground hover:bg-secondary/40"
+                                    )}
+                                >
+                                    {status}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex flex-col items-end gap-6">
+                    <div className="flex items-center gap-4">
+                        <div className="relative group">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted group-hover:text-foreground transition-colors" />
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => handleSearch(e.target.value)}
+                                placeholder="Search Protocol Anomalies..."
+                                className="bg-secondary/20 border border-border/10 rounded-[1.5rem] pl-12 pr-6 py-4 text-[13px] w-72 focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all outline-none"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Project Context Strip */}
+            <div className="bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md rounded-[2.5rem] border border-border/10 p-4 -mx-2">
+                <div className="flex items-center gap-3 overflow-x-auto pb-1 no-scrollbar scroll-smooth">
+                    <button
+                        onClick={() => handleProjectChange(null)}
+                        className={cn(
+                            "flex items-center gap-3 px-6 py-4 rounded-[1.8rem] whitespace-nowrap transition-all duration-500 shrink-0",
+                            !projectId 
+                                ? "bg-indigo-600 text-white shadow-indigo-500/20 shadow-xl" 
+                                : "bg-white dark:bg-zinc-800 text-muted hover:text-foreground border border-border/10"
+                        )}
+                    >
+                        <Layers className="w-4 h-4" />
+                        <span className="text-[11px] font-black uppercase tracking-widest">Global Portfolio</span>
+                    </button>
+
+                    <div className="w-px h-10 bg-border/20 mx-2" />
+
+                    {projects.map((proj) => (
+                        <button
+                            key={proj._id}
+                            onClick={() => handleProjectChange(proj._id)}
+                            className={cn(
+                                "flex items-center gap-3 px-6 py-4 rounded-[1.8rem] whitespace-nowrap transition-all duration-500 shrink-0 group relative",
+                                projectId === proj._id 
+                                    ? "bg-black text-white dark:bg-white dark:text-black shadow-xl" 
+                                    : "bg-white dark:bg-zinc-800 text-muted hover:text-foreground border border-border/10 hover:border-border/30"
+                            )}
+                        >
+                            <Layout className="w-4 h-4 opacity-70 group-hover:scale-110 transition-transform" />
+                            <div className="flex flex-col items-start leading-none gap-1">
+                                <span className="text-[11px] font-black uppercase tracking-widest">{proj.name}</span>
+                                {proj.conflictCount > 0 && (
+                                    <span className={cn(
+                                        "text-[8px] font-bold uppercase tracking-tighter",
+                                        projectId === proj._id ? "opacity-60" : "text-indigo-500"
+                                    )}>
+                                        {proj.conflictCount} Anomalies
+                                    </span>
+                                )}
+                            </div>
+                            {projectId === proj._id && (
+                                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-2 bg-indigo-500 rounded-full blur-[2px]" />
+                            )}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Conflict Stats Display */}
+            <div className="flex items-center gap-12 px-6">
+                <div className="flex flex-col">
+                    <span className="text-[9px] font-black text-muted uppercase tracking-[0.2em] mb-1 opacity-60">Status Frequency</span>
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-display font-[300] tracking-tighter">
+                            {pagination.total}
+                        </span>
+                        <span className="text-xs text-indigo-500 font-black uppercase tracking-widest">{filter}</span>
+                    </div>
+                </div>
+                
+                <div className="h-10 w-px bg-border/10" />
+
+                <div className="flex flex-col">
+                    <span className="text-[9px] font-black text-muted uppercase tracking-[0.2em] mb-1 opacity-60">Architectural Context</span>
+                    <span className="text-[11px] font-bold text-foreground tracking-wide uppercase opacity-80">
+                        {currentProjectName || "Portfolio Consolidate"}
+                    </span>
+                </div>
             </div>
 
             {/* Conflict List Content */}
-            <div className="space-y-4">
-                {filteredConflicts.length === 0 ? (
-                    <div className="bg-white dark:bg-[#0f1115] border border-slate-200 dark:border-slate-800 rounded-[2rem] p-12 text-center flex flex-col items-center gap-4">
-                        <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                            <BrainCircuit className="w-8 h-8" />
+            <div className="space-y-6 min-h-[400px]">
+                {conflicts.length === 0 && !loading ? (
+                    <div className="premium-card p-24 text-center flex flex-col items-center gap-6 animate-in zoom-in-95 duration-700">
+                        <div className="w-24 h-24 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20">
+                            <BrainCircuit className="w-10 h-10" />
                         </div>
-                        <h3 className="text-xl font-bold text-slate-900 dark:text-white">No Conflicts Detected</h3>
-                        <p className="text-slate-500 max-w-sm">All requirements are logically synchronized. Your project's semantic health is optimal.</p>
+                        <div className="space-y-2">
+                            <h3 className="text-3xl font-display font-[300]">Synchronized Protocol</h3>
+                            <p className="text-muted text-[13px] tracking-wide uppercase opacity-60">No logical contradictions detected in current batch</p>
+                        </div>
                     </div>
                 ) : (
-                    filteredConflicts.map((conflict) => (
-                        <Link
-                            key={conflict._id}
-                            to={`/pm/conflicts/${conflict._id}`}
-                            className="block group"
-                        >
-                            <div className="bg-white/80 dark:bg-[#0f1115]/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-[2rem] p-6 md:p-8 transition-all hover:border-indigo-500/50 hover:shadow-2xl hover:shadow-indigo-500/5 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
-                                <div className="flex items-center gap-6 relative z-10">
-                                    <div className={`p-4 rounded-2xl ${conflict.severityScore >= 8 ? 'bg-red-50 dark:bg-red-500/10 text-red-500' :
-                                        conflict.severityScore >= 5 ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-500' :
-                                            'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500'
-                                        } group-hover:scale-110 transition-transform duration-500`}>
-                                        {conflict.severityScore >= 8 ? <AlertOctagon className="w-7 h-7" /> : <AlertTriangle className="w-7 h-7" />}
-                                    </div>
-                                    <div>
-                                        <div className="flex items-center gap-3 mb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                            <span className="text-indigo-500">{conflict._id.substring(0, 8)}</span>
-                                            <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-                                            <span>{conflict.conflictType || 'Logic Conflict'}</span>
-                                            {conflict.projectId?.name && (
-                                                <>
-                                                    <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-                                                    <span className="text-emerald-500">{conflict.projectId.name}</span>
-                                                </>
-                                            )}
-                                        </div>
-                                        <h3 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-indigo-500 transition-colors">
-                                            {conflict.explanation || "Requirement Contradiction"}
-                                        </h3>
-                                        <div className="flex items-center gap-4 mt-3">
-                                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
-                                                <BrainCircuit className="w-3.5 h-3.5" />
-                                                {conflict.requirementA?.title} vs {conflict.requirementB?.title}
+                    <>
+                        <div className="grid grid-cols-1 gap-6">
+                            {conflicts.map((conflict, i) => (
+                                <Link
+                                    key={conflict._id + i}
+                                    to={`/pm/conflicts/${conflict._id}`}
+                                    className="block group"
+                                >
+                                    <div className="premium-card p-8 md:p-10 flex flex-col md:flex-row md:items-center justify-between gap-10 hover:shadow-premium group transition-all relative overflow-hidden">
+                                        <div className="flex items-center gap-8 relative z-10 flex-1">
+                                            <div className={cn(
+                                                "w-16 h-16 rounded-[22px] flex items-center justify-center border transition-all duration-500 group-hover:scale-110",
+                                                conflict.severityScore >= 8 ? 'bg-rose-500/10 border-rose-500/20 text-rose-500' :
+                                                conflict.severityScore >= 5 ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' :
+                                                'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'
+                                            )}>
+                                                {conflict.severityScore >= 8 ? <AlertOctagon className="w-7 h-7" /> : <AlertTriangle className="w-7 h-7" />}
                                             </div>
-                                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
-                                                <Clock className="w-3.5 h-3.5" />
-                                                {new Date(conflict.createdAt).toLocaleDateString()}
+                                            <div className="space-y-3 flex-1">
+                                                <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.2em] text-muted">
+                                                    <span className="text-indigo-500">{conflict._id.substring(0, 8)}</span>
+                                                    <span className="w-1 h-1 bg-border rounded-full" />
+                                                    <span>{conflict.conflictType || 'Logic Contradiction'}</span>
+                                                    {conflict.projectId?.name && (
+                                                        <>
+                                                            <span className="w-1 h-1 bg-border rounded-full" />
+                                                            <span className="text-emerald-500">{conflict.projectId.name}</span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <h3 className="text-3xl font-display font-[300] tracking-tight group-hover:italic transition-all">
+                                                    {conflict.explanation || "Requirement Contradiction"}
+                                                </h3>
+                                                <div className="flex flex-wrap items-center gap-6 pt-2">
+                                                    <div className="flex items-center gap-2 px-3 py-1 bg-secondary/40 rounded-lg text-[10px] font-bold text-muted">
+                                                        <BrainCircuit className="w-3.5 h-3.5" />
+                                                        {conflict.requirementA?.title} vs {conflict.requirementB?.title}
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-[10px] font-bold text-muted opacity-60">
+                                                        <Clock className="w-3.5 h-3.5" />
+                                                        {new Date(conflict.createdAt).toLocaleDateString()}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
 
-                                <div className="flex items-center gap-8 relative z-10">
-                                    <div className="hidden lg:block text-right">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Impact Level</p>
-                                        <p className={`font-black uppercase tracking-tighter ${conflict.severityScore >= 8 ? 'text-red-500' :
-                                            conflict.severityScore >= 5 ? 'text-amber-500' :
-                                                'text-emerald-500'
-                                            }`}>{conflict.severityScore >= 8 ? 'High' : conflict.severityScore >= 5 ? 'Medium' : 'Low'}</p>
-                                    </div>
-                                    <div className="hidden lg:block text-right">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Status</p>
-                                        <div className="flex items-center gap-1.5 justify-end">
-                                            <span className={`text-xs font-bold uppercase ${conflict.status === 'resolved' ? 'text-emerald-500' : 'text-slate-500'}`}>
-                                                {conflict.status}
-                                            </span>
+                                        <div className="flex items-center gap-12 relative z-10 shrink-0">
+                                            <div className="hidden lg:flex flex-col items-end">
+                                                <span className="text-[9px] font-black text-muted uppercase tracking-widest mb-1 opacity-60">Status</span>
+                                                <span className={cn(
+                                                    "text-[10px] font-black uppercase tracking-[0.2em]",
+                                                    conflict.status === 'resolved' ? 'text-emerald-500' : 'text-amber-500'
+                                                )}>
+                                                    {conflict.status}
+                                                </span>
+                                            </div>
+                                            <div className="w-14 h-14 rounded-2xl bg-secondary border border-border/10 flex items-center justify-center text-muted group-hover:bg-black group-hover:text-white transition-all group-hover:rotate-45">
+                                                <ArrowRight className="w-6 h-6 -rotate-45 group-hover:rotate-0 transition-transform duration-500" />
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center justify-center text-slate-400 group-hover:bg-indigo-600 group-hover:text-white group-hover:border-transparent transition-all group-hover:rotate-45">
-                                        <ArrowRight className="w-6 h-6 -rotate-45 group-hover:rotate-0 transition-transform" />
-                                    </div>
-                                </div>
 
-                                {/* Hover Glow */}
-                                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -mr-32 -mt-32 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            </div>
-                        </Link>
-                    ))
+                                        {/* Hover Gradient Overlay */}
+                                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 via-indigo-500/0 to-indigo-500/[0.02] opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                        
+                        {/* Sentinel for Infinite Scroll */}
+                        <div ref={observerTarget} className="h-20 flex items-center justify-center">
+                            {loading && (
+                                <div className="flex items-center gap-3 py-10">
+                                    <Loader2 className="w-5 h-5 animate-spin text-indigo-500" />
+                                    <span className="text-[10px] font-black text-muted uppercase tracking-[0.3em]">Calibrating next batch...</span>
+                                </div>
+                            )}
+                        </div>
+                    </>
                 )}
             </div>
         </div>

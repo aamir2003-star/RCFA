@@ -207,10 +207,10 @@ export default function CreateProject() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-[11px] font-bold text-muted uppercase tracking-[0.2em]">
-                  Budget ($) <span className="text-red-500">*</span>
+                  Budget (₹) <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-5 top-1/2 -translate-y-1/2 text-[15px] text-muted font-bold">$</span>
+                  <span className="absolute left-5 top-1/2 -translate-y-1/2 text-[15px] text-muted font-bold">₹</span>
                   <input
                     type="number"
                     name="budget"

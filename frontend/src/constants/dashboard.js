@@ -130,12 +130,12 @@ export const PM_STATS_TEMPLATE = [
         trendUp: true
     },
     {
-        key: "totalConflicts",
-        title: "CONFLICTS DETECTED",
+        key: "openConflicts",
+        title: "PENDING TRIAGE",
         icon: AlertCircle,
         iconColor: "text-red-500",
         bg: "bg-red-50 dark:bg-red-900/30",
-        trend: "Real-time",
+        trend: "Action Required",
         trendUp: false,
         borderLeft: "border-l-4 border-l-red-500"
     },

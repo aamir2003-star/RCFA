@@ -27,7 +27,13 @@ const storage = new CloudinaryStorage({
         } else if (file.fieldname === 'cover' || file.fieldname === 'coverImage') {
             folder = 'spectraAI/covers';
         } else if (file.fieldname === 'chat' || file.fieldname === 'attachments') {
-            folder = 'spectraAI/images';
+            if (file.mimetype.startsWith('image/')) {
+                folder = 'spectraAI/discussion/images';
+            } else if (file.mimetype.startsWith('video/')) {
+                folder = 'spectraAI/discussion/video';
+            } else {
+                folder = 'spectraAI/discussion/others';
+            }
         } else if (file.mimetype.startsWith('image/')) {
             // Fallback for general images if not otherwise specified
             folder = 'spectraAI/images';
@@ -38,7 +44,7 @@ const storage = new CloudinaryStorage({
         return {
             folder: folder,
             public_id: `${Date.now()}-${file.originalname.split('.')[0]}`,
-            resource_type: 'auto', // Support for non-image files
+            resource_type: 'auto',
         };
     },
 });

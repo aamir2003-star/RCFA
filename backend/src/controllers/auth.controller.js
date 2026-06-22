@@ -103,6 +103,7 @@ export const logout = async (req, res, next) => {
     }
 
     user.refreshToken = null;
+    user.isOnline = false;
     await user.save();
 
     res.json({ message: 'Logged out successfully' });

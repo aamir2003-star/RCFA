@@ -8,7 +8,7 @@ export const getUsers = async (req, res, next) => {
         const query = role ? { role: { $regex: new RegExp(`^${role}$`, 'i') } } : {};
 
         const users = await User.find(query)
-            .select('name email role')
+            .select('name email role isOnline')
             .sort({ name: 1 });
 
         res.json(users);
@@ -41,7 +41,7 @@ export const getPmTeam = async (req, res, next) => {
         // Fetch all developers (case-insensitive role check)
         const allDevs = await User.find({
             role: { $regex: /^dev$/i }
-        }).select('name email role avatar').lean();
+        }).select('name email role avatar isOnline').lean();
 
         // Fetch ALL projects to calculate global workload
         const allProjects = await ProjectModel.find({})
