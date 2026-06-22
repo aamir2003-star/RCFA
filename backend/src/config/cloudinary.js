@@ -45,7 +45,6 @@ const storage = new CloudinaryStorage({
             folder: folder,
             public_id: `${Date.now()}-${file.originalname.split('.')[0]}`,
             resource_type: 'auto',
-            content_disposition: 'inline', // Ensure files open in browser if possible
         };
     },
 });
